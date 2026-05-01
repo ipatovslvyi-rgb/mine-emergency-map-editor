@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SchemaData, SchemaElement, ToolType } from '@/types/schema';
+import { SchemaData, SchemaElement, ToolType, SchemaFormData, defaultFormData } from '@/types/schema';
 
 const createEmptySchema = (name: string): SchemaData => ({
   id: Date.now().toString(),
@@ -13,6 +13,7 @@ const createEmptySchema = (name: string): SchemaData => ({
   gridSize: 20,
   showGrid: true,
   version: 1,
+  formData: defaultFormData(),
 });
 
 const defaultSchema = createEmptySchema('Аварийная схема №1');
@@ -36,6 +37,7 @@ interface SchemaStore {
   deleteSchema: (id: string) => void;
   duplicateSchema: (id: string) => void;
   renameSchema: (id: string, name: string) => void;
+  updateFormData: (id: string, formData: SchemaFormData) => void;
 
   addElement: (element: SchemaElement) => void;
   updateElement: (id: string, updates: Partial<SchemaElement>) => void;
@@ -92,6 +94,14 @@ export const useSchemaStore = create<SchemaStore>((set, get) => ({
   },
 
   setActiveSchema: (id) => set({ activeSchemaId: id, selectedElementIds: [] }),
+
+  updateFormData: (id, formData) => {
+    set(state => ({
+      schemas: state.schemas.map(s =>
+        s.id === id ? { ...s, formData, updatedAt: new Date().toISOString() } : s
+      )
+    }));
+  },
 
   createSchema: (name) => {
     const schema = createEmptySchema(name);
