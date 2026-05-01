@@ -5,6 +5,7 @@ import SymbolLibrary from '@/components/editor/SymbolLibrary';
 import Canvas from '@/components/editor/Canvas';
 import PropertiesPanel from '@/components/editor/PropertiesPanel';
 import SchemaFormPanel from '@/components/editor/SchemaFormPanel';
+import PrintDocument from '@/components/editor/PrintDocument';
 import SchemasPage from './SchemasPage';
 import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
@@ -41,13 +42,7 @@ const Index: React.FC = () => {
   }, [zoom, undo, redo, deleteSelectedElements, setActiveTool, setZoom, editorTab]);
 
   const handleExport = useCallback(async (type: 'pdf' | 'png' | 'print') => {
-    if (type === 'print' || type === 'pdf') {
-      window.print();
-      return;
-    }
-    if (type === 'png') {
-      alert('Для экспорта в PNG используйте Ctrl+P → Сохранить как PDF, затем конвертируйте.');
-    }
+    window.print();
   }, []);
 
   const handleFormChange = (data: SchemaFormData) => {
@@ -135,6 +130,11 @@ const Index: React.FC = () => {
       </div>
 
       {statusBar}
+
+      {/* Скрытый блок для печати — виден только при window.print() */}
+      <div className="print-wrapper">
+        <PrintDocument data={formData} schemaName={schema?.name ?? ''} />
+      </div>
     </div>
   );
 };
