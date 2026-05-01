@@ -1,0 +1,136 @@
+import React, { useState } from 'react';
+import { useSchemaStore } from '@/store/schemaStore';
+import Icon from '@/components/ui/icon';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+interface TopBarProps {
+  activeView: string;
+  onViewChange: (v: string) => void;
+  onExport: (type: 'pdf' | 'png' | 'print') => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) => {
+  const { getActiveSchema, renameSchema } = useSchemaStore();
+  const schema = getActiveSchema();
+  const [editing, setEditing] = useState(false);
+  const [nameVal, setNameVal] = useState('');
+
+  const startEdit = () => {
+    setNameVal(schema?.name || '');
+    setEditing(true);
+  };
+  const commitEdit = () => {
+    if (schema && nameVal.trim()) renameSchema(schema.id, nameVal.trim());
+    setEditing(false);
+  };
+
+  const NAV_ITEMS = [
+    { id: 'editor', label: 'Редактор', icon: 'PenTool' },
+    { id: 'schemas', label: 'Схемы', icon: 'FolderOpen' },
+    { id: 'settings', label: 'Настройки', icon: 'Settings2' },
+    { id: 'help', label: 'Справка', icon: 'BookOpen' },
+  ];
+
+  return (
+    <div className="toolbar-bg border-b border-border flex items-center h-11 px-3 gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 mr-2">
+        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
+          <Icon name="TriangleAlert" size={13} />
+        </div>
+        <span className="font-semibold text-sm tracking-tight" style={{ color: 'hsl(var(--foreground))' }}>МинПлан</span>
+        <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
+          АЭМП
+        </span>
+      </div>
+
+      <div className="h-5 border-l border-border mx-1" />
+
+      {NAV_ITEMS.map(item => (
+        <button
+          key={item.id}
+          className={`tab-btn flex items-center gap-1.5 ${activeView === item.id ? 'active' : ''}`}
+          onClick={() => onViewChange(item.id)}
+        >
+          <Icon name={item.icon} size={13} />
+          {item.label}
+        </button>
+      ))}
+
+      {schema && activeView === 'editor' && (
+        <>
+          <div className="h-5 border-l border-border mx-1" />
+          {editing ? (
+            <input
+              autoFocus
+              className="prop-input text-sm"
+              style={{ width: 200 }}
+              value={nameVal}
+              onChange={e => setNameVal(e.target.value)}
+              onBlur={commitEdit}
+              onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditing(false); }}
+            />
+          ) : (
+            <button
+              className="flex items-center gap-1.5 text-sm hover:text-foreground transition-colors px-1"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+              onClick={startEdit}
+            >
+              {schema.name}
+              <Icon name="Pencil" size={11} />
+            </button>
+          )}
+        </>
+      )}
+
+      <div className="flex-1" />
+
+      {activeView === 'editor' && (
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                onClick={() => onExport('png')}
+              >
+                <Icon name="FileImage" size={13} />
+                PNG
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Экспорт в PNG</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                onClick={() => onExport('pdf')}
+              >
+                <Icon name="FileText" size={13} />
+                PDF
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Экспорт в PDF</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
+                style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+                onClick={() => onExport('print')}
+              >
+                <Icon name="Printer" size={13} />
+                Печать
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Отправить на печать</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TopBar;
