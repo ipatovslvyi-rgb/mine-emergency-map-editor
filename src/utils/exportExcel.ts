@@ -33,8 +33,8 @@ export const exportToExcel = (data: SchemaFormData, schemaName: string) => {
     ['', ''],
     ['УСЛОВНЫЕ ОБОЗНАЧЕНИЯ', ''],
     ...data.legendItems
-      .filter(i => i.trim())
-      .map((item, idx): [string, string] => [`Обозначение ${idx + 1}`, item]),
+      .filter(i => i.label.trim())
+      .map((item, idx): [string, string] => [`Обозначение ${idx + 1}`, item.label]),
     ['', ''],
     ['ПОДПИСИ', ''],
     ['Руководитель горноспасательных работ', data.supervisor],

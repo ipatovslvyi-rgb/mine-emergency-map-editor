@@ -60,6 +60,11 @@ export interface AtmosphereData {
   smokeLevel: string;
 }
 
+export interface LegendItem {
+  imageUrl: string;
+  label: string;
+}
+
 export interface SchemaFormData {
   position: string;
   date: string;
@@ -75,7 +80,7 @@ export interface SchemaFormData {
   crossSection: string;
   phone: string;
   atmosphere: AtmosphereData;
-  legendItems: string[];
+  legendItems: LegendItem[];
   supervisor: string;
   deputyCommander: string;
   commanderOnDuty: string;
@@ -107,7 +112,7 @@ export const defaultFormData = (): SchemaFormData => ({
     temperature: '0,00',
     smokeLevel: 'средняя от 5 до 10м',
   },
-  legendItems: ['', '', '', '', '', '', '', '', '', ''],
+  legendItems: [],
   supervisor: '',
   deputyCommander: '',
   commanderOnDuty: '',

@@ -171,8 +171,11 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
             Условные обозначения:
           </div>
           {data.legendItems.map((item, i) => (
-            <div key={i} style={{ borderBottom: '1px solid #94a3b8', fontSize: 11, lineHeight: 1.8, paddingLeft: 2 }}>
-              {item || '\u00A0'}
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, borderBottom: '1px solid #94a3b8', fontSize: 10, lineHeight: 1.6, paddingLeft: 2 }}>
+              {item.imageUrl && (
+                <img src={item.imageUrl} alt={item.label} style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }} />
+              )}
+              <span>{item.label || '\u00A0'}</span>
             </div>
           ))}
         </div>

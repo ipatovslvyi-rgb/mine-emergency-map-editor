@@ -1,6 +1,14 @@
 import React, { useRef } from 'react';
-import { SchemaFormData, AtmosphereData } from '@/types/schema';
+import { SchemaFormData, AtmosphereData, LegendItem } from '@/types/schema';
 import Icon from '@/components/ui/icon';
+
+const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b0075aaa-399c-411d-b91e-c4f784ba6460.png', label: 'Пожар' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/9f37556a-d0f9-405d-a7a2-5636f7819402.png', label: 'Взрыв' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/7472fb3d-606e-4849-920c-08a6867a6c83.png', label: 'Газовыделение' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/28db5f8d-85ad-49ce-b53b-da13e168b451.png', label: 'Считыватель системы позиционирования' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/ff1e6286-8210-4aa2-b3ab-4aa362305c35.png', label: 'Надшахтное здание' },
+];
 
 interface Props {
   data: SchemaFormData;
@@ -187,23 +195,75 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
           {/* УСЛОВНЫЕ ОБОЗНАЧЕНИЯ */}
           <div>
             <SectionTitle>Условные обозначения</SectionTitle>
-            <div className="space-y-1">
-              {data.legendItems.map((item, i) => (
-                <input
-                  key={i}
-                  type="text"
-                  value={item}
-                  onChange={e => {
-                    const items = [...data.legendItems];
-                    items[i] = e.target.value;
-                    onChange({ ...data, legendItems: items });
-                  }}
-                  placeholder={`Обозначение ${i + 1}`}
-                  className={inp}
-                  style={{ color: 'hsl(var(--foreground))', fontSize: 12 }}
-                />
-              ))}
+
+            {/* Библиотека символов */}
+            <div className="text-xs mb-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Нажмите на символ для добавления:
             </div>
+            <div className="flex flex-wrap gap-2 mb-3 p-2 rounded border border-border" style={{ background: 'hsl(var(--card))' }}>
+              {LEGEND_SYMBOLS.map(sym => {
+                const already = data.legendItems.some(it => it.imageUrl === sym.imageUrl);
+                return (
+                  <button
+                    key={sym.imageUrl}
+                    title={sym.label}
+                    onClick={() => {
+                      if (already) return;
+                      onChange({ ...data, legendItems: [...data.legendItems, { imageUrl: sym.imageUrl, label: sym.label }] });
+                    }}
+                    className="flex flex-col items-center gap-0.5 rounded p-1 transition-all"
+                    style={{
+                      opacity: already ? 0.35 : 1,
+                      cursor: already ? 'default' : 'pointer',
+                      background: already ? 'hsl(var(--muted))' : 'transparent',
+                      border: '1px solid hsl(var(--border))',
+                      minWidth: 52,
+                    }}
+                  >
+                    <img src={sym.imageUrl} alt={sym.label} style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                    <span style={{ fontSize: 9, color: 'hsl(var(--muted-foreground))', textAlign: 'center', lineHeight: 1.2, maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {sym.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Список добавленных */}
+            {data.legendItems.length === 0 ? (
+              <div className="text-xs text-center py-3 rounded border border-dashed border-border" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                Добавьте обозначения из библиотеки выше
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {data.legendItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded px-2 py-1" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+                    <img src={item.imageUrl} alt={item.label} style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />
+                    <input
+                      type="text"
+                      value={item.label}
+                      onChange={e => {
+                        const items = [...data.legendItems];
+                        items[i] = { ...items[i], label: e.target.value };
+                        onChange({ ...data, legendItems: items });
+                      }}
+                      className="flex-1 bg-transparent text-xs focus:outline-none"
+                      style={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <button
+                      onClick={() => {
+                        const items = data.legendItems.filter((_, idx) => idx !== i);
+                        onChange({ ...data, legendItems: items });
+                      }}
+                      className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded hover:opacity-80"
+                      style={{ color: 'hsl(var(--muted-foreground))' }}
+                    >
+                      <Icon name="X" size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
