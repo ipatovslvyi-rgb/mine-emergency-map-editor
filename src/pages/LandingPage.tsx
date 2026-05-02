@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import Icon from '@/components/ui/icon';
 
 interface Props {
@@ -14,35 +14,8 @@ const FEATURES = [
   { icon: 'FolderOpen', title: 'Несколько схем', desc: 'Ведите несколько позиций одновременно, переключайтесь мгновенно' },
 ];
 
-const SYMBOLS = [
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b0075aaa-399c-411d-b91e-c4f784ba6460.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/9f37556a-d0f9-405d-a7a2-5636f7819402.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/7472fb3d-606e-4849-920c-08a6867a6c83.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/4d263ba9-11d9-48fc-abd4-45104740f9c7.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b307c90a-9516-4ccb-81b8-e3129dca9ae3.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/60bb06e4-1c22-4c23-8e77-eeaaa86b3c43.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/ff1e6286-8210-4aa2-b3ab-4aa362305c35.png',
-  'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/00c2fb18-d9e9-483c-a310-313ef51e2545.png',
-];
 
 const LandingPage: React.FC<Props> = ({ onEnter }) => {
-  const tickerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = tickerRef.current;
-    if (!el) return;
-    let x = 0;
-    const speed = 0.4;
-    const w = el.scrollWidth / 2;
-    const tick = () => {
-      x -= speed;
-      if (Math.abs(x) >= w) x = 0;
-      el.style.transform = `translateX(${x}px)`;
-      requestAnimationFrame(tick);
-    };
-    const raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden" style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}>
@@ -115,12 +88,18 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         </div>
       </section>
 
-      {/* ── БЕГУЩАЯ СТРОКА СИМВОЛОВ ── */}
-      <div className="overflow-hidden py-4 border-y border-border flex-shrink-0" style={{ background: 'hsl(var(--panel-bg))' }}>
-        <div ref={tickerRef} className="flex gap-6 items-center" style={{ width: 'max-content' }}>
-          {[...SYMBOLS, ...SYMBOLS].map((url, i) => (
-            <div key={i} className="w-12 h-12 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--card))' }}>
-              <img src={url} alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+      {/* ── СТАТИСТИКА ── */}
+      <div className="border-y border-border flex-shrink-0" style={{ background: 'hsl(var(--panel-bg))' }}>
+        <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-border">
+          {[
+            { value: 'А4', label: 'Альбомный формат документа', icon: 'FileText' },
+            { value: '10+', label: 'Условных обозначений в библиотеке', icon: 'Layers' },
+            { value: '1 клик', label: 'До готового PDF или печати', icon: 'Printer' },
+          ].map((s, i) => (
+            <div key={i} className="flex flex-col items-center justify-center gap-1.5 py-8 px-6 text-center">
+              <Icon name={s.icon} size={20} style={{ color: 'hsl(var(--primary))' }} />
+              <div className="text-2xl font-black" style={{ color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>{s.value}</div>
+              <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.4 }}>{s.label}</div>
             </div>
           ))}
         </div>
