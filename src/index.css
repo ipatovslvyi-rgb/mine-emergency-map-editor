@@ -32,10 +32,19 @@
   .print-document {
     background: white !important;
     color: black !important;
-    padding: 14mm 16mm !important;
-    font-size: 11pt !important;
+    font-size: 9pt !important;
     width: 100% !important;
+    height: 100% !important;
     box-sizing: border-box !important;
+  }
+  .print-wrapper {
+    padding-top: 20mm !important;
+    padding-right: 10mm !important;
+    padding-bottom: 20mm !important;
+    padding-left: 30mm !important;
+    box-sizing: border-box !important;
+    width: 297mm !important;
+    height: 210mm !important;
   }
   @page {
     size: A4 landscape;

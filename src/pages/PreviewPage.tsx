@@ -63,14 +63,14 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
         className="flex-1 overflow-auto flex items-start justify-center py-8"
         style={{ background: 'hsl(216 20% 6%)' }}
       >
-        {/* Лист А4 альбомный — соотношение 297:210 */}
+        {/* Лист А4 альбомный — 297×210мм, поля: лево 3см, верх 2см, право 1см, низ 2см */}
         <div
           style={{
-            width: '90vw',
-            maxWidth: 1050,
+            width: '92vw',
+            maxWidth: 1100,
             aspectRatio: '297 / 210',
             background: '#ffffff',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
             borderRadius: 2,
             position: 'relative',
             overflow: 'hidden',
@@ -80,9 +80,12 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
             style={{
               position: 'absolute',
               inset: 0,
-              padding: '4% 5%',
+              /* поля: верх 2/210=9.52%, право 1/297=3.37%, низ 2/210=9.52%, лево 3/297=10.1% */
+              paddingTop: '9.52%',
+              paddingRight: '3.37%',
+              paddingBottom: '9.52%',
+              paddingLeft: '10.1%',
               boxSizing: 'border-box',
-              transformOrigin: 'top left',
             }}
           >
             <PrintDocument data={data} schemaName={schemaName} />

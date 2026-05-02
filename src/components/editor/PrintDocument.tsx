@@ -8,192 +8,132 @@ interface Props {
 
 const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
   const V = (val: string, fallback = '___') => val?.trim() || fallback;
-  const LINE = (val: string, width = 120) => (
-    <span style={{ display: 'inline-block', borderBottom: '1px solid #000', minWidth: width, paddingBottom: 1 }}>
-      {val || '\u00A0'}
+
+  const UL = (val: string, minW = 80) => (
+    <span style={{ display: 'inline-block', borderBottom: '1px solid #000', minWidth: minW, paddingBottom: 0 }}>
+      {val?.trim() || '\u00A0'}
     </span>
   );
 
-  return (
-    <div className="print-document" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: 11, color: '#000', background: '#fff' }}>
+  const fs = 9;
 
-      {/* ШАПКА */}
-      <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 13, marginBottom: 8, paddingBottom: 6, borderBottom: '2px solid #1e3a8a' }}>
-        Схема аварийного участка — позиция&nbsp;&nbsp;
-        <u>{V(data.position)}</u>
-        &nbsp;&nbsp;&nbsp;
-        <u>{V(data.date)}</u>
-        &nbsp;&nbsp;&nbsp;
-        <u>{V(data.time)}</u>
-        &nbsp;&nbsp;(<u>{V(data.timezone, 'мск')}</u>)
+  return (
+    <div
+      className="print-document"
+      style={{
+        fontFamily: "'Times New Roman', Times, serif",
+        fontSize: fs,
+        color: '#000',
+        background: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* ── ШАПКА ── */}
+      <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 11, paddingBottom: 4, marginBottom: 4, borderBottom: '2px solid #1e3a8a', flexShrink: 0 }}>
+        Схема аварийного участка&nbsp;—&nbsp;позиция&nbsp;{UL(data.position, 30)}
+        &nbsp;&nbsp;{UL(data.date, 70)}&nbsp;&nbsp;{UL(data.time, 40)}&nbsp;({UL(data.timezone || 'мск', 28)})
       </div>
 
-      {/* НАИМЕНОВАНИЕ ОБЪЕКТА */}
-      <table style={{ width: '100%', marginBottom: 6, borderCollapse: 'collapse' }}>
-        <tbody>
-          <tr>
-            <td style={{ whiteSpace: 'nowrap', fontWeight: 700, paddingRight: 6, verticalAlign: 'bottom', fontSize: 11 }}>
-              Наименование обслуживаемого объекта:
-            </td>
-            <td style={{ borderBottom: '1px solid #000', width: '100%', verticalAlign: 'bottom', paddingBottom: 1 }}>
-              {V(data.objectName, '')}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {/* ── ВЕРХНИЙ БЛОК: левая (реквизиты) + правая (атмосфера) ── */}
+      <div style={{ display: 'flex', gap: 12, flexShrink: 0, marginBottom: 4 }}>
 
-      {/* ВИД АВАРИИ / ДАТА / МЕСТО */}
-      <table style={{ width: '100%', marginBottom: 4, borderCollapse: 'collapse', lineHeight: 1.7 }}>
-        <tbody>
-          <tr>
-            <td style={{ whiteSpace: 'nowrap', fontWeight: 700, paddingRight: 6, width: 160 }}>Вид аварии:</td>
-            <td>{LINE(data.accidentType, 200)}</td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>Дата и время аварии:</td>
-            <td>
-              {LINE(data.accidentDate, 90)}&nbsp;&nbsp;
-              {LINE(data.accidentTime, 60)}&nbsp;&nbsp;
-              ({LINE(data.accidentTimezone || 'мск', 40)})
-            </td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>Место аварии:</td>
-            <td style={{ fontStyle: 'italic' }}>{LINE(data.accidentLocation, 300)}</td>
-          </tr>
-        </tbody>
-      </table>
+        {/* Левая — реквизиты */}
+        <div style={{ flex: 1 }}>
+          {/* Объект */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 2, alignItems: 'flex-end' }}>
+            <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Наименование объекта:</span>
+            <span style={{ borderBottom: '1px solid #000', flex: 1 }}>{data.objectName || '\u00A0'}</span>
+          </div>
 
-      {/* ПАРАМЕТРЫ + АТМОСФЕРА */}
-      <div style={{ display: 'flex', gap: 16, borderTop: '1px solid #94a3b8', paddingTop: 6, marginBottom: 4 }}>
-
-        {/* Левая — параметры */}
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <table style={{ borderCollapse: 'collapse', lineHeight: 1.8, width: '100%' }}>
+          {/* Вид, дата, место — в одну строку */}
+          <table style={{ borderCollapse: 'collapse', width: '100%', lineHeight: 1.5 }}>
             <tbody>
               <tr>
-                <td style={{ fontWeight: 700, fontSize: 11, paddingRight: 6, whiteSpace: 'nowrap' }}>
-                  Количество воздуха в аварийной выработке:
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <span style={{ fontStyle: 'italic' }}>{LINE(data.airVolume, 50)}</span>
-                  <span style={{ fontSize: 9, verticalAlign: 'super' }}>м³</span>/с
-                </td>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', paddingRight: 4, fontSize: fs }}>Вид аварии:</td>
+                <td style={{ borderBottom: '1px solid #000', fontSize: fs }}>{data.accidentType || '\u00A0'}</td>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', paddingLeft: 8, paddingRight: 4, fontSize: fs }}>Дата/время:</td>
+                <td style={{ whiteSpace: 'nowrap', fontSize: fs }}>{UL(data.accidentDate, 60)}&nbsp;{UL(data.accidentTime, 36)}</td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 700, fontSize: 11, whiteSpace: 'nowrap' }}>
-                  Сечение аварийной выработки:
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <span style={{ fontStyle: 'italic' }}>{LINE(data.crossSection, 50)}</span>
-                  <span style={{ fontSize: 9, verticalAlign: 'super' }}>м²</span>
-                </td>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Место аварии:</td>
+                <td colSpan={3} style={{ borderBottom: '1px solid #000', fontStyle: 'italic', fontSize: fs }}>{data.accidentLocation || '\u00A0'}</td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 700, fontSize: 11, whiteSpace: 'nowrap' }}>Телефон КП:</td>
-                <td style={{ fontStyle: 'italic' }}>{LINE(data.phone, 70)}</td>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Кол-во воздуха:</td>
+                <td style={{ fontSize: fs }}>{UL(data.airVolume, 40)}&nbsp;м³/с</td>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', paddingLeft: 8, fontSize: fs }}>Сечение:</td>
+                <td style={{ fontSize: fs }}>{UL(data.crossSection, 40)}&nbsp;м²</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Телефон КП:</td>
+                <td colSpan={3} style={{ fontSize: fs, fontStyle: 'italic' }}>{UL(data.phone, 60)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         {/* Правая — атмосфера */}
-        <div style={{ minWidth: 320 }}>
-          <div style={{ fontWeight: 700, textDecoration: 'underline', marginBottom: 4, fontSize: 11 }}>
-            Состав рудничной атмосферы:
+        <div style={{ flexShrink: 0, borderLeft: '1px solid #94a3b8', paddingLeft: 10 }}>
+          <div style={{ fontWeight: 700, textDecoration: 'underline', marginBottom: 2, fontSize: fs }}>Состав рудничной атмосферы:</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 12, rowGap: 1, fontSize: fs }}>
+            {[
+              ['CO', data.atmosphere.co, '%'],
+              ['CO₂', data.atmosphere.co2, '%'],
+              ['SO₂', data.atmosphere.so2, '%'],
+              ['O₂', data.atmosphere.o2, '%'],
+              ['CH₄', data.atmosphere.ch4, '%'],
+              ['NO-NO₂', data.atmosphere.noNo2, '%'],
+              ['t°', data.atmosphere.temperature, '°C'],
+            ].map(([name, val, unit]) => (
+              <div key={name} style={{ whiteSpace: 'nowrap' }}>
+                <b>{name}-</b>&nbsp;<i>{UL(val, 34)}</i>&nbsp;{unit}
+              </div>
+            ))}
+            <div style={{ gridColumn: '1 / -1', whiteSpace: 'nowrap' }}>
+              <b>Задымлённость-</b>&nbsp;<i>{UL(data.atmosphere.smokeLevel, 80)}</i>
+            </div>
           </div>
-          <table style={{ borderCollapse: 'collapse', fontSize: 11 }}>
-            <tbody>
-              <tr>
-                <td style={{ paddingRight: 16, whiteSpace: 'nowrap' }}>
-                  <b>CO-</b> <i>{LINE(data.atmosphere.co, 50)}</i>%
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <b>CO₂-</b> <i>{LINE(data.atmosphere.co2, 50)}</i>%
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingRight: 16, whiteSpace: 'nowrap' }}>
-                  <b>t-</b> <i>{LINE(data.atmosphere.temperature, 40)}</i>°
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <b>SO₂-</b> <i>{LINE(data.atmosphere.so2, 50)}</i>%
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingRight: 16, whiteSpace: 'nowrap' }}>
-                  <b>O₂-</b> <i>{LINE(data.atmosphere.o2, 50)}</i>%
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <b>CH₄-</b> <i>{LINE(data.atmosphere.ch4, 50)}</i>%
-                </td>
-              </tr>
-              <tr>
-                <td />
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <b>NO-NO₂-</b> <i>{LINE(data.atmosphere.noNo2, 50)}</i>%
-                </td>
-              </tr>
-              <tr>
-                <td />
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <b>SO₂-</b> <i>{LINE(data.atmosphere.so2_2, 50)}</i>%
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={2} style={{ paddingTop: 4, whiteSpace: 'nowrap' }}>
-                  <b>Степень задымлённости-</b>&nbsp;
-                  <i>{LINE(data.atmosphere.smokeLevel, 160)}</i>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
-      {/* ОСНОВНАЯ ОБЛАСТЬ + УСЛОВНЫЕ ОБОЗНАЧЕНИЯ */}
-      <div style={{ display: 'flex', border: '1px solid #64748b', marginBottom: 8, minHeight: 340 }}>
+      {/* ── ОСНОВНАЯ ОБЛАСТЬ (схема + условные обозначения) — растягивается ── */}
+      <div style={{ flex: 1, display: 'flex', border: '1px solid #64748b', minHeight: 0 }}>
 
-        {/* Область схемы */}
-        <div style={{ flex: 1, borderRight: '1px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 340, overflow: 'hidden' }}>
+        {/* Картинка схемы */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #64748b', overflow: 'hidden' }}>
           {data.schemaImageUrl ? (
-            <img src={data.schemaImageUrl} alt="Схема" style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain' }} />
+            <img src={data.schemaImageUrl} alt="Схема" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
           ) : (
-            <span style={{ fontSize: 28, color: '#cbd5e1', fontWeight: 300 }}>
-              {schemaName || 'Схема'}
-            </span>
+            <span style={{ fontSize: 20, color: '#cbd5e1', fontWeight: 300 }}>{schemaName || 'Схема'}</span>
           )}
         </div>
 
         {/* Условные обозначения */}
-        <div style={{ width: 175, padding: '6px 8px' }}>
-          <div style={{ fontWeight: 700, textDecoration: 'underline', textAlign: 'center', fontSize: 11, marginBottom: 6 }}>
+        <div style={{ width: 160, flexShrink: 0, padding: '4px 6px', overflowY: 'auto' }}>
+          <div style={{ fontWeight: 700, textDecoration: 'underline', textAlign: 'center', fontSize: fs, marginBottom: 4 }}>
             Условные обозначения:
           </div>
           {data.legendItems.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, borderBottom: '1px solid #94a3b8', fontSize: 10, lineHeight: 1.6, paddingLeft: 2 }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 3, borderBottom: '1px solid #e2e8f0', padding: '2px 0', fontSize: 8 }}>
               {item.imageUrl && (
-                <img src={item.imageUrl} alt={item.label} style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }} />
+                <img src={item.imageUrl} alt={item.label} style={{ width: 16, height: 16, objectFit: 'contain', flexShrink: 0 }} />
               )}
-              <span>{item.label || '\u00A0'}</span>
+              <span style={{ lineHeight: 1.2 }}>{item.label || '\u00A0'}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ПОДПИСИ */}
-      <div style={{ borderTop: '1px solid #94a3b8', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {[
-          { lbl: 'Руководитель горноспасательных работ:', val: data.supervisor },
-        ].map(({ lbl, val }) => (
-          <div key={lbl} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-            <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: 10 }}>{lbl}</span>
-            <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: 14 }} />
-            <span style={{ fontStyle: 'italic', whiteSpace: 'nowrap', borderBottom: '1px solid #000', minWidth: 140, textAlign: 'center', fontSize: 10 }}>
-              {V(val, '\u00A0')}
-            </span>
-          </div>
-        ))}
+      {/* ── ПОДПИСЬ ── */}
+      <div style={{ flexShrink: 0, paddingTop: 4, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
+        <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Руководитель горноспасательных работ:</span>
+        <div style={{ flex: 1, borderBottom: '1px solid #000' }} />
+        <span style={{ fontStyle: 'italic', borderBottom: '1px solid #000', minWidth: 130, textAlign: 'center', fontSize: fs }}>
+          {V(data.supervisor, '\u00A0')}
+        </span>
       </div>
 
     </div>
