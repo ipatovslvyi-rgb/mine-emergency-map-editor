@@ -102,12 +102,32 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
       {/* ── ОСНОВНАЯ ОБЛАСТЬ (схема + условные обозначения) — растягивается ── */}
       <div style={{ flex: 1, display: 'flex', border: '1px solid #64748b', minHeight: 0 }}>
 
-        {/* Картинка схемы */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #64748b', overflow: 'hidden' }}>
+        {/* Картинка схемы + наложенные символы */}
+        <div style={{ flex: 1, position: 'relative', borderRight: '1px solid #64748b', overflow: 'hidden' }}>
           {data.schemaImageUrl ? (
-            <img src={data.schemaImageUrl} alt="Схема" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            <>
+              <img src={data.schemaImageUrl} alt="Схема" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+              {(data.placedSymbols ?? []).map(sym => (
+                <img
+                  key={sym.id}
+                  src={sym.imageUrl}
+                  alt={sym.label}
+                  style={{
+                    position: 'absolute',
+                    left: `${sym.x}%`,
+                    top: `${sym.y}%`,
+                    width: sym.size * 0.6,
+                    height: sym.size * 0.6,
+                    objectFit: 'contain',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                />
+              ))}
+            </>
           ) : (
-            <span style={{ fontSize: 20, color: '#cbd5e1', fontWeight: 300 }}>{schemaName || 'Схема'}</span>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 20, color: '#cbd5e1', fontWeight: 300 }}>{schemaName || 'Схема'}</span>
+            </div>
           )}
         </div>
 

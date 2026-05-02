@@ -65,6 +65,15 @@ export interface LegendItem {
   label: string;
 }
 
+export interface PlacedSymbol {
+  id: string;
+  imageUrl: string;
+  label: string;
+  x: number;
+  y: number;
+  size: number;
+}
+
 export interface SchemaFormData {
   position: string;
   date: string;
@@ -85,6 +94,7 @@ export interface SchemaFormData {
   deputyCommander: string;
   commanderOnDuty: string;
   schemaImageUrl: string;
+  placedSymbols: PlacedSymbol[];
 }
 
 export const defaultFormData = (): SchemaFormData => ({
@@ -117,6 +127,7 @@ export const defaultFormData = (): SchemaFormData => ({
   deputyCommander: '',
   commanderOnDuty: '',
   schemaImageUrl: '',
+  placedSymbols: [],
 });
 
 export interface SchemaData {
