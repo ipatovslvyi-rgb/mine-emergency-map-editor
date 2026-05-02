@@ -2,6 +2,7 @@ import React from 'react';
 import { SchemaFormData } from '@/types/schema';
 import PrintDocument from '@/components/editor/PrintDocument';
 import Icon from '@/components/ui/icon';
+import { exportToExcel } from '@/utils/exportExcel';
 
 interface Props {
   data: SchemaFormData;
@@ -37,6 +38,15 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
         <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' }}>
           A4 / Альбомная
         </span>
+
+        <button
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium transition-all hover:opacity-80"
+          style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+          onClick={() => exportToExcel(data, schemaName)}
+        >
+          <Icon name="FileSpreadsheet" size={14} />
+          Excel
+        </button>
 
         <button
           className="flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium transition-all hover:opacity-80"
