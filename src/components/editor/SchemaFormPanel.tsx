@@ -116,8 +116,6 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
             <SectionTitle>Подписи</SectionTitle>
             <div className="space-y-2">
               <Field label="Руководитель горноспасательных работ" value={data.supervisor} onChange={v => set('supervisor', v)} placeholder="Фамилия И.О." />
-              <Field label="Помощник командира отряда" value={data.deputyCommander} onChange={v => set('deputyCommander', v)} placeholder="Фамилия И.О." />
-              <Field label="Командир (в сутках)" value={data.commanderOnDuty} onChange={v => set('commanderOnDuty', v)} placeholder="И.И. Иванов" />
             </div>
           </div>
 

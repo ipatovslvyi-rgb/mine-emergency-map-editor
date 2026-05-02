@@ -182,8 +182,6 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
       <div style={{ borderTop: '1px solid #94a3b8', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {[
           { lbl: 'Руководитель горноспасательных работ:', val: data.supervisor },
-          { lbl: 'Помощник командира отряда:', val: data.deputyCommander },
-          { lbl: 'Командир (в сутках):', val: data.commanderOnDuty },
         ].map(({ lbl, val }) => (
           <div key={lbl} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
             <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: 10 }}>{lbl}</span>

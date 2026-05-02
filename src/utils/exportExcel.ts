@@ -38,8 +38,6 @@ export const exportToExcel = (data: SchemaFormData, schemaName: string) => {
     ['', ''],
     ['ПОДПИСИ', ''],
     ['Руководитель горноспасательных работ', data.supervisor],
-    ['Помощник командира отряда', data.deputyCommander],
-    ['Командир (в сутках)', data.commanderOnDuty],
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
