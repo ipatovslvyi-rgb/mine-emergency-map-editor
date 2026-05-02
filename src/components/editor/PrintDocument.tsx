@@ -9,6 +9,13 @@ interface Props {
 const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
   const V = (val: string, fallback = '___') => val?.trim() || fallback;
 
+  const allLegendItems = [
+    ...data.legendItems,
+    ...(data.placedSymbols ?? [])
+      .filter(sym => !data.legendItems.some(l => l.imageUrl === sym.imageUrl))
+      .map(sym => ({ imageUrl: sym.imageUrl, label: sym.label })),
+  ];
+
   const UL = (val: string, minW = 80) => (
     <span style={{ display: 'inline-block', borderBottom: '1px solid #000', minWidth: minW, paddingBottom: 0 }}>
       {val?.trim() || '\u00A0'}
@@ -136,7 +143,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
           <div style={{ fontWeight: 700, textDecoration: 'underline', textAlign: 'center', fontSize: fs, marginBottom: 4 }}>
             Условные обозначения:
           </div>
-          {data.legendItems.map((item, i) => (
+          {allLegendItems.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 3, borderBottom: '1px solid #e2e8f0', padding: '2px 0', fontSize: 8 }}>
               {item.imageUrl && (
                 <img src={item.imageUrl} alt={item.label} style={{ width: 16, height: 16, objectFit: 'contain', flexShrink: 0 }} />
