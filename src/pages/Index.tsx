@@ -6,11 +6,13 @@ import PreviewPage from './PreviewPage';
 import SchemasPage from './SchemasPage';
 import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
+import LandingPage from './LandingPage';
 import { useSchemaStore } from '@/store/schemaStore';
 import { defaultFormData, SchemaFormData } from '@/types/schema';
 import Icon from '@/components/ui/icon';
 
 const Index: React.FC = () => {
+  const [showLanding, setShowLanding] = useState(true);
   const [activeView, setActiveView] = useState<string>('editor');
   const [editorTab, setEditorTab] = useState<'form' | 'preview'>('form');
   const { getActiveSchema, zoom, undo, redo, updateFormData } = useSchemaStore();
@@ -49,6 +51,10 @@ const Index: React.FC = () => {
       <span>{new Date().toLocaleDateString('ru-RU')}</span>
     </div>
   );
+
+  if (showLanding) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />;
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
