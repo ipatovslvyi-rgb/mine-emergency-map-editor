@@ -1,311 +1,214 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { SchemaFormData, AtmosphereData } from '@/types/schema';
+import Icon from '@/components/ui/icon';
 
 interface Props {
   data: SchemaFormData;
   onChange: (data: SchemaFormData) => void;
 }
 
-const Field: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  wide?: boolean;
-  italic?: boolean;
-  mono?: boolean;
-  small?: boolean;
-}> = ({ label, value, onChange, placeholder, wide, italic, mono, small }) => (
-  <div className={`flex items-baseline gap-2 ${wide ? 'col-span-2' : ''}`}>
-    <span
-      className="flex-shrink-0 font-semibold"
-      style={{ fontSize: small ? 11 : 12, color: '#1e293b', whiteSpace: 'nowrap' }}
-    >
-      {label}
-    </span>
-    <input
-      type="text"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 flex-1"
-      style={{
-        fontSize: small ? 11 : 12,
-        fontStyle: italic ? 'italic' : 'normal',
-        fontFamily: mono ? "'IBM Plex Mono', monospace" : 'inherit',
-        color: '#1e293b',
-        minWidth: 60,
-        paddingBottom: 1,
-      }}
-    />
+const ACCIDENT_TYPES = ['Пожар', 'Взрыв', 'Обрушение', 'Загазованность', 'Затопление', 'Прорыв газа', 'Иное'];
+
+const inp = 'w-full bg-transparent border border-border rounded px-3 py-1.5 text-sm focus:outline-none focus:border-primary transition-colors placeholder-muted-foreground';
+const label = 'block text-xs font-medium mb-1';
+
+const Field: React.FC<{ label: string; value: string; onChange: (v: string) => void; placeholder?: string; half?: boolean }> = (props) => (
+  <div className={props.half ? 'flex-1' : 'w-full'}>
+    <label className={label} style={{ color: 'hsl(var(--muted-foreground))' }}>{props.label}</label>
+    <input type="text" value={props.value} onChange={e => props.onChange(e.target.value)} placeholder={props.placeholder} className={inp} style={{ color: 'hsl(var(--foreground))' }} />
   </div>
 );
 
-const AtmField: React.FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  unit?: string;
-}> = ({ label, value, onChange, unit }) => (
-  <div className="flex items-baseline gap-0.5">
-    <span style={{ fontSize: 11, fontWeight: 600, color: '#1e293b', whiteSpace: 'nowrap' }}>{label}</span>
-    <input
-      type="text"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600"
-      style={{ fontSize: 11, fontStyle: 'italic', color: '#1e293b', width: 64, paddingBottom: 1 }}
-    />
-    {unit && <span style={{ fontSize: 11, color: '#1e293b' }}>{unit}</span>}
+const AtmRow: React.FC<{ label: string; value: string; onChange: (v: string) => void; unit?: string }> = ({ label: lbl, value, onChange, unit = '%' }) => (
+  <div className="flex items-center border-b border-border py-1.5 gap-2">
+    <span className="text-xs font-medium flex-shrink-0" style={{ color: 'hsl(var(--muted-foreground))', minWidth: 48 }}>{lbl}</span>
+    <div className="flex-1 flex items-center gap-1">
+      <input
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="flex-1 bg-transparent text-sm focus:outline-none text-right"
+        style={{ color: 'hsl(var(--foreground))' }}
+      />
+      <span className="text-xs flex-shrink-0" style={{ color: 'hsl(var(--muted-foreground))' }}>{unit}</span>
+    </div>
+  </div>
+);
+
+const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="text-xs font-semibold uppercase tracking-wider mb-2 pb-1 border-b border-border" style={{ color: 'hsl(var(--muted-foreground))' }}>
+    {children}
   </div>
 );
 
 const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
-  const set = (key: keyof SchemaFormData, val: string) =>
-    onChange({ ...data, [key]: val });
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const setAtm = (key: keyof AtmosphereData, val: string) =>
-    onChange({ ...data, atmosphere: { ...data.atmosphere, [key]: val } });
+  const set = (key: keyof SchemaFormData, val: string) => onChange({ ...data, [key]: val });
+  const setAtm = (key: keyof AtmosphereData, val: string) => onChange({ ...data, atmosphere: { ...data.atmosphere, [key]: val } });
 
-  const setLegend = (i: number, val: string) => {
-    const items = [...data.legendItems];
-    items[i] = val;
-    onChange({ ...data, legendItems: items });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      set('schemaImageUrl', ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const INP = 'border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 text-center';
-
   return (
-    <div
-      className="flex-1 overflow-y-auto"
-      style={{ background: '#ffffff', color: '#1e293b', fontFamily: "'IBM Plex Sans', 'Times New Roman', serif" }}
-    >
-      <div style={{ padding: '12px 20px', maxWidth: 960, margin: '0 auto' }}>
+    <div className="flex-1 overflow-y-auto" style={{ background: 'hsl(var(--background))' }}>
+      <div className="flex h-full" style={{ minHeight: 0 }}>
 
-        {/* ШАПКА */}
-        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap" style={{ borderBottom: '2px solid #1e40af', paddingBottom: 8 }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Схема аварийного участка - позиция</span>
-          <input
-            type="text"
-            value={data.position}
-            onChange={e => set('position', e.target.value)}
-            className={INP}
-            style={{ fontSize: 15, fontWeight: 700, width: 50, textAlign: 'center' }}
-          />
-          <input
-            type="text"
-            value={data.date}
-            onChange={e => set('date', e.target.value)}
-            className={INP}
-            style={{ fontSize: 15, fontWeight: 700, width: 90 }}
-          />
-          <input
-            type="text"
-            value={data.time}
-            onChange={e => set('time', e.target.value)}
-            className={INP}
-            style={{ fontSize: 15, fontWeight: 700, width: 60 }}
-          />
-          <span style={{ fontSize: 15, fontWeight: 700 }}>(</span>
-          <input
-            type="text"
-            value={data.timezone}
-            onChange={e => set('timezone', e.target.value)}
-            className={INP}
-            style={{ fontSize: 15, fontWeight: 700, width: 40 }}
-          />
-          <span style={{ fontSize: 15, fontWeight: 700 }}>)</span>
-        </div>
+        {/* ЛЕВАЯ КОЛОНКА — ВВОД ДАННЫХ */}
+        <div className="flex-1 overflow-y-auto border-r border-border p-4 space-y-4" style={{ minWidth: 0 }}>
 
-        {/* НАИМЕНОВАНИЕ ОБЪЕКТА */}
-        <div className="flex items-baseline gap-2 mb-3">
-          <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Наименование обслуживаемого объекта:</span>
-          <input
-            type="text"
-            value={data.objectName}
-            onChange={e => set('objectName', e.target.value)}
-            placeholder="Введите наименование объекта..."
-            className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 flex-1"
-            style={{ fontSize: 12, color: '#1e293b', paddingBottom: 1 }}
-          />
-        </div>
-
-        {/* ВИД АВАРИИ, ДАТА, МЕСТО */}
-        <div className="space-y-1.5 mb-3">
-          <Field label="Вид аварии:" value={data.accidentType} onChange={v => set('accidentType', v)} placeholder="Пожар" />
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Дата и время аварии:</span>
-            <input
-              type="text"
-              value={data.accidentDate}
-              onChange={e => set('accidentDate', e.target.value)}
-              className={`${INP}`}
-              style={{ fontSize: 12, width: 90 }}
-            />
-            <input
-              type="text"
-              value={data.accidentTime}
-              onChange={e => set('accidentTime', e.target.value)}
-              className={INP}
-              style={{ fontSize: 12, width: 60 }}
-            />
-            <span style={{ fontSize: 12 }}>(</span>
-            <input
-              type="text"
-              value={data.accidentTimezone}
-              onChange={e => set('accidentTimezone', e.target.value)}
-              className={INP}
-              style={{ fontSize: 12, width: 40 }}
-            />
-            <span style={{ fontSize: 12 }}>)</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Место аварии:</span>
-            <input
-              type="text"
-              value={data.accidentLocation}
-              onChange={e => set('accidentLocation', e.target.value)}
-              placeholder="насосная гор. +210м."
-              className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 flex-1"
-              style={{ fontSize: 12, fontStyle: 'italic', color: '#1e293b', paddingBottom: 1 }}
-            />
-          </div>
-        </div>
-
-        {/* ПАРАМЕТРЫ + СОСТАВ АТМОСФЕРЫ */}
-        <div className="flex gap-4" style={{ borderTop: '1px solid #cbd5e1', paddingTop: 8 }}>
-
-          {/* Левая колонка — параметры */}
-          <div className="flex-1 space-y-1.5" style={{ minWidth: 260 }}>
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Количество воздуха в аварийной выработке:</span>
-            </div>
-            <div className="flex items-baseline gap-1 pl-2">
-              <input
-                type="text"
-                value={data.airVolume}
-                onChange={e => set('airVolume', e.target.value)}
-                placeholder="4,79"
-                className={INP}
-                style={{ fontSize: 12, fontStyle: 'italic', width: 60 }}
-              />
-              <span style={{ fontSize: 11 }}>м³/с</span>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Сечение аварийной выработки:</span>
-            </div>
-            <div className="flex items-baseline gap-1 pl-2">
-              <input
-                type="text"
-                value={data.crossSection}
-                onChange={e => set('crossSection', e.target.value)}
-                placeholder="10,0"
-                className={INP}
-                style={{ fontSize: 12, fontStyle: 'italic', width: 60 }}
-              />
-              <span style={{ fontSize: 11 }}>м²</span>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>Телефон КП:</span>
-              <input
-                type="text"
-                value={data.phone}
-                onChange={e => set('phone', e.target.value)}
-                placeholder="2-100"
-                className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600"
-                style={{ fontSize: 12, fontStyle: 'italic', width: 80, paddingBottom: 1 }}
-              />
+          {/* ЗАГОЛОВОК ДОКУМЕНТА */}
+          <div>
+            <SectionTitle>Заголовок документа</SectionTitle>
+            <div className="space-y-2">
+              <Field label="Позиция №" value={data.position} onChange={v => set('position', v)} placeholder="28" />
+              <div className="flex gap-2">
+                <Field label="Дата" value={data.date} onChange={v => set('date', v)} placeholder="02.05.2026" half />
+                <Field label="Время" value={data.time} onChange={v => set('time', v)} placeholder="23:26" half />
+              </div>
+              <Field label="Часовой пояс" value={data.timezone} onChange={v => set('timezone', v)} placeholder="мск" />
             </div>
           </div>
 
-          {/* Правая колонка — состав атмосферы */}
-          <div style={{ minWidth: 340 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, textDecoration: 'underline', marginBottom: 6 }}>
-              Состав рудничной атмосферы:
+          {/* ОСНОВНЫЕ СВЕДЕНИЯ */}
+          <div>
+            <SectionTitle>Основные сведения</SectionTitle>
+            <div className="space-y-2">
+              <Field label="Наименование объекта" value={data.objectName} onChange={v => set('objectName', v)} placeholder="Рудник (месторождение)..." />
+
+              <div>
+                <label className={label} style={{ color: 'hsl(var(--muted-foreground))' }}>Вид аварии</label>
+                <select
+                  value={data.accidentType}
+                  onChange={e => set('accidentType', e.target.value)}
+                  className={inp}
+                  style={{ color: 'hsl(var(--foreground))', background: 'hsl(var(--card))' }}
+                >
+                  {ACCIDENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <Field label="Дата аварии" value={data.accidentDate} onChange={v => set('accidentDate', v)} placeholder="02.05.2026" half />
+                <Field label="Время аварии" value={data.accidentTime} onChange={v => set('accidentTime', v)} placeholder="23:26" half />
+              </div>
+
+              <Field label="Место аварии" value={data.accidentLocation} onChange={v => set('accidentLocation', v)} placeholder="насосная гор. +210м." />
+
+              <div className="flex gap-2">
+                <Field label="Кол-во воздуха, м³/с" value={data.airVolume} onChange={v => set('airVolume', v)} placeholder="4,79" half />
+                <Field label="Сечение выработки, м²" value={data.crossSection} onChange={v => set('crossSection', v)} placeholder="10,0" half />
+              </div>
+
+              <Field label="Телефон КП" value={data.phone} onChange={v => set('phone', v)} placeholder="2-100" />
             </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-              <AtmField label="CO- " value={data.atmosphere.co} onChange={v => setAtm('co', v)} unit="%" />
-              <AtmField label="CO₂- " value={data.atmosphere.co2} onChange={v => setAtm('co2', v)} unit="%" />
-              <div className="flex items-baseline gap-1">
-                <span style={{ fontSize: 11, fontWeight: 600 }}>t-</span>
+          </div>
+
+          {/* ПОДПИСИ */}
+          <div>
+            <SectionTitle>Подписи</SectionTitle>
+            <div className="space-y-2">
+              <Field label="Руководитель горноспасательных работ" value={data.supervisor} onChange={v => set('supervisor', v)} placeholder="Фамилия И.О." />
+              <Field label="Помощник командира отряда" value={data.deputyCommander} onChange={v => set('deputyCommander', v)} placeholder="Фамилия И.О." />
+              <Field label="Командир (в сутках)" value={data.commanderOnDuty} onChange={v => set('commanderOnDuty', v)} placeholder="И.И. Иванов" />
+            </div>
+          </div>
+
+        </div>
+
+        {/* ПРАВАЯ КОЛОНКА */}
+        <div className="overflow-y-auto p-4 space-y-4 flex-shrink-0" style={{ width: 340 }}>
+
+          {/* СОСТАВ РУДНИЧНОЙ АТМОСФЕРЫ */}
+          <div>
+            <SectionTitle>Состав рудничной атмосферы</SectionTitle>
+            <div>
+              <AtmRow label="CO" value={data.atmosphere.co} onChange={v => setAtm('co', v)} />
+              <AtmRow label="CO₂" value={data.atmosphere.co2} onChange={v => setAtm('co2', v)} />
+              <AtmRow label="SO₂" value={data.atmosphere.so2} onChange={v => setAtm('so2', v)} />
+              <AtmRow label="O₂" value={data.atmosphere.o2} onChange={v => setAtm('o2', v)} />
+              <AtmRow label="CH₄" value={data.atmosphere.ch4} onChange={v => setAtm('ch4', v)} />
+              <AtmRow label="NO-NO₂" value={data.atmosphere.noNo2} onChange={v => setAtm('noNo2', v)} />
+              <AtmRow label="t°" value={data.atmosphere.temperature} onChange={v => setAtm('temperature', v)} unit="°C" />
+              <div className="pt-2">
+                <label className={label} style={{ color: 'hsl(var(--muted-foreground))' }}>Степень задымлённости</label>
                 <input
                   type="text"
-                  value={data.atmosphere.temperature}
-                  onChange={e => setAtm('temperature', e.target.value)}
-                  className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600"
-                  style={{ fontSize: 11, fontStyle: 'italic', width: 40, paddingBottom: 1 }}
+                  value={data.atmosphere.smokeLevel}
+                  onChange={e => setAtm('smokeLevel', e.target.value)}
+                  placeholder="средняя от 5 до 10м"
+                  className={inp}
+                  style={{ color: 'hsl(var(--foreground))' }}
                 />
-                <span style={{ fontSize: 11 }}>°</span>
               </div>
-              <AtmField label="SO₂- " value={data.atmosphere.so2} onChange={v => setAtm('so2', v)} unit="%" />
-              <AtmField label="O₂- " value={data.atmosphere.o2} onChange={v => setAtm('o2', v)} unit="%" />
-              <AtmField label="CH₄- " value={data.atmosphere.ch4} onChange={v => setAtm('ch4', v)} unit="%" />
-              <AtmField label="NO-NO₂- " value={data.atmosphere.noNo2} onChange={v => setAtm('noNo2', v)} unit="%" />
-              <div />
-              <AtmField label="SO₂- " value={data.atmosphere.so2_2} onChange={v => setAtm('so2_2', v)} unit="%" />
-            </div>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span style={{ fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>Степень задымлённости-</span>
-              <input
-                type="text"
-                value={data.atmosphere.smokeLevel}
-                onChange={e => setAtm('smokeLevel', e.target.value)}
-                placeholder="средняя от 5 до 10м"
-                className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 flex-1"
-                style={{ fontSize: 11, fontStyle: 'italic', paddingBottom: 1 }}
-              />
             </div>
           </div>
-        </div>
 
-        {/* ОСНОВНАЯ ОБЛАСТЬ + УСЛОВНЫЕ ОБОЗНАЧЕНИЯ */}
-        <div className="flex gap-0 mt-3" style={{ border: '1px solid #94a3b8' }}>
-          {/* Основная область схемы */}
-          <div
-            className="flex-1 flex items-center justify-center"
-            style={{ minHeight: 280, borderRight: '1px solid #94a3b8', background: '#f8fafc' }}
-          >
-            <span style={{ fontSize: 36, color: '#cbd5e1', fontWeight: 300 }}>Страница 1</span>
+          {/* СХЕМА (КАРТИНКА) УЧАСТКА */}
+          <div>
+            <SectionTitle>Схема (картинка) участка</SectionTitle>
+            <div
+              className="rounded border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors hover:border-primary"
+              style={{
+                borderColor: data.schemaImageUrl ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                background: 'hsl(var(--card))',
+                minHeight: 140,
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+              onClick={() => fileRef.current?.click()}
+            >
+              {data.schemaImageUrl ? (
+                <>
+                  <img src={data.schemaImageUrl} alt="Схема" style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }} />
+                  <button
+                    className="absolute top-1 right-1 w-6 h-6 rounded flex items-center justify-center text-xs"
+                    style={{ background: 'hsl(var(--destructive))', color: '#fff' }}
+                    onClick={e => { e.stopPropagation(); set('schemaImageUrl', ''); }}
+                  >
+                    <Icon name="X" size={12} />
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-2 py-4" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  <Icon name="ImagePlus" size={28} />
+                  <span className="text-xs">Нажмите для загрузки</span>
+                </div>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           </div>
 
-          {/* Условные обозначения */}
-          <div style={{ width: 180, padding: '8px 10px' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, textDecoration: 'underline', marginBottom: 6, textAlign: 'center' }}>
-              Условные обозначения:
-            </div>
-            {data.legendItems.map((item, i) => (
-              <div key={i} style={{ borderBottom: '1px solid #cbd5e1', marginBottom: 2 }}>
+          {/* УСЛОВНЫЕ ОБОЗНАЧЕНИЯ */}
+          <div>
+            <SectionTitle>Условные обозначения</SectionTitle>
+            <div className="space-y-1">
+              {data.legendItems.map((item, i) => (
                 <input
+                  key={i}
                   type="text"
                   value={item}
-                  onChange={e => setLegend(i, e.target.value)}
-                  placeholder={i < 4 ? ['Надшахтное здание', 'Пожар', 'Стационарный пункт ВГК', 'Отделение в движении'][i] : ''}
-                  className="w-full bg-transparent focus:outline-none"
-                  style={{ fontSize: 11, color: '#1e293b', paddingBottom: 2, paddingTop: 1 }}
+                  onChange={e => {
+                    const items = [...data.legendItems];
+                    items[i] = e.target.value;
+                    onChange({ ...data, legendItems: items });
+                  }}
+                  placeholder={`Обозначение ${i + 1}`}
+                  className={inp}
+                  style={{ color: 'hsl(var(--foreground))', fontSize: 12 }}
                 />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* ПОДПИСЬ */}
-        <div className="flex items-end gap-3 mt-4" style={{ borderTop: '1px solid #94a3b8', paddingTop: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
-            Руководитель горноспасательных работ:
-          </span>
-          <div className="flex-1 border-b border-gray-400" style={{ minHeight: 18 }} />
-          <input
-            type="text"
-            value={data.supervisor}
-            onChange={e => set('supervisor', e.target.value)}
-            placeholder="/Ф.И. Фамилия/"
-            className="border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-600 text-center"
-            style={{ fontSize: 12, width: 160, paddingBottom: 1 }}
-          />
         </div>
-
       </div>
     </div>
   );

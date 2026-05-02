@@ -77,6 +77,9 @@ export interface SchemaFormData {
   atmosphere: AtmosphereData;
   legendItems: string[];
   supervisor: string;
+  deputyCommander: string;
+  commanderOnDuty: string;
+  schemaImageUrl: string;
 }
 
 export const defaultFormData = (): SchemaFormData => ({
@@ -85,27 +88,30 @@ export const defaultFormData = (): SchemaFormData => ({
   time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
   timezone: 'мск',
   objectName: '',
-  accidentType: '',
+  accidentType: 'Пожар',
   accidentDate: new Date().toLocaleDateString('ru-RU'),
   accidentTime: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
   accidentTimezone: 'мск',
-  accidentLocation: '',
-  airVolume: '',
-  crossSection: '',
-  phone: '',
+  accidentLocation: 'насосная гор. +210м.',
+  airVolume: '4,79',
+  crossSection: '10,0',
+  phone: '2-100',
   atmosphere: {
-    co: '',
-    co2: '',
-    so2: '',
-    o2: '',
-    ch4: '',
-    noNo2: '',
-    so2_2: '',
-    temperature: '',
-    smokeLevel: '',
+    co: '0,00',
+    co2: '0,00',
+    so2: '0,00',
+    o2: '0,00',
+    ch4: '0,00',
+    noNo2: '0,00',
+    so2_2: '0,00',
+    temperature: '0,00',
+    smokeLevel: 'средняя от 5 до 10м',
   },
   legendItems: ['', '', '', '', '', '', '', '', '', ''],
   supervisor: '',
+  deputyCommander: '',
+  commanderOnDuty: '',
+  schemaImageUrl: '',
 });
 
 export interface SchemaData {

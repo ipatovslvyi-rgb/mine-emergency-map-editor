@@ -155,10 +155,14 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
       <div style={{ display: 'flex', border: '1px solid #64748b', marginBottom: 8, minHeight: 340 }}>
 
         {/* Область схемы */}
-        <div style={{ flex: 1, borderRight: '1px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 340 }}>
-          <span style={{ fontSize: 28, color: '#cbd5e1', fontWeight: 300 }}>
-            {schemaName || 'Схема'}
-          </span>
+        <div style={{ flex: 1, borderRight: '1px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 340, overflow: 'hidden' }}>
+          {data.schemaImageUrl ? (
+            <img src={data.schemaImageUrl} alt="Схема" style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain' }} />
+          ) : (
+            <span style={{ fontSize: 28, color: '#cbd5e1', fontWeight: 300 }}>
+              {schemaName || 'Схема'}
+            </span>
+          )}
         </div>
 
         {/* Условные обозначения */}
@@ -174,15 +178,21 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
         </div>
       </div>
 
-      {/* ПОДПИСЬ */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, paddingTop: 6, borderTop: '1px solid #94a3b8' }}>
-        <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: 11 }}>
-          Руководитель горноспасательных работ:
-        </span>
-        <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: 16 }} />
-        <span style={{ fontStyle: 'italic', whiteSpace: 'nowrap', borderBottom: '1px solid #000', minWidth: 160, textAlign: 'center', fontSize: 11 }}>
-          {V(data.supervisor, '\u00A0')}
-        </span>
+      {/* ПОДПИСИ */}
+      <div style={{ borderTop: '1px solid #94a3b8', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {[
+          { lbl: 'Руководитель горноспасательных работ:', val: data.supervisor },
+          { lbl: 'Помощник командира отряда:', val: data.deputyCommander },
+          { lbl: 'Командир (в сутках):', val: data.commanderOnDuty },
+        ].map(({ lbl, val }) => (
+          <div key={lbl} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+            <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: 10 }}>{lbl}</span>
+            <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: 14 }} />
+            <span style={{ fontStyle: 'italic', whiteSpace: 'nowrap', borderBottom: '1px solid #000', minWidth: 140, textAlign: 'center', fontSize: 10 }}>
+              {V(val, '\u00A0')}
+            </span>
+          </div>
+        ))}
       </div>
 
     </div>
