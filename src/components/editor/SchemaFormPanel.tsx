@@ -8,6 +8,11 @@ const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
   { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/7472fb3d-606e-4849-920c-08a6867a6c83.png', label: 'Газовыделение' },
   { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/28db5f8d-85ad-49ce-b53b-da13e168b451.png', label: 'Считыватель системы позиционирования' },
   { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/ff1e6286-8210-4aa2-b3ab-4aa362305c35.png', label: 'Надшахтное здание' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/60bb06e4-1c22-4c23-8e77-eeaaa86b3c43.png', label: 'Самоходное двигательное оборудование' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/4d263ba9-11d9-48fc-abd4-45104740f9c7.png', label: 'Местонахождение пострадавшего (смертельно травмированного)' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b307c90a-9516-4ccb-81b8-e3129dca9ae3.png', label: 'Местонахождение пострадавшего (травмированного)' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/4ce54736-a241-4c30-9157-3d5ea526a23e.png', label: 'Отделение в движении' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/00c2fb18-d9e9-483c-a310-313ef51e2545.png', label: 'Место проникновения воды в выработку' },
 ];
 
 interface Props {
