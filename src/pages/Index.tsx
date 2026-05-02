@@ -6,6 +6,7 @@ import Canvas from '@/components/editor/Canvas';
 import PropertiesPanel from '@/components/editor/PropertiesPanel';
 import SchemaFormPanel from '@/components/editor/SchemaFormPanel';
 import PrintDocument from '@/components/editor/PrintDocument';
+import PreviewPage from './PreviewPage';
 import SchemasPage from './SchemasPage';
 import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
@@ -15,7 +16,7 @@ import Icon from '@/components/ui/icon';
 
 const Index: React.FC = () => {
   const [activeView, setActiveView] = useState<string>('editor');
-  const [editorTab, setEditorTab] = useState<'canvas' | 'form'>('form');
+  const [editorTab, setEditorTab] = useState<'canvas' | 'form' | 'preview'>('form');
   const { getActiveSchema, zoom, setZoom, undo, redo, deleteSelectedElements, setActiveTool, updateFormData } = useSchemaStore();
   const schema = getActiveSchema();
 
@@ -42,6 +43,7 @@ const Index: React.FC = () => {
   }, [zoom, undo, redo, deleteSelectedElements, setActiveTool, setZoom, editorTab]);
 
   const handleExport = useCallback(async (type: 'pdf' | 'png' | 'print') => {
+    if (type === 'preview') { setEditorTab('preview'); return; }
     window.print();
   }, []);
 
@@ -88,7 +90,7 @@ const Index: React.FC = () => {
                   onClick={() => setEditorTab('form')}
                 >
                   <Icon name="ClipboardList" size={13} />
-                  Данные схемы
+                  Ввод данных
                 </button>
                 <button
                   className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-all ${editorTab === 'canvas' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
@@ -97,6 +99,14 @@ const Index: React.FC = () => {
                 >
                   <Icon name="PenTool" size={13} />
                   Схема / Чертёж
+                </button>
+                <button
+                  className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-all ${editorTab === 'preview' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+                  style={{ borderBottomColor: editorTab === 'preview' ? 'hsl(var(--primary))' : 'transparent' }}
+                  onClick={() => setEditorTab('preview')}
+                >
+                  <Icon name="Eye" size={13} />
+                  Предпросмотр
                 </button>
                 {editorTab === 'form' && (
                   <div className="flex-1 flex justify-end px-3">
@@ -109,6 +119,13 @@ const Index: React.FC = () => {
 
               {editorTab === 'form' ? (
                 <SchemaFormPanel data={formData} onChange={handleFormChange} />
+              ) : editorTab === 'preview' ? (
+                <PreviewPage
+                  data={formData}
+                  schemaName={schema?.name ?? ''}
+                  onClose={() => setEditorTab('form')}
+                  onPrint={() => window.print()}
+                />
               ) : (
                 <Canvas />
               )}

@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface TopBarProps {
   activeView: string;
   onViewChange: (v: string) => void;
-  onExport: (type: 'pdf' | 'png' | 'print') => void;
+  onExport: (type: 'pdf' | 'png' | 'print' | 'preview') => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) => {
@@ -91,27 +91,13 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
               <button
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
                 style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
-                onClick={() => onExport('png')}
+                onClick={() => onExport('preview')}
               >
-                <Icon name="FileImage" size={13} />
-                PNG
+                <Icon name="Eye" size={13} />
+                Предпросмотр
               </button>
             </TooltipTrigger>
-            <TooltipContent>Экспорт в PNG</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
-                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
-                onClick={() => onExport('pdf')}
-              >
-                <Icon name="FileText" size={13} />
-                PDF
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Экспорт в PDF</TooltipContent>
+            <TooltipContent>Предпросмотр документа</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -122,10 +108,10 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
                 onClick={() => onExport('print')}
               >
                 <Icon name="Printer" size={13} />
-                Печать
+                Печать / PDF
               </button>
             </TooltipTrigger>
-            <TooltipContent>Отправить на печать</TooltipContent>
+            <TooltipContent>Отправить на печать или сохранить PDF</TooltipContent>
           </Tooltip>
         </div>
       )}
