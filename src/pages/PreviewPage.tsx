@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { SchemaFormData } from '@/types/schema';
 import PrintDocument from '@/components/editor/PrintDocument';
 import Icon from '@/components/ui/icon';
 import { exportToExcel } from '@/utils/exportExcel';
+import html2canvas from 'html2canvas';
 
 interface Props {
   data: SchemaFormData;
@@ -12,6 +13,28 @@ interface Props {
 }
 
 const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) => {
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleDownloadImage = async () => {
+    if (!sheetRef.current) return;
+    setExporting(true);
+    try {
+      const canvas = await html2canvas(sheetRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${schemaName || 'схема'}_${data.date.replace(/\./g, '-')}.png`;
+      a.click();
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
 
@@ -50,6 +73,16 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
           </button>
 
           <button
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
+            style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+            onClick={handleDownloadImage}
+            disabled={exporting}
+          >
+            <Icon name={exporting ? 'Loader2' : 'Image'} size={13} />
+            <span className="hidden sm:inline">{exporting ? 'Сохранение…' : 'PNG'}</span>
+          </button>
+
+          <button
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
             style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
             onClick={onPrint}
@@ -67,6 +100,7 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
       >
         {/* Лист А4 альбомный — 297×210мм, поля: лево 3см, верх 2см, право 1см, низ 2см */}
         <div
+          ref={sheetRef}
           style={{
             width: 'min(96vw, 1100px)',
             aspectRatio: '297 / 210',
