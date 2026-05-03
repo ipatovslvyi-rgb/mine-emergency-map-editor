@@ -175,7 +175,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
 
       {/* ── FOOTER ── */}
       <footer className="px-8 py-4 border-t border-border flex items-center justify-between text-xs flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))', color: 'hsl(var(--muted-foreground))' }}>
-        <span>МинПлан АЭМП v1.0</span>
+        <span>САУ v1.001</span>
         <span>Автоматизированная система горноспасательной документации</span>
       </footer>
 
