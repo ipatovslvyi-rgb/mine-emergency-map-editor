@@ -38,9 +38,9 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
         <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
           <Icon name="TriangleAlert" size={13} />
         </div>
-        <span className="font-semibold text-sm tracking-tight hidden sm:inline" style={{ color: 'hsl(var(--foreground))' }}>МинПлан</span>
+        <span className="font-semibold text-sm tracking-tight hidden sm:inline" style={{ color: 'hsl(var(--foreground))' }}>САУ</span>
         <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
-          АЭМП
+          v1.001
         </span>
       </div>
 

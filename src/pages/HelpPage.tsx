@@ -120,7 +120,7 @@ const HelpPage: React.FC = () => {
 
         <div className="mt-6 p-4 rounded-lg text-center" style={{ background: 'hsl(var(--muted))' }}>
           <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
-            МинПлан v1.0 — Редактор аварийно-эвакуационных схем горных предприятий
+            САУ v1.001 — Схема аварийного участка опасного производственного объекта
           </p>
         </div>
       </div>

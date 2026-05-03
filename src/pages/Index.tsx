@@ -44,7 +44,7 @@ const Index: React.FC = () => {
     <div className="status-bar flex-shrink-0">
       <span className="flex items-center gap-1.5" style={{ color: 'hsl(var(--warning))' }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'hsl(var(--warning))', display: 'inline-block', flexShrink: 0 }} />
-        АЭМП v1.0
+        САУ v1.001
       </span>
       {schema && <span style={{ color: 'hsl(var(--foreground))' }}>{schema.name}</span>}
       <span className="flex-1" />
