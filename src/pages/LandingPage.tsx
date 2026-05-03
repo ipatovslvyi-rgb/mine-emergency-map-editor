@@ -26,7 +26,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
           <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
             <Icon name="TriangleAlert" size={16} />
           </div>
-          <span className="font-bold text-base tracking-tight">МинПлан</span>
+          <span className="text-base tracking-tight font-thin">САУ-1.001</span>
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
             АЭМП
           </span>
