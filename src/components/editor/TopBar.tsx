@@ -32,38 +32,42 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
   ];
 
   return (
-    <div className="toolbar-bg border-b border-border flex items-center h-11 px-3 gap-2 flex-shrink-0">
-      <div className="flex items-center gap-2 mr-2">
+    <div className="toolbar-bg border-b border-border flex items-center h-11 px-2 md:px-3 gap-1 md:gap-2 flex-shrink-0">
+      {/* Лого */}
+      <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
         <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
           <Icon name="TriangleAlert" size={13} />
         </div>
-        <span className="font-semibold text-sm tracking-tight" style={{ color: 'hsl(var(--foreground))' }}>МинПлан</span>
-        <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
+        <span className="font-semibold text-sm tracking-tight hidden sm:inline" style={{ color: 'hsl(var(--foreground))' }}>МинПлан</span>
+        <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
           АЭМП
         </span>
       </div>
 
-      <div className="h-5 border-l border-border mx-1" />
+      <div className="h-5 border-l border-border mx-0.5 md:mx-1 hidden sm:block" />
 
+      {/* Навигация — на мобиле только иконки */}
       {NAV_ITEMS.map(item => (
         <button
           key={item.id}
           className={`tab-btn flex items-center gap-1.5 ${activeView === item.id ? 'active' : ''}`}
           onClick={() => onViewChange(item.id)}
+          title={item.label}
         >
           <Icon name={item.icon} size={13} />
-          {item.label}
+          <span className="hidden sm:inline">{item.label}</span>
         </button>
       ))}
 
+      {/* Название схемы — скрыто на мобиле */}
       {schema && activeView === 'editor' && (
         <>
-          <div className="h-5 border-l border-border mx-1" />
+          <div className="h-5 border-l border-border mx-0.5 hidden md:block" />
           {editing ? (
             <input
               autoFocus
-              className="prop-input text-sm"
-              style={{ width: 200 }}
+              className="prop-input text-sm hidden md:block"
+              style={{ width: 160 }}
               value={nameVal}
               onChange={e => setNameVal(e.target.value)}
               onBlur={commitEdit}
@@ -71,7 +75,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
             />
           ) : (
             <button
-              className="flex items-center gap-1.5 text-sm hover:text-foreground transition-colors px-1"
+              className="hidden md:flex items-center gap-1.5 text-sm hover:text-foreground transition-colors px-1"
               style={{ color: 'hsl(var(--muted-foreground))' }}
               onClick={startEdit}
             >
@@ -84,17 +88,18 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
 
       <div className="flex-1" />
 
+      {/* Кнопки экспорта */}
       {activeView === 'editor' && (
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
                 style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
                 onClick={() => onExport('preview')}
               >
                 <Icon name="Eye" size={13} />
-                Предпросмотр
+                <span className="hidden sm:inline">Предпросмотр</span>
               </button>
             </TooltipTrigger>
             <TooltipContent>Предпросмотр документа</TooltipContent>
@@ -103,12 +108,12 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
+                className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 rounded text-xs font-medium transition-all"
                 style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
                 onClick={() => onExport('print')}
               >
                 <Icon name="Printer" size={13} />
-                Печать / PDF
+                <span className="hidden sm:inline">Печать / PDF</span>
               </button>
             </TooltipTrigger>
             <TooltipContent>Отправить на печать или сохранить PDF</TooltipContent>

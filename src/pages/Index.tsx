@@ -83,7 +83,7 @@ const Index: React.FC = () => {
               </button>
               {editorTab === 'form' && (
                 <div className="flex-1 flex justify-end px-3">
-                  <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'hsl(var(--safe) / 0.15)', color: 'hsl(var(--safe))', border: '1px solid hsl(var(--safe) / 0.3)' }}>
+                  <span className="text-xs px-2 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--safe) / 0.15)', color: 'hsl(var(--safe))', border: '1px solid hsl(var(--safe) / 0.3)' }}>
                     Данные сохраняются автоматически
                   </span>
                 </div>
@@ -91,7 +91,9 @@ const Index: React.FC = () => {
             </div>
 
             {editorTab === 'form' ? (
-              <SchemaFormPanel data={formData} onChange={handleFormChange} />
+              <div className="flex-1 overflow-y-auto md:overflow-hidden">
+                <SchemaFormPanel data={formData} onChange={handleFormChange} />
+              </div>
             ) : (
               <PreviewPage
                 data={formData}

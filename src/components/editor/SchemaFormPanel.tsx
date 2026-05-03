@@ -57,10 +57,10 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
   const atmInp = 'flex-1 bg-transparent text-sm focus:outline-none text-right';
 
   return (
-    <div className="flex h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
+    <div className="flex flex-col md:flex-row h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
 
-      {/* ЛЕВАЯ КОЛОНКА — поля данных, компактная */}
-      <div className="overflow-y-auto border-r border-border p-3 space-y-2 flex-shrink-0" style={{ width: 280 }}>
+      {/* ЛЕВАЯ КОЛОНКА — поля данных */}
+      <div className="overflow-y-auto border-b md:border-b-0 md:border-r border-border p-3 space-y-2 md:flex-shrink-0 w-full md:w-[280px]">
 
         <Section title="Заголовок">
           <Field label="Позиция №" value={data.position} onChange={v => set('position', v)} placeholder="28" />
@@ -148,8 +148,8 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
 
       </div>
 
-      {/* ПРАВАЯ ЧАСТЬ — редактор схемы на весь оставшийся экран */}
-      <div className="flex-1 overflow-hidden flex flex-col" style={{ minWidth: 0 }}>
+      {/* ПРАВАЯ ЧАСТЬ — редактор схемы */}
+      <div className="flex-1 overflow-hidden flex flex-col min-h-[340px] md:min-h-0" style={{ minWidth: 0 }}>
         <SchemaCanvas
           imageUrl={data.schemaImageUrl}
           placedSymbols={data.placedSymbols ?? []}
