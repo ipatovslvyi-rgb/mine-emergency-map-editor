@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0a1a4a",
-  "theme_color": "#1e3a8a",
+  "background_color": "#0d1520",
+  "theme_color": "#f97316",
   "lang": "ru",
   "icons": [
     {
@@ -17,7 +17,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/d44b49ed-e140-4b6d-bea3-787f96fa20ff.jpg",
+      "src": "https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg",
       "type": "image/jpeg",
       "sizes": "1024x1024",
       "purpose": "any"
