@@ -26,17 +26,61 @@ const SVG_SQUAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><
 
 const SVG_WATER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#e3f2fd" stroke="#0d47a1" stroke-width="2.5"/><path d="M32 14 Q44 28 44 38 A12 12 0 0 1 20 38 Q20 28 32 14 Z" fill="#42a5f5" stroke="#0d47a1" stroke-width="2" stroke-linejoin="round"/><path d="M28 36 Q26 40 28 44" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M14 52 Q20 48 26 52 T38 52 T50 52" fill="none" stroke="#0d47a1" stroke-width="2" stroke-linecap="round"/></svg>`;
 
+/* ── ГОСТ-символы ── */
+
+// Отделение на месте работ: прямоугольник с текстом "N чел"
+const SVG_SQUAD_STATIC = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="4" y="16" width="56" height="32" rx="3" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><text x="32" y="27" text-anchor="middle" font-family="Arial" font-size="9" font-weight="bold" fill="#1b5e20">N чел</text><line x1="10" y1="32" x2="54" y2="32" stroke="#1b5e20" stroke-width="1.2" stroke-dasharray="3,2"/><text x="32" y="43" text-anchor="middle" font-family="Arial" font-size="8" fill="#2e7d32">на месте</text></svg>`;
+
+// Подземная горноспасательная база: прямоугольник «ПБ»
+const SVG_BASE_UNDERGROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="14" width="48" height="36" rx="3" fill="#fff8e1" stroke="#e65100" stroke-width="2.5"/><text x="32" y="38" text-anchor="middle" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#e65100">ПБ</text></svg>`;
+
+// Наземная база: прямоугольник «НБ»
+const SVG_BASE_GROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="14" width="48" height="36" rx="3" fill="#e8eaf6" stroke="#283593" stroke-width="2.5"/><text x="32" y="38" text-anchor="middle" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#283593">НБ</text></svg>`;
+
+// Пост безопасности: круг с флажком (ГОСТ)
+const SVG_SAFETY_POST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="38" r="14" fill="#fff" stroke="#1a237e" stroke-width="2.5"/><line x1="32" y1="10" x2="32" y2="24" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/><polygon points="32,10 46,16 32,22" fill="#1a237e"/></svg>`;
+
+// Место отбора проб: треугольник с номером (ГОСТ)
+const SVG_SAMPLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="32,8 58,54 6,54" fill="#fff9c4" stroke="#f57f17" stroke-width="2.5" stroke-linejoin="round"/><text x="32" y="48" text-anchor="middle" font-family="Arial Black, Arial" font-size="18" font-weight="900" fill="#e65100">4</text></svg>`;
+
+// Очаг пожара (ГОСТ: солнцеподобный круг с лучами, красный)
+const SVG_FIRE_SOURCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="12" fill="#ffcdd2" stroke="#c62828" stroke-width="2.5"/><line x1="32" y1="6" x2="32" y2="14" stroke="#c62828" stroke-width="2.5" stroke-linecap="round"/><line x1="32" y1="50" x2="32" y2="58" stroke="#c62828" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="32" x2="14" y2="32" stroke="#c62828" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="32" x2="58" y2="32" stroke="#c62828" stroke-width="2.5" stroke-linecap="round"/><line x1="14" y1="14" x2="20" y2="20" stroke="#c62828" stroke-width="2" stroke-linecap="round"/><line x1="44" y1="44" x2="50" y2="50" stroke="#c62828" stroke-width="2" stroke-linecap="round"/><line x1="50" y1="14" x2="44" y2="20" stroke="#c62828" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="50" x2="20" y2="44" stroke="#c62828" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+// Нарушенная крепь: ряд треугольников над линией (ГОСТ)
+const SVG_BROKEN_SUPPORT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="4" y1="44" x2="60" y2="44" stroke="#5d4037" stroke-width="2.5" stroke-linecap="round"/><polygon points="10,44 18,24 26,44" fill="none" stroke="#5d4037" stroke-width="2" stroke-linejoin="round"/><polygon points="24,44 32,24 40,44" fill="none" stroke="#5d4037" stroke-width="2" stroke-linejoin="round"/><polygon points="38,44 46,24 54,44" fill="none" stroke="#5d4037" stroke-width="2" stroke-linejoin="round"/></svg>`;
+
+// Зона обрушения: пунктирный эллипс с точками (ГОСТ)
+const SVG_COLLAPSE_ZONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="26" ry="14" fill="#efebe9" stroke="#795548" stroke-width="2" stroke-dasharray="4,3"/><circle cx="20" cy="34" r="2" fill="#795548"/><circle cx="28" cy="38" r="2" fill="#795548"/><circle cx="36" cy="34" r="2" fill="#795548"/><circle cx="44" cy="38" r="2" fill="#795548"/><line x1="8" y1="48" x2="56" y2="48" stroke="#795548" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+// Прорыв заиловочной массы/плывунов: стрелка с изгибом коричневая
+const SVG_SLUDGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M44 12 Q50 20 44 30 Q36 40 28 44 L20 52" fill="none" stroke="#6d4c41" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polygon points="14,48 24,46 20,56" fill="#6d4c41"/><path d="M50 22 Q54 28 50 34 Q44 42 36 46 L28 54" fill="none" stroke="#6d4c41" stroke-width="2" stroke-linecap="round" opacity="0.5"/></svg>`;
+
+// Место выброса газа или горного удара: линия с кружком «В»
+const SVG_OUTBURST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="8" y1="28" x2="56" y2="28" stroke="#4a148c" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="40" x2="56" y2="40" stroke="#4a148c" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="28" r="9" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/><text x="32" y="32" text-anchor="middle" font-family="Arial Black, Arial" font-size="11" font-weight="900" fill="#4a148c">В</text><line x1="32" y1="37" x2="32" y2="45" stroke="#4a148c" stroke-width="2" stroke-linecap="round"/><polygon points="28,43 32,50 36,43" fill="#4a148c"/></svg>`;
+
 export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
+  // Существующие
   { imageUrl: svgToDataUrl(SVG_FIRE), label: 'Пожар' },
-  { imageUrl: svgToDataUrl(SVG_EXPLOSION), label: 'Взрыв' },
+  { imageUrl: svgToDataUrl(SVG_EXPLOSION), label: 'Место взрыва' },
   { imageUrl: svgToDataUrl(SVG_GAS), label: 'Газовыделение' },
   { imageUrl: svgToDataUrl(SVG_BEACON), label: 'Считыватель системы позиционирования' },
   { imageUrl: svgToDataUrl(SVG_BUILDING), label: 'Надшахтное здание' },
   { imageUrl: svgToDataUrl(SVG_VEHICLE), label: 'Самоходное двигательное оборудование' },
-  { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD), label: 'Местонахождение пострадавшего (смертельно травмированного)' },
-  { imageUrl: svgToDataUrl(SVG_VICTIM_INJURED), label: 'Местонахождение пострадавшего (травмированного)' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD), label: 'Место обнаружения пострадавшего без признаков жизни' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_INJURED), label: 'Место обнаружения пострадавшего с признаками жизни' },
   { imageUrl: svgToDataUrl(SVG_SQUAD), label: 'Отделение в движении' },
-  { imageUrl: svgToDataUrl(SVG_WATER), label: 'Место проникновения воды в выработку' },
+  { imageUrl: svgToDataUrl(SVG_WATER), label: 'Прорыв воды, рассола' },
+  // ГОСТ новые
+  { imageUrl: svgToDataUrl(SVG_SQUAD_STATIC), label: 'Отделение на месте работ' },
+  { imageUrl: svgToDataUrl(SVG_BASE_UNDERGROUND), label: 'Подземная горноспасательная база (ПБ)' },
+  { imageUrl: svgToDataUrl(SVG_BASE_GROUND), label: 'Наземная база (НБ)' },
+  { imageUrl: svgToDataUrl(SVG_SAFETY_POST), label: 'Пост безопасности' },
+  { imageUrl: svgToDataUrl(SVG_SAMPLE), label: 'Место отбора проб' },
+  { imageUrl: svgToDataUrl(SVG_FIRE_SOURCE), label: 'Очаг пожара' },
+  { imageUrl: svgToDataUrl(SVG_BROKEN_SUPPORT), label: 'Горная выработка с нарушенной крепью' },
+  { imageUrl: svgToDataUrl(SVG_COLLAPSE_ZONE), label: 'Зона обрушения горных пород' },
+  { imageUrl: svgToDataUrl(SVG_SLUDGE), label: 'Прорыв заиловочной массы и плывунов' },
+  { imageUrl: svgToDataUrl(SVG_OUTBURST), label: 'Место выброса (В) или горного удара (У)' },
 ];
 
 interface Props {
