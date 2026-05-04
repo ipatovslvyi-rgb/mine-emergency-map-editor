@@ -35,9 +35,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
     <div className="toolbar-bg border-b border-border flex items-center h-11 px-2 md:px-3 gap-1 md:gap-2 flex-shrink-0">
       {/* Лого */}
       <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
-        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
-          <Icon name="TriangleAlert" size={13} />
-        </div>
+        <img src="/logo.svg" alt="САУ" className="w-7 h-7 rounded" style={{ objectFit: 'contain' }} />
         <span className="font-semibold text-sm tracking-tight hidden sm:inline" style={{ color: 'hsl(var(--foreground))' }}>САУ</span>
         <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
           v1.001

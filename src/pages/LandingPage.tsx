@@ -23,9 +23,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
       {/* ── NAV ── */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
-            <Icon name="TriangleAlert" size={16} />
-          </div>
+          <img src="/logo.svg" alt="САУ" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
           <span className="text-base tracking-tight font-thin">САУ</span>
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
             v1.001
