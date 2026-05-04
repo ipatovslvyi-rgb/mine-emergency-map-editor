@@ -3,17 +3,40 @@ import { SchemaFormData, AtmosphereData, LegendItem } from '@/types/schema';
 import SchemaCanvas from './SchemaCanvas';
 import Icon from '@/components/ui/icon';
 
+const svgToDataUrl = (svg: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+const SVG_FIRE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff3e0" stroke="#c62828" stroke-width="2.5"/><path d="M32 12 L40 28 L36 30 L44 48 L32 42 L20 48 L28 30 L24 28 Z" fill="#ef5350" stroke="#b71c1c" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="38" r="4" fill="#ffeb3b"/></svg>`;
+
+const SVG_EXPLOSION = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff8e1" stroke="#e65100" stroke-width="2.5"/><polygon points="32,8 38,24 54,20 44,34 56,42 40,42 36,56 30,42 16,48 22,34 10,26 26,26" fill="#ff9800" stroke="#bf360c" stroke-width="2" stroke-linejoin="round"/><text x="32" y="38" text-anchor="middle" font-family="Arial Black" font-size="14" font-weight="900" fill="#bf360c">B</text></svg>`;
+
+const SVG_GAS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2.5"/><path d="M18 38 Q14 32 20 28 Q22 22 30 24 Q34 18 42 22 Q50 22 50 30 Q54 34 50 40 Q46 46 38 44 Q30 48 22 44 Q16 44 18 38 Z" fill="#ba68c8" stroke="#4a148c" stroke-width="1.8"/><text x="32" y="38" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="#fff">CH₄</text></svg>`;
+
+const SVG_BEACON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#e0f7fa" stroke="#006064" stroke-width="2.5"/><rect x="28" y="34" width="8" height="18" fill="#0097a7" stroke="#004d5c" stroke-width="1.5"/><circle cx="32" cy="22" r="8" fill="#00bcd4" stroke="#004d5c" stroke-width="1.8"/><path d="M14 22 Q22 14 32 14" fill="none" stroke="#00bcd4" stroke-width="2"/><path d="M50 22 Q42 14 32 14" fill="none" stroke="#00bcd4" stroke-width="2"/><path d="M10 26 Q22 10 32 10" fill="none" stroke="#00bcd4" stroke-width="1.5" opacity="0.6"/><path d="M54 26 Q42 10 32 10" fill="none" stroke="#00bcd4" stroke-width="1.5" opacity="0.6"/></svg>`;
+
+const SVG_BUILDING = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#eceff1" stroke="#37474f" stroke-width="2.5"/><polygon points="14,40 32,18 50,40" fill="#90a4ae" stroke="#263238" stroke-width="1.8" stroke-linejoin="round"/><rect x="20" y="40" width="24" height="14" fill="#cfd8dc" stroke="#263238" stroke-width="1.8"/><rect x="28" y="44" width="8" height="10" fill="#37474f"/><rect x="22" y="42" width="4" height="4" fill="#fff" stroke="#263238" stroke-width="0.8"/><rect x="38" y="42" width="4" height="4" fill="#fff" stroke="#263238" stroke-width="0.8"/></svg>`;
+
+const SVG_VEHICLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fffde7" stroke="#f57f17" stroke-width="2.5"/><rect x="12" y="30" width="36" height="14" rx="2" fill="#fbc02d" stroke="#5d4037" stroke-width="1.8"/><polygon points="48,30 56,30 56,40 48,44" fill="#f9a825" stroke="#5d4037" stroke-width="1.8"/><rect x="16" y="22" width="14" height="10" fill="#fff59d" stroke="#5d4037" stroke-width="1.5"/><circle cx="20" cy="48" r="5" fill="#212121" stroke="#000" stroke-width="1"/><circle cx="42" cy="48" r="5" fill="#212121" stroke="#000" stroke-width="1"/><circle cx="20" cy="48" r="2" fill="#9e9e9e"/><circle cx="42" cy="48" r="2" fill="#9e9e9e"/></svg>`;
+
+const SVG_VICTIM_DEAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#ffebee" stroke="#b71c1c" stroke-width="2.5"/><circle cx="32" cy="22" r="7" fill="#fff" stroke="#b71c1c" stroke-width="2"/><circle cx="29" cy="22" r="1.5" fill="#b71c1c"/><circle cx="35" cy="22" r="1.5" fill="#b71c1c"/><path d="M28 26 L30 24 M30 26 L28 24" stroke="#b71c1c" stroke-width="1.2"/><path d="M34 26 L36 24 M36 26 L34 24" stroke="#b71c1c" stroke-width="1.2"/><path d="M14 50 L50 50" stroke="#b71c1c" stroke-width="3" stroke-linecap="round"/><path d="M22 42 L42 42" stroke="#b71c1c" stroke-width="2.5" stroke-linecap="round"/><path d="M18 50 Q32 32 46 50" fill="none" stroke="#b71c1c" stroke-width="2"/></svg>`;
+
+const SVG_VICTIM_INJURED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff3e0" stroke="#e65100" stroke-width="2.5"/><circle cx="32" cy="20" r="7" fill="#ffcc80" stroke="#5d4037" stroke-width="1.8"/><path d="M22 30 Q32 26 42 30 L42 44 Q32 48 22 44 Z" fill="#ff7043" stroke="#bf360c" stroke-width="1.8" stroke-linejoin="round"/><rect x="29" y="34" width="6" height="2" fill="#fff"/><rect x="31" y="32" width="2" height="6" fill="#fff"/><path d="M22 44 L18 54 M42 44 L46 54" stroke="#bf360c" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+
+const SVG_SQUAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="22" cy="22" r="5" fill="#66bb6a" stroke="#1b5e20" stroke-width="1.5"/><path d="M14 38 Q22 30 30 38 L30 46 Q22 50 14 46 Z" fill="#43a047" stroke="#1b5e20" stroke-width="1.5"/><circle cx="42" cy="22" r="5" fill="#66bb6a" stroke="#1b5e20" stroke-width="1.5"/><path d="M34 38 Q42 30 50 38 L50 46 Q42 50 34 46 Z" fill="#43a047" stroke="#1b5e20" stroke-width="1.5"/><polygon points="32,46 38,52 32,58 26,52" fill="#1b5e20"/></svg>`;
+
+const SVG_WATER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#e3f2fd" stroke="#0d47a1" stroke-width="2.5"/><path d="M32 14 Q44 28 44 38 A12 12 0 0 1 20 38 Q20 28 32 14 Z" fill="#42a5f5" stroke="#0d47a1" stroke-width="2" stroke-linejoin="round"/><path d="M28 36 Q26 40 28 44" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M14 52 Q20 48 26 52 T38 52 T50 52" fill="none" stroke="#0d47a1" stroke-width="2" stroke-linecap="round"/></svg>`;
+
 export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b0075aaa-399c-411d-b91e-c4f784ba6460.png', label: 'Пожар' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/9f37556a-d0f9-405d-a7a2-5636f7819402.png', label: 'Взрыв' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/7472fb3d-606e-4849-920c-08a6867a6c83.png', label: 'Газовыделение' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/28db5f8d-85ad-49ce-b53b-da13e168b451.png', label: 'Считыватель системы позиционирования' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/ff1e6286-8210-4aa2-b3ab-4aa362305c35.png', label: 'Надшахтное здание' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/60bb06e4-1c22-4c23-8e77-eeaaa86b3c43.png', label: 'Самоходное двигательное оборудование' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/4d263ba9-11d9-48fc-abd4-45104740f9c7.png', label: 'Местонахождение пострадавшего (смертельно травмированного)' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/b307c90a-9516-4ccb-81b8-e3129dca9ae3.png', label: 'Местонахождение пострадавшего (травмированного)' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/4ce54736-a241-4c30-9157-3d5ea526a23e.png', label: 'Отделение в движении' },
-  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/00c2fb18-d9e9-483c-a310-313ef51e2545.png', label: 'Место проникновения воды в выработку' },
+  { imageUrl: svgToDataUrl(SVG_FIRE), label: 'Пожар' },
+  { imageUrl: svgToDataUrl(SVG_EXPLOSION), label: 'Взрыв' },
+  { imageUrl: svgToDataUrl(SVG_GAS), label: 'Газовыделение' },
+  { imageUrl: svgToDataUrl(SVG_BEACON), label: 'Считыватель системы позиционирования' },
+  { imageUrl: svgToDataUrl(SVG_BUILDING), label: 'Надшахтное здание' },
+  { imageUrl: svgToDataUrl(SVG_VEHICLE), label: 'Самоходное двигательное оборудование' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD), label: 'Местонахождение пострадавшего (смертельно травмированного)' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_INJURED), label: 'Местонахождение пострадавшего (травмированного)' },
+  { imageUrl: svgToDataUrl(SVG_SQUAD), label: 'Отделение в движении' },
+  { imageUrl: svgToDataUrl(SVG_WATER), label: 'Место проникновения воды в выработку' },
 ];
 
 interface Props {
