@@ -31,6 +31,9 @@ interface SchemaStore {
   fillColor: string;
   strokeWidth: number;
   fontSize: number;
+  colorScheme: string;
+  paperSize: string;
+  orientation: string;
 
   setActiveSchema: (id: string) => void;
   createSchema: (name: string) => void;
@@ -55,6 +58,9 @@ interface SchemaStore {
   setFillColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
   setFontSize: (size: number) => void;
+  setColorScheme: (scheme: string) => void;
+  setPaperSize: (size: string) => void;
+  setOrientation: (orientation: string) => void;
 
   getActiveSchema: () => SchemaData | undefined;
   getSelectedElements: () => SchemaElement[];
@@ -78,6 +84,9 @@ export const useSchemaStore = create<SchemaStore>((set, get) => ({
   fillColor: 'transparent',
   strokeWidth: 2,
   fontSize: 14,
+  colorScheme: 'dark',
+  paperSize: 'A3',
+  orientation: 'landscape',
   history: [[defaultSchema]],
   historyIndex: 0,
 
@@ -218,6 +227,12 @@ export const useSchemaStore = create<SchemaStore>((set, get) => ({
   setFillColor: (color) => set({ fillColor: color }),
   setStrokeWidth: (width) => set({ strokeWidth: width }),
   setFontSize: (size) => set({ fontSize: size }),
+  setColorScheme: (scheme) => {
+    document.documentElement.setAttribute('data-theme', scheme === 'dark' ? '' : scheme);
+    set({ colorScheme: scheme });
+  },
+  setPaperSize: (size) => set({ paperSize: size }),
+  setOrientation: (orientation) => set({ orientation }),
 
   undo: () => {
     const { history, historyIndex } = get();

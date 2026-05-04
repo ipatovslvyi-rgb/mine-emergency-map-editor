@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSchemaStore } from '@/store/schemaStore';
 import Icon from '@/components/ui/icon';
 
 const SettingsPage: React.FC = () => {
-  const { showGrid, setShowGrid, gridSize, setGridSize, zoom, setZoom } = useSchemaStore();
-  const [paperSize, setPaperSize] = useState('A3');
-  const [orientation, setOrientation] = useState('landscape');
-  const [colorScheme, setColorScheme] = useState('dark');
+  const {
+    showGrid, setShowGrid, gridSize, setGridSize, zoom, setZoom,
+    colorScheme, setColorScheme, paperSize, setPaperSize, orientation, setOrientation,
+  } = useSchemaStore();
 
   const PAPER_SIZES = ['A4', 'A3', 'A2', 'A1'];
   const COLOR_SCHEMES = [

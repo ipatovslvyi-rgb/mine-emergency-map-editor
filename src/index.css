@@ -101,6 +101,82 @@
     --sidebar-border: 216 15% 16%;
     --sidebar-ring: 30 95% 55%;
   }
+
+  /* Светлая тема */
+  [data-theme="light"] {
+    --background: 0 0% 97%;
+    --foreground: 220 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 30 95% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 90%;
+    --secondary-foreground: 220 20% 25%;
+    --muted: 220 15% 93%;
+    --muted-foreground: 220 15% 45%;
+    --accent: 200 80% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 82%;
+    --input: 220 15% 88%;
+    --ring: 30 95% 45%;
+    --panel-bg: 220 15% 95%;
+    --toolbar-bg: 220 20% 92%;
+    --canvas-bg: 0 0% 95%;
+    --symbol-hover: 220 15% 88%;
+    --danger: 0 85% 50%;
+    --warning: 38 95% 45%;
+    --safe: 145 65% 35%;
+    --sidebar-background: 220 20% 92%;
+    --sidebar-foreground: 220 20% 30%;
+    --sidebar-primary: 30 95% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 88%;
+    --sidebar-accent-foreground: 220 20% 12%;
+    --sidebar-border: 220 15% 80%;
+    --sidebar-ring: 30 95% 45%;
+  }
+
+  /* Высококонтрастная тема */
+  [data-theme="high-contrast"] {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 45 100% 55%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 195 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 35%;
+    --input: 0 0% 15%;
+    --ring: 45 100% 55%;
+    --panel-bg: 0 0% 5%;
+    --toolbar-bg: 0 0% 3%;
+    --canvas-bg: 0 0% 10%;
+    --symbol-hover: 0 0% 20%;
+    --danger: 0 100% 60%;
+    --warning: 45 100% 55%;
+    --safe: 120 100% 45%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 45 100% 55%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 30%;
+    --sidebar-ring: 45 100% 55%;
+  }
 }
 
 @layer base {
