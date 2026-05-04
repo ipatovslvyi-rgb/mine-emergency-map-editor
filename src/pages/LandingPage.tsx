@@ -53,6 +53,10 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         }} />
 
         <div className="relative z-10 max-w-3xl mx-auto">
+          {/* Логотип */}
+          <div className="flex justify-center mb-6">
+            <img src="/logo.svg" alt="САУ" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
+          </div>
           {/* Бейдж */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-medium" style={{ background: 'hsl(var(--warning) / 0.12)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.25)' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'hsl(var(--warning))', display: 'inline-block' }} />
