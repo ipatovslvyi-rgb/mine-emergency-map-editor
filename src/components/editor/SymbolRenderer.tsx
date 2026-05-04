@@ -70,6 +70,27 @@ const SVGSymbols: Record<string, React.FC<{ color: string; size: number }>> = {
       <rect x="20" y="7" width="8" height="6" fill={color}/>
     </svg>
   ),
+  squad_moving: ({ color, size }) => (
+    <svg width={size} height={size} viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="14" stroke={color} strokeWidth="2" fill="none"/>
+      <text x="20" y="25" textAnchor="middle" fontSize="16" fontWeight="bold" fill={color} fontFamily="sans-serif">5</text>
+      <polyline points="28,12 36,20 28,28" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  squad_static: ({ color, size }) => (
+    <svg width={size} height={size} viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="14" stroke={color} strokeWidth="2" fill="none"/>
+      <text x="20" y="25" textAnchor="middle" fontSize="16" fontWeight="bold" fill={color} fontFamily="sans-serif">5</text>
+    </svg>
+  ),
+  fire_realistic: ({ color, size }) => (
+    <svg width={size} height={size} viewBox="0 0 40 48">
+      <path d="M20 44 C8 44 4 34 8 26 C10 21 14 19 14 14 C16 18 15 22 17 24 C18 20 19 15 22 10 C24 18 22 22 24 26 C26 22 25 18 27 14 C30 20 32 26 30 32 C32 28 34 24 32 18 C36 24 38 32 34 38 C36 44 28 46 20 44 Z" fill={color} opacity="0.9"/>
+      <path d="M20 44 C10 44 8 36 11 30 C13 26 16 24 16 20 C17 23 17 27 19 29 C20 25 21 20 23 16 C25 22 23 26 25 30 C27 26 26 22 28 18 C30 24 31 30 29 36 C30 40 24 45 20 44 Z" fill="#fbbf24" opacity="0.85"/>
+      <path d="M20 42 C14 42 13 36 15 32 C16 29 18 28 18 25 C19 28 19 31 21 32 C22 29 22 26 23 23 C25 27 24 31 26 34 C26 38 22 43 20 42 Z" fill="#fef08a" opacity="0.8"/>
+      <ellipse cx="20" cy="44" rx="10" ry="3" fill={color} opacity="0.25"/>
+    </svg>
+  ),
 };
 
 const SymbolRenderer: React.FC<SymbolRendererProps> = ({ content, type, color = '#64748b', size = 32 }) => {

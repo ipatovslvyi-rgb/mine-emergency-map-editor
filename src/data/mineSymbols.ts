@@ -5,7 +5,7 @@ export const SYMBOL_CATEGORIES: SymbolCategory[] = [
     id: 'emergency',
     name: 'Аварийные зоны',
     symbols: [
-      { id: 'fire', name: 'Очаг пожара', category: 'emergency', type: 'text', content: '🔥', color: '#ef4444' },
+      { id: 'fire', name: 'Очаг пожара', category: 'emergency', type: 'svg', content: 'fire_realistic', color: '#ef4444' },
       { id: 'explosion', name: 'Взрыв / завал', category: 'emergency', type: 'text', content: '💥', color: '#f97316' },
       { id: 'gas', name: 'Загазованность', category: 'emergency', type: 'text', content: '☁', color: '#a855f7' },
       { id: 'flood', name: 'Затопление', category: 'emergency', type: 'text', content: '💧', color: '#3b82f6' },
@@ -13,6 +13,14 @@ export const SYMBOL_CATEGORIES: SymbolCategory[] = [
       { id: 'radiation', name: 'Радиация', category: 'emergency', type: 'text', content: '☢', color: '#22c55e' },
       { id: 'toxic', name: 'Токсичная зона', category: 'emergency', type: 'text', content: '☠', color: '#ef4444' },
       { id: 'electric', name: 'Электроопасность', category: 'emergency', type: 'text', content: '⚡', color: '#eab308' },
+    ]
+  },
+  {
+    id: 'squads',
+    name: 'Отделения',
+    symbols: [
+      { id: 'squad_moving', name: 'Отделение в движении', category: 'squads', type: 'svg', content: 'squad_moving', color: '#e2a83a' },
+      { id: 'squad_static', name: 'Отделение на месте работ', category: 'squads', type: 'svg', content: 'squad_static', color: '#e2a83a' },
     ]
   },
   {
