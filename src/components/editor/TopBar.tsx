@@ -36,7 +36,6 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport }) =
       {/* Лого */}
       <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
         <img src="/logo.svg" alt="САУ" className="w-7 h-7 rounded" style={{ objectFit: 'contain' }} />
-        <span className="font-semibold text-sm tracking-tight hidden sm:inline" style={{ color: 'hsl(var(--foreground))' }}>САУ</span>
         <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
           v1.001
         </span>
