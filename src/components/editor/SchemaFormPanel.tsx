@@ -58,6 +58,21 @@ const SVG_SLUDGE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 // Место выброса газа или горного удара: линия с кружком «В»
 const SVG_OUTBURST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="8" y1="28" x2="56" y2="28" stroke="#4a148c" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="40" x2="56" y2="40" stroke="#4a148c" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="28" r="9" fill="#ede7f6" stroke="#4a148c" stroke-width="2"/><text x="32" y="32" text-anchor="middle" font-family="Arial Black, Arial" font-size="11" font-weight="900" fill="#4a148c">В</text><line x1="32" y1="37" x2="32" y2="45" stroke="#4a148c" stroke-width="2" stroke-linecap="round"/><polygon points="28,43 32,50 36,43" fill="#4a148c"/></svg>`;
 
+// Распространение пожара по выработкам: очаг + пунктир + звёздочки (красный, ГОСТ)
+const SVG_FIRE_SPREAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="14" cy="32" r="10" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/><line x1="14" y1="18" x2="14" y2="22" stroke="#c62828" stroke-width="1.8" stroke-linecap="round"/><line x1="14" y1="42" x2="14" y2="46" stroke="#c62828" stroke-width="1.8" stroke-linecap="round"/><line x1="0" y1="32" x2="4" y2="32" stroke="#c62828" stroke-width="1.8" stroke-linecap="round"/><line x1="24" y1="32" x2="28" y2="32" stroke="#c62828" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="22" x2="7" y2="25" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="22" x2="21" y2="25" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="42" x2="7" y2="39" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="42" x2="21" y2="39" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="32" x2="54" y2="32" stroke="#c62828" stroke-width="2" stroke-dasharray="4,3" stroke-linecap="round"/><text x="34" y="28" font-family="Arial" font-size="9" fill="#c62828">✶</text><text x="42" y="30" font-family="Arial" font-size="9" fill="#c62828">✶</text><text x="50" y="28" font-family="Arial" font-size="9" fill="#c62828">✶</text></svg>`;
+
+// Направление воздушной струи: стрелка вдоль линии
+const SVG_AIRFLOW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="6" y1="26" x2="58" y2="26" stroke="#0277bd" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="38" x2="58" y2="38" stroke="#0277bd" stroke-width="2.5" stroke-linecap="round"/><polygon points="48,20 62,32 48,44" fill="#0277bd"/></svg>`;
+
+// Вентиляционная перемычка: две параллельные линии с поперечными штрихами
+const SVG_VENT_WALL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="32" y1="6" x2="32" y2="58" stroke="#37474f" stroke-width="4" stroke-linecap="round"/><line x1="22" y1="6" x2="22" y2="58" stroke="#37474f" stroke-width="4" stroke-linecap="round"/><line x1="6" y1="18" x2="22" y2="18" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="28" x2="22" y2="28" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="38" x2="22" y2="38" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="48" x2="22" y2="48" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="32" y1="18" x2="58" y2="18" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/><line x1="32" y1="32" x2="58" y2="32" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/><line x1="32" y1="46" x2="58" y2="46" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
+// Вентиляционная дверь: линия с просветом и дугой
+const SVG_VENT_DOOR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="32" y1="6" x2="32" y2="24" stroke="#37474f" stroke-width="3.5" stroke-linecap="round"/><line x1="32" y1="40" x2="32" y2="58" stroke="#37474f" stroke-width="3.5" stroke-linecap="round"/><path d="M32 24 A16 16 0 0 1 48 40" fill="none" stroke="#37474f" stroke-width="2.5" stroke-linecap="round"/><line x1="32" y1="24" x2="48" y2="40" stroke="#37474f" stroke-width="1.5" stroke-dasharray="3,2" stroke-linecap="round"/></svg>`;
+
+// Шлюз вентиляционный: прямоугольник с двумя линиями
+const SVG_VENT_LOCK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="14" y="14" width="36" height="36" rx="2" fill="#e0f2f1" stroke="#00695c" stroke-width="2.5"/><line x1="14" y1="32" x2="50" y2="32" stroke="#00695c" stroke-width="2"/><line x1="32" y1="14" x2="32" y2="50" stroke="#00695c" stroke-width="2"/><text x="32" y="13" text-anchor="middle" font-family="Arial" font-size="9" fill="#00695c">Ш</text></svg>`;
+
 export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
   // Существующие
   { imageUrl: svgToDataUrl(SVG_FIRE), label: 'Пожар' },
@@ -81,6 +96,11 @@ export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
   { imageUrl: svgToDataUrl(SVG_COLLAPSE_ZONE), label: 'Зона обрушения горных пород' },
   { imageUrl: svgToDataUrl(SVG_SLUDGE), label: 'Прорыв заиловочной массы и плывунов' },
   { imageUrl: svgToDataUrl(SVG_OUTBURST), label: 'Место выброса (В) или горного удара (У)' },
+  { imageUrl: svgToDataUrl(SVG_FIRE_SPREAD), label: 'Распространение пожара по горным выработкам' },
+  { imageUrl: svgToDataUrl(SVG_AIRFLOW), label: 'Направление воздушной струи' },
+  { imageUrl: svgToDataUrl(SVG_VENT_WALL), label: 'Вентиляционная перемычка' },
+  { imageUrl: svgToDataUrl(SVG_VENT_DOOR), label: 'Вентиляционная дверь' },
+  { imageUrl: svgToDataUrl(SVG_VENT_LOCK), label: 'Шлюз вентиляционный' },
 ];
 
 interface Props {
