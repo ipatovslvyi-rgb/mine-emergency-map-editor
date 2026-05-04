@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1a4a"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="55%" r="40%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.7"/>
+      <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#bg)"/>
+  <ellipse cx="256" cy="280" rx="170" ry="100" fill="url(#glow)"/>
+  <path d="M 130 260 A 130 130 0 0 1 200 160" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.85"/>
+  <text x="256" y="310" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="180" font-weight="900" fill="#ffffff" letter-spacing="-4">САУ</text>
+</svg>

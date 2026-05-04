@@ -1,0 +1,26 @@
+{
+  "name": "САУ — Схема аварийного участка",
+  "short_name": "САУ",
+  "description": "Профессиональный редактор аварийных схем для горнодобывающих предприятий",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a1a4a",
+  "theme_color": "#1e3a8a",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/d44b49ed-e140-4b6d-bea3-787f96fa20ff.jpg",
+      "type": "image/jpeg",
+      "sizes": "1024x1024",
+      "purpose": "any"
+    }
+  ]
+}
