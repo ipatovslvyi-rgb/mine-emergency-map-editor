@@ -58,7 +58,7 @@ const Index: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
-      <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} />
+      <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} onHome={() => setShowLanding(true)} />
 
       <div className="flex flex-1 overflow-hidden">
         {activeView === 'editor' ? (
