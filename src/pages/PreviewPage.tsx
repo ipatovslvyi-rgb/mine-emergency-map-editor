@@ -22,10 +22,29 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
     if (!sheetRef.current) return;
     setExporting(true);
     try {
+      // Загружаем шрифт явно чтобы html2canvas корректно рендерил текст
+      const font = new FontFace(
+        'Times New Roman',
+        'local("Times New Roman"), local("TimesNewRoman")'
+      );
+      try { await font.load(); document.fonts.add(font); } catch { /* системный шрифт — игнорируем */ }
+      await document.fonts.ready;
+
       const canvas = await html2canvas(sheetRef.current, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Применяем стили явно к клону для корректного рендера шрифтов
+          const els = clonedDoc.querySelectorAll<HTMLElement>('*');
+          els.forEach(el => {
+            const cs = window.getComputedStyle(el);
+            if (cs.fontFamily) el.style.fontFamily = cs.fontFamily;
+            if (cs.fontSize) el.style.fontSize = cs.fontSize;
+          });
+        },
       });
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
