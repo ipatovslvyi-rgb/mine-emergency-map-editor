@@ -31,6 +31,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
     { id: 'schemas', label: 'Схемы', icon: 'FolderOpen' },
     { id: 'settings', label: 'Настройки', icon: 'Settings2' },
     { id: 'help', label: 'Справка', icon: 'BookOpen' },
+    { id: 'admin', label: 'Админ', icon: 'ShieldCheck' },
   ];
 
   return (
