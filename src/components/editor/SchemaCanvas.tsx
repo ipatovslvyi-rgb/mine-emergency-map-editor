@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { PlacedSymbol, LegendItem } from '@/types/schema';
 import Icon from '@/components/ui/icon';
+import ImageEditDialog from './ImageEditDialog';
 
 interface Props {
   imageUrl: string;
@@ -26,6 +27,7 @@ const SchemaCanvas: React.FC<Props> = ({
   const [dragging, setDragging] = useState<{ id: string; offX: number; offY: number } | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,6 +183,14 @@ const SchemaCanvas: React.FC<Props> = ({
         {imageUrl && (
           <div className="absolute top-2 right-2 flex gap-1" style={{ zIndex: 10 }}>
             <button
+              onClick={e => { e.stopPropagation(); setShowEditor(true); }}
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+              style={{ background: 'rgba(37,99,235,0.85)', color: '#fff' }}
+              title="Обрезать, масштабировать, повернуть"
+            >
+              <Icon name="Crop" size={11} /> Редактировать
+            </button>
+            <button
               onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}
               className="flex items-center gap-1 px-2 py-1 rounded text-xs"
               style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}
@@ -224,6 +234,17 @@ const SchemaCanvas: React.FC<Props> = ({
       </div>
 
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+
+      {showEditor && imageUrl && (
+        <ImageEditDialog
+          imageUrl={imageUrl}
+          onSave={(newUrl) => {
+            onImageUpload(newUrl);
+            setShowEditor(false);
+          }}
+          onClose={() => setShowEditor(false)}
+        />
+      )}
     </div>
   );
 };
