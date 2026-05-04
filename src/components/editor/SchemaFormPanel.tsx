@@ -138,16 +138,39 @@ const Section: React.FC<{ title: string; children: React.ReactNode; defaultOpen?
 };
 
 const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
+  const [mobileTab, setMobileTab] = React.useState<'data' | 'schema'>('data');
   const set = (key: keyof SchemaFormData, val: string) => onChange({ ...data, [key]: val });
   const setAtm = (key: keyof AtmosphereData, val: string) => onChange({ ...data, atmosphere: { ...data.atmosphere, [key]: val } });
 
   const atmInp = 'flex-1 bg-transparent text-sm focus:outline-none text-right';
 
   return (
-    <div className="flex flex-col md:flex-row h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
+
+      {/* Мобильные вкладки — только на маленьких экранах */}
+      <div className="flex md:hidden border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }}>
+        <button
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition-all ${mobileTab === 'data' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
+          style={{ borderBottomColor: mobileTab === 'data' ? 'hsl(var(--primary))' : 'transparent' }}
+          onClick={() => setMobileTab('data')}
+        >
+          <Icon name="ClipboardList" size={14} />
+          Данные
+        </button>
+        <button
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition-all ${mobileTab === 'schema' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
+          style={{ borderBottomColor: mobileTab === 'schema' ? 'hsl(var(--primary))' : 'transparent' }}
+          onClick={() => setMobileTab('schema')}
+        >
+          <Icon name="Map" size={14} />
+          Схема
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
 
       {/* ЛЕВАЯ КОЛОНКА — поля данных */}
-      <div className="overflow-y-auto border-b md:border-b-0 md:border-r border-border p-3 space-y-2 md:flex-shrink-0 w-full md:w-[280px]">
+      <div className={`overflow-y-auto border-b md:border-b-0 md:border-r border-border p-3 space-y-2 md:flex-shrink-0 w-full md:w-[280px] ${mobileTab === 'schema' ? 'hidden md:block' : ''}`}>
 
         <Section title="Заголовок">
           <Field label="Позиция №" value={data.position} onChange={v => set('position', v)} placeholder="28" />
@@ -236,7 +259,7 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
       </div>
 
       {/* ПРАВАЯ ЧАСТЬ — редактор схемы */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-[340px] md:min-h-0" style={{ minWidth: 0 }}>
+      <div className={`flex-1 overflow-hidden flex flex-col md:min-h-0 ${mobileTab === 'data' ? 'hidden md:flex' : 'flex'}`} style={{ minWidth: 0, minHeight: 0 }}>
         <SchemaCanvas
           imageUrl={data.schemaImageUrl}
           placedSymbols={data.placedSymbols ?? []}
@@ -252,6 +275,7 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
         />
       </div>
 
+      </div>
     </div>
   );
 };

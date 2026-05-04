@@ -164,18 +164,26 @@ const SchemaCanvas: React.FC<Props> = ({
           />
         ) : (
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-4 cursor-pointer"
             style={{
               border: dragOver ? '2px solid hsl(var(--primary))' : '2px dashed hsl(var(--border))',
               background: dragOver ? 'hsl(var(--primary) / 0.05)' : undefined,
             }}
             onClick={() => fileRef.current?.click()}
           >
-            <Icon name="ImagePlus" size={40} style={{ color: 'hsl(var(--muted-foreground))' }} />
-            <div className="text-sm font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              Нажмите или перетащите изображение схемы
+            <Icon name="ImagePlus" size={48} style={{ color: 'hsl(var(--muted-foreground))' }} />
+            <div className="text-sm font-medium text-center px-4" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Нажмите, чтобы загрузить схему
             </div>
-            <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>PNG, JPG, SVG</div>
+            <button
+              onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}
+              className="flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold"
+              style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+            >
+              <Icon name="Upload" size={16} />
+              Выбрать файл
+            </button>
+            <div className="text-xs hidden md:block" style={{ color: 'hsl(var(--muted-foreground))' }}>или перетащите PNG, JPG, SVG</div>
           </div>
         )}
 

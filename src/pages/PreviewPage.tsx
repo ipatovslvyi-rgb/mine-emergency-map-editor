@@ -95,14 +95,15 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
 
       {/* Область предпросмотра */}
       <div
-        className="flex-1 overflow-auto flex items-start justify-center py-4 md:py-8 px-2 md:px-4"
+        className="flex-1 overflow-auto flex items-start justify-center py-3 md:py-8 px-2 md:px-4"
         style={{ background: 'hsl(216 20% 6%)' }}
       >
-        {/* Лист А4 альбомный — 297×210мм, поля: лево 3см, верх 2см, право 1см, низ 2см */}
+        {/* Лист А4 альбомный — 297×210мм */}
         <div
           ref={sheetRef}
           style={{
-            width: 'min(96vw, 1100px)',
+            width: 'min(98vw, 1100px)',
+            minWidth: 320,
             aspectRatio: '297 / 210',
             background: '#ffffff',
             boxShadow: '0 8px 40px rgba(0,0,0,0.55)',

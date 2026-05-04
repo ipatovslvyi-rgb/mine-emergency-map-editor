@@ -91,7 +91,7 @@ const Index: React.FC = () => {
             </div>
 
             {editorTab === 'form' ? (
-              <div className="flex-1 overflow-y-auto md:overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <SchemaFormPanel data={formData} onChange={handleFormChange} />
               </div>
             ) : (
