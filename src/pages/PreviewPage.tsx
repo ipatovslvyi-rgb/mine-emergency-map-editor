@@ -10,9 +10,11 @@ interface Props {
   schemaName: string;
   onClose: () => void;
   onPrint: () => void;
+  isDemo?: boolean;
+  onActivate?: () => void;
 }
 
-const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) => {
+const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDemo, onActivate }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -63,33 +65,46 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint }) =>
         </span>
 
         <div className="flex items-center gap-1.5 ml-auto">
-          <button
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
-            style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
-            onClick={() => exportToExcel(data, schemaName)}
-          >
-            <Icon name="FileSpreadsheet" size={13} />
-            <span className="hidden sm:inline">Excel</span>
-          </button>
+          {isDemo ? (
+            <button
+              onClick={onActivate}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.4)' }}
+            >
+              <Icon name="Lock" size={13} />
+              Активировать для экспорта
+            </button>
+          ) : (
+            <>
+              <button
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                onClick={() => exportToExcel(data, schemaName)}
+              >
+                <Icon name="FileSpreadsheet" size={13} />
+                <span className="hidden sm:inline">Excel</span>
+              </button>
 
-          <button
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
-            style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
-            onClick={handleDownloadImage}
-            disabled={exporting}
-          >
-            <Icon name={exporting ? 'Loader2' : 'Image'} size={13} />
-            <span className="hidden sm:inline">{exporting ? 'Сохранение…' : 'PNG'}</span>
-          </button>
+              <button
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
+                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                onClick={handleDownloadImage}
+                disabled={exporting}
+              >
+                <Icon name={exporting ? 'Loader2' : 'Image'} size={13} />
+                <span className="hidden sm:inline">{exporting ? 'Сохранение…' : 'PNG'}</span>
+              </button>
 
-          <button
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
-            style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
-            onClick={onPrint}
-          >
-            <Icon name="Printer" size={13} />
-            <span className="hidden sm:inline">Печать / PDF</span>
-          </button>
+              <button
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+                onClick={onPrint}
+              >
+                <Icon name="Printer" size={13} />
+                <span className="hidden sm:inline">Печать / PDF</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

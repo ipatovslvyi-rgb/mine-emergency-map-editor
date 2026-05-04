@@ -7,8 +7,11 @@ import SchemasPage from './SchemasPage';
 import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
 import LandingPage from './LandingPage';
+import ActivatePage from './ActivatePage';
+import AdminLicensePage from './AdminLicensePage';
 import { useSchemaStore } from '@/store/schemaStore';
 import { defaultFormData, SchemaFormData } from '@/types/schema';
+import { useLicense } from '@/hooks/useLicense';
 import Icon from '@/components/ui/icon';
 
 const Index: React.FC = () => {
@@ -16,6 +19,8 @@ const Index: React.FC = () => {
   const [activeView, setActiveView] = useState<string>('editor');
   const [editorTab, setEditorTab] = useState<'form' | 'preview'>('form');
   const { getActiveSchema, zoom, undo, redo, updateFormData } = useSchemaStore();
+  const { activated, loading: licLoading } = useLicense();
+  const isDemo = !licLoading && !activated;
   const schema = getActiveSchema();
 
   useEffect(() => {
@@ -58,7 +63,7 @@ const Index: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
-      <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} onHome={() => setShowLanding(true)} />
+      <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} onHome={() => setShowLanding(true)} isDemo={isDemo} />
 
       <div className="flex flex-1 overflow-hidden">
         {activeView === 'editor' ? (
@@ -92,7 +97,7 @@ const Index: React.FC = () => {
 
             {editorTab === 'form' ? (
               <div className="flex-1 overflow-hidden">
-                <SchemaFormPanel data={formData} onChange={handleFormChange} />
+                <SchemaFormPanel data={formData} onChange={handleFormChange} isDemo={isDemo} />
               </div>
             ) : (
               <PreviewPage
@@ -100,6 +105,8 @@ const Index: React.FC = () => {
                 schemaName={schema?.name ?? ''}
                 onClose={() => setEditorTab('form')}
                 onPrint={() => window.print()}
+                isDemo={isDemo}
+                onActivate={() => setActiveView('activate')}
               />
             )}
           </div>
@@ -107,6 +114,10 @@ const Index: React.FC = () => {
           <SchemasPage onOpen={() => setActiveView('editor')} />
         ) : activeView === 'settings' ? (
           <SettingsPage />
+        ) : activeView === 'activate' ? (
+          <ActivatePage onActivated={() => setActiveView('editor')} onBack={() => setActiveView('editor')} />
+        ) : activeView === 'admin' ? (
+          <AdminLicensePage />
         ) : (
           <HelpPage />
         )}

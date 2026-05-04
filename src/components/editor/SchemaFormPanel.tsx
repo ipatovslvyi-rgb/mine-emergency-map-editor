@@ -106,6 +106,7 @@ export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
 interface Props {
   data: SchemaFormData;
   onChange: (data: SchemaFormData) => void;
+  isDemo?: boolean;
 }
 
 const ACCIDENT_TYPES = ['Пожар', 'Взрыв', 'Обрушение', 'Загазованность', 'Затопление', 'Прорыв газа', 'Иное'];
@@ -137,7 +138,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode; defaultOpen?
   );
 };
 
-const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
+const SchemaFormPanel: React.FC<Props> = ({ data, onChange, isDemo }) => {
   const [mobileTab, setMobileTab] = React.useState<'data' | 'schema'>('data');
   const set = (key: keyof SchemaFormData, val: string) => onChange({ ...data, [key]: val });
   const setAtm = (key: keyof AtmosphereData, val: string) => onChange({ ...data, atmosphere: { ...data.atmosphere, [key]: val } });
@@ -170,7 +171,7 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
 
       {/* ЛЕВАЯ КОЛОНКА — поля данных */}
-      <div className={`overflow-y-auto border-b md:border-b-0 md:border-r border-border p-3 space-y-2 md:flex-shrink-0 w-full md:w-[280px] ${mobileTab === 'schema' ? 'hidden md:block' : ''}`}>
+      <div className={`overflow-y-auto border-b md:border-b-0 md:border-r border-border p-3 space-y-2 md:flex-shrink-0 w-full md:w-[280px] ${mobileTab === 'schema' ? 'hidden md:block' : ''} ${isDemo ? 'pointer-events-none select-none' : ''}`} style={isDemo ? { filter: 'blur(0.5px)', opacity: 0.7 } : undefined}>
 
         <Section title="Заголовок">
           <Field label="Позиция №" value={data.position} onChange={v => set('position', v)} placeholder="28" />
@@ -259,20 +260,28 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange }) => {
       </div>
 
       {/* ПРАВАЯ ЧАСТЬ — редактор схемы */}
-      <div className={`flex-1 overflow-hidden flex flex-col md:min-h-0 ${mobileTab === 'data' ? 'hidden md:flex' : 'flex'}`} style={{ minWidth: 0, minHeight: 0 }}>
+      <div className={`flex-1 overflow-hidden flex flex-col md:min-h-0 ${mobileTab === 'data' ? 'hidden md:flex' : 'flex'} relative`} style={{ minWidth: 0, minHeight: 0 }}>
         <SchemaCanvas
           imageUrl={data.schemaImageUrl}
           placedSymbols={data.placedSymbols ?? []}
-          legendSymbols={LEGEND_SYMBOLS}
+          legendSymbols={isDemo ? [] : LEGEND_SYMBOLS}
           legendItems={data.legendItems}
           onImageUpload={url => set('schemaImageUrl', url)}
-          onPlacedChange={symbols => onChange({ ...data, placedSymbols: symbols })}
-          onLegendAdd={item => {
+          onPlacedChange={isDemo ? () => {} : symbols => onChange({ ...data, placedSymbols: symbols })}
+          onLegendAdd={isDemo ? () => {} : item => {
             if (!data.legendItems.some(l => l.imageUrl === item.imageUrl)) {
               onChange({ ...data, legendItems: [...data.legendItems, item] });
             }
           }}
         />
+        {isDemo && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center" style={{ zIndex: 30 }}>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs" style={{ background: 'rgba(0,0,0,0.75)', color: '#fff', backdropFilter: 'blur(4px)' }}>
+              <Icon name="Lock" size={12} />
+              Демо-режим: условные обозначения недоступны
+            </div>
+          </div>
+        )}
       </div>
 
       </div>

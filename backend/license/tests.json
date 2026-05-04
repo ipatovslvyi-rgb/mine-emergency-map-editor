@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Invalid key returns 404",
+      "method": "POST",
+      "path": "/",
+      "body": {"key": "INVALID-KEY-000"},
+      "expectedStatus": 404
+    }
+  ]
+}

@@ -8,9 +8,10 @@ interface TopBarProps {
   onViewChange: (v: string) => void;
   onExport: (type: 'pdf' | 'png' | 'print' | 'preview') => void;
   onHome?: () => void;
+  isDemo?: boolean;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onHome }) => {
+const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onHome, isDemo }) => {
   const { getActiveSchema, renameSchema } = useSchemaStore();
   const schema = getActiveSchema();
   const [editing, setEditing] = useState(false);
@@ -37,7 +38,12 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
       {/* Лого */}
       <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
         <img src="/logo.svg" alt="САУ" className="w-7 h-7 rounded cursor-pointer hover:opacity-80 transition-opacity" style={{ objectFit: 'contain' }} onClick={onHome} />
-        <span className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
+        <span
+          className="text-xs font-mono-tech px-1.5 py-0.5 rounded hidden sm:inline cursor-pointer"
+          style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}
+          onDoubleClick={() => onViewChange('admin')}
+          title="Двойной клик — панель администратора"
+        >
           v1.001
         </span>
       </div>
@@ -85,6 +91,19 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
       )}
 
       <div className="flex-1" />
+
+      {/* Демо-бейдж */}
+      {isDemo && (
+        <button
+          onClick={() => onViewChange('activate')}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold mr-1 transition-all hover:opacity-80"
+          style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.4)' }}
+        >
+          <Icon name="Lock" size={11} />
+          <span className="hidden sm:inline">Демо</span>
+          <span className="hidden sm:inline">· Активировать</span>
+        </button>
+      )}
 
       {/* Кнопки экспорта */}
       {activeView === 'editor' && (
