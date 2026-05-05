@@ -9,6 +9,7 @@ import HelpPage from './HelpPage';
 import LandingPage from './LandingPage';
 import ActivatePage from './ActivatePage';
 import AdminLicensePage from './AdminLicensePage';
+import PresentationPage from './PresentationPage';
 import { useSchemaStore } from '@/store/schemaStore';
 import { defaultFormData, SchemaFormData } from '@/types/schema';
 import { useLicenseContext } from '@/contexts/LicenseContext';
@@ -159,6 +160,8 @@ const Index: React.FC = () => {
           <ActivatePage onActivated={() => setActiveView('editor')} onBack={() => setActiveView('editor')} />
         ) : activeView === 'admin' ? (
           <AdminLicensePage />
+        ) : activeView === 'presentation' ? (
+          <PresentationPage onBack={() => setActiveView('editor')} />
         ) : (
           <HelpPage />
         )}
