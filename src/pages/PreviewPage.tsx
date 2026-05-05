@@ -129,36 +129,45 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
 
       {/* Область предпросмотра */}
       <div
-        className="flex-1 overflow-auto flex items-start justify-center py-3 md:py-8 px-2 md:px-4"
+        className="flex-1 overflow-auto"
         style={{ background: 'hsl(216 20% 6%)' }}
       >
-        {/* Лист А4 альбомный — 297×210мм */}
-        <div
-          ref={sheetRef}
-          style={{
-            width: 'min(98vw, 1100px)',
-            minWidth: 320,
-            aspectRatio: '297 / 210',
-            background: '#ffffff',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
-            borderRadius: 2,
-            position: 'relative',
-            overflow: 'hidden',
-            flexShrink: 0,
-          }}
-        >
+        {/* Подсказка для мобильных */}
+        <div className="flex items-center justify-center gap-1.5 py-1.5 md:hidden" style={{ color: 'hsl(var(--muted-foreground))', fontSize: 11 }}>
+          <Icon name="Move" size={11} />
+          Листайте влево-вправо для просмотра схемы
+        </div>
+
+        {/* Обёртка с горизонтальной прокруткой на мобиле */}
+        <div className="flex items-start justify-start md:justify-center py-2 md:py-8 px-3 md:px-4" style={{ minWidth: 'min-content' }}>
+          {/* Лист А4 альбомный — 297×210мм, на мобиле фиксированная ширина для читаемости */}
           <div
+            ref={sheetRef}
             style={{
-              position: 'absolute',
-              inset: 0,
-              paddingTop: '9.52%',
-              paddingRight: '3.37%',
-              paddingBottom: '9.52%',
-              paddingLeft: '10.1%',
-              boxSizing: 'border-box',
+              width: 'min(98vw, 1100px)',
+              minWidth: 700,
+              aspectRatio: '297 / 210',
+              background: '#ffffff',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
+              borderRadius: 2,
+              position: 'relative',
+              overflow: 'hidden',
+              flexShrink: 0,
             }}
           >
-            <PrintDocument data={data} schemaName={schemaName} />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                paddingTop: '9.52%',
+                paddingRight: '3.37%',
+                paddingBottom: '9.52%',
+                paddingLeft: '10.1%',
+                boxSizing: 'border-box',
+              }}
+            >
+              <PrintDocument data={data} schemaName={schemaName} />
+            </div>
           </div>
         </div>
       </div>

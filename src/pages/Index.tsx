@@ -65,6 +65,32 @@ const Index: React.FC = () => {
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
       <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} onHome={() => setShowLanding(true)} isDemo={isDemo} />
 
+      {/* Демо-баннер — яркая полоса на весь экран */}
+      {isDemo && (
+        <div
+          className="flex items-center justify-between gap-2 px-3 py-1.5 flex-shrink-0"
+          style={{
+            background: 'linear-gradient(90deg, hsl(var(--warning) / 0.22) 0%, hsl(var(--warning) / 0.12) 100%)',
+            borderBottom: '1px solid hsl(var(--warning) / 0.5)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Icon name="AlertTriangle" size={13} style={{ color: 'hsl(var(--warning))' }} />
+            <span className="text-xs font-medium" style={{ color: 'hsl(var(--warning))' }}>
+              Демо-режим — экспорт и условные обозначения недоступны
+            </span>
+          </div>
+          <button
+            onClick={() => setActiveView('activate')}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all hover:opacity-90 flex-shrink-0"
+            style={{ background: 'hsl(var(--warning))', color: '#000' }}
+          >
+            <Icon name="KeyRound" size={12} style={{ color: '#000' }} />
+            Активировать
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-1 overflow-hidden">
         {activeView === 'editor' ? (
           <div className="flex-1 flex flex-col overflow-hidden">
