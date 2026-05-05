@@ -6,29 +6,43 @@
   position: absolute;
   left: -9999px;
   top: -9999px;
-  width: 0;
-  height: 0;
+  width: 297mm;
+  height: 210mm;
   overflow: hidden;
   pointer-events: none;
+  visibility: hidden;
 }
 
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
   body * {
     visibility: hidden !important;
   }
+
   .print-wrapper,
   .print-wrapper * {
     visibility: visible !important;
   }
+
   .print-wrapper {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100vw !important;
-    height: auto !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    padding-top: 20mm !important;
+    padding-right: 10mm !important;
+    padding-bottom: 20mm !important;
+    padding-left: 30mm !important;
+    box-sizing: border-box !important;
     overflow: visible !important;
     z-index: 99999 !important;
   }
+
   .print-document {
     background: white !important;
     color: black !important;
@@ -37,47 +51,10 @@
     height: 100% !important;
     box-sizing: border-box !important;
   }
-  .print-wrapper {
-    padding-top: 20mm !important;
-    padding-right: 10mm !important;
-    padding-bottom: 20mm !important;
-    padding-left: 30mm !important;
-    box-sizing: border-box !important;
-    width: 297mm !important;
-    height: 210mm !important;
-  }
-  @page {
-    size: A4 landscape;
-    margin: 0;
-  }
 
-  /* Презентация */
+  /* Презентация — печатается через iframe, эти стили не используются */
   .presentation-toolbar {
     display: none !important;
-  }
-  .presentation-sheet {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
-  }
-  .presentation-print-area,
-  .presentation-print-area * {
-    visibility: visible !important;
-  }
-  .presentation-print-area {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 210mm !important;
-    z-index: 99999 !important;
-  }
-}
-
-@media print and (presentation-mode) {
-  @page {
-    size: A4 portrait;
-    margin: 0;
   }
 }
 

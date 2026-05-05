@@ -139,20 +139,22 @@ const PresentationPage: React.FC<Props> = ({ onBack }) => {
 
   const handlePrint = () => {
     const html = buildPrintHTML(logoUrl);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:210mm;height:297mm;border:none;';
     document.body.appendChild(iframe);
-    const doc = iframe.contentDocument!;
-    doc.open();
-    doc.write(html);
-    doc.close();
     iframe.onload = () => {
       setTimeout(() => {
         iframe.contentWindow!.focus();
         iframe.contentWindow!.print();
-        setTimeout(() => document.body.removeChild(iframe), 2000);
-      }, 600);
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          URL.revokeObjectURL(url);
+        }, 3000);
+      }, 800);
     };
+    iframe.src = url;
   };
 
   const scaledH = SHEET_H * scale;
