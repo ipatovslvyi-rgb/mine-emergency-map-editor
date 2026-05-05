@@ -27,11 +27,11 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
   };
 
   const NAV_ITEMS = [
+    { id: 'home', label: 'Главная', icon: 'House' },
     { id: 'editor', label: 'Редактор', icon: 'PenTool' },
     { id: 'schemas', label: 'Схемы', icon: 'FolderOpen' },
     { id: 'settings', label: 'Настройки', icon: 'Settings2' },
     { id: 'help', label: 'Справка', icon: 'BookOpen' },
-    { id: 'admin', label: 'Админ', icon: 'ShieldCheck' },
   ];
 
   return (

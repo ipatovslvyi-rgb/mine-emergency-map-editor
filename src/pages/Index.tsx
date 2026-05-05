@@ -72,7 +72,13 @@ const Index: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
-      <TopBar activeView={activeView} onViewChange={setActiveView} onExport={handleExport} onHome={() => setShowLanding(true)} isDemo={isDemo} />
+      <TopBar
+        activeView={activeView}
+        onViewChange={(v) => v === 'home' ? setShowLanding(true) : setActiveView(v)}
+        onExport={handleExport}
+        onHome={() => setShowLanding(true)}
+        isDemo={isDemo}
+      />
 
       {/* Демо-баннер — яркая полоса на весь экран */}
       {isDemo && (
