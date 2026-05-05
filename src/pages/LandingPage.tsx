@@ -57,7 +57,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
             <img src="/logo.svg" alt="САУ" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
           </div>
           {/* Бейдж */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-medium" style={{ background: 'hsl(var(--warning) / 0.12)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.25)' }}>
+          <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-medium" style={{ background: 'hsl(var(--warning) / 0.12)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.25)' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'hsl(var(--warning))', display: 'inline-block' }} />
             Автоматизированная система оформления документов
           </div>
