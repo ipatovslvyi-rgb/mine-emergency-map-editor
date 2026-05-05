@@ -50,19 +50,34 @@ const PresentationPage: React.FC<Props> = ({ onBack }) => {
 
   const handlePrint = () => {
     if (!contentRef.current) return;
-    const html = contentRef.current.outerHTML;
-    const win = window.open('', '_blank', 'width=900,height=1100');
-    if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>САУ — Презентация</title>
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1123px;border:none;';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<title>САУ — Презентация</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #fff; font-family: 'IBM Plex Sans', Arial, sans-serif; }
+  html, body { width: 210mm; background: #fff; font-family: 'IBM Plex Sans', Arial, sans-serif; }
   @page { size: A4 portrait; margin: 0; }
-</style></head><body>${html}</body></html>`);
-    win.document.close();
-    win.focus();
-    setTimeout(() => { win.print(); win.close(); }, 700);
+  @media print { html, body { width: 210mm; } }
+  img { max-width: 100%; }
+</style>
+</head><body>${contentRef.current.outerHTML}</body></html>`);
+    doc.close();
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        iframe.contentWindow!.focus();
+        iframe.contentWindow!.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 800);
+    };
   };
 
   return (
