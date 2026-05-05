@@ -1,15 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>САУ — Схема аварийного участка</title>
-    <meta name="description" content="Профессиональный редактор аварийных схем для горнодобывающих предприятий"/>
+
+    <!-- SEO: заголовок и описание с ключевыми словами -->
+    <title>САУ — Схема аварийного участка | Программа для горноспасательной документации</title>
+    <meta name="description" content="Автоматизированная система оформления схем аварийного участка для горнодобывающих предприятий. Быстрое создание документов А4, экспорт PDF и Excel. Условные обозначения горноспасательной службы."/>
+    <meta name="keywords" content="схема аварийного участка, горноспасательная документация, аварийная схема шахты, оформление горноспасательных схем, программа для горнодобывающих предприятий, САУ, схема выработки, аварийная документация, горноспасательная служба"/>
+    <meta name="author" content="work_studio@internet.ru"/>
+    <meta name="robots" content="index, follow"/>
+    <meta name="language" content="ru"/>
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mine-emergency-map-editor.poehali.dev/"/>
+
+    <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <meta name="author" content="poehali.dev"/>
+
+    <!-- Верификация Яндекс -->
     <meta name="yandex-verification" content="bb5d10ec644704f5" />
+
+    <!-- Иконки -->
     <link rel="icon" type="image/svg+xml" href="/logo.svg">
     <link rel="shortcut icon" href="/logo.svg">
 
@@ -17,28 +31,59 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#f97316">
 
-    <!-- iOS / iPhone / iPad -->
+    <!-- iOS -->
     <link rel="apple-touch-icon" href="https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="САУ">
 
-    <!-- Android / Mobile -->
+    <!-- Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="САУ">
 
+    <!-- Open Graph -->
     <meta property="og:title" content="САУ — Схема аварийного участка">
-    <meta property="og:description" content="Автоматизированная система документации. Профессиональный редактор аварийных схем для горнодобывающих предприятий.">
+    <meta property="og:description" content="Автоматизированная система документации для горнодобывающих предприятий. Быстрое оформление схем аварийного участка, экспорт PDF и Excel.">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mine-emergency-map-editor.poehali.dev/">
+    <meta property="og:locale" content="ru_RU">
     <meta property="og:image" content="https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg">
     <meta property="og:image:width" content="1024">
     <meta property="og:image:height" content="1024">
-    <meta property="og:image:alt" content="САУ — Схема аварийного участка">
+    <meta property="og:image:alt" content="САУ — Схема аварийного участка для горнодобывающих предприятий">
+    <meta property="og:site_name" content="САУ — Схема аварийного участка">
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="САУ — Схема аварийного участка">
     <meta name="twitter:description" content="Автоматизированная система документации для горнодобывающих предприятий.">
     <meta name="twitter:image" content="https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg">
+
+    <!-- Schema.org — SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "САУ — Схема аварийного участка",
+      "description": "Автоматизированная система оформления схем аварийного участка для горнодобывающих предприятий. Быстрое создание документов А4, экспорт PDF и Excel.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://mine-emergency-map-editor.poehali.dev/",
+      "inLanguage": "ru",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "work_studio",
+        "email": "work_studio@internet.ru"
+      },
+      "keywords": "схема аварийного участка, горноспасательная документация, программа для горнодобывающих предприятий"
+    }
+    </script>
 
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
 
@@ -49,8 +94,8 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
 
     <meta name="pp-name" value="mine-emergency-map-editor">
-      <script src="https://cdn.poehali.dev/intertnal/js/inspector-min.js"></script>
-  </head>
+    <script src="https://cdn.poehali.dev/intertnal/js/inspector-min.js"></script>
+</head>
 
 <body>
 <div id="root"></div>

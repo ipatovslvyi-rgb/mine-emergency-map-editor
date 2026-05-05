@@ -21,15 +21,16 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
     <div className="min-h-screen flex flex-col overflow-x-hidden" style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}>
 
       {/* ── NAV ── */}
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }}>
+      <nav className="flex items-center justify-between px-8 py-4 border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }} aria-label="Основная навигация">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.svg" alt="САУ" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
+          <img src="/logo.svg" alt="Логотип САУ — Схема аварийного участка" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
             v1.001
           </span>
         </div>
         <button
           onClick={onEnter}
+          aria-label="Открыть редактор схем аварийного участка"
           className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-90"
           style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
         >
@@ -54,7 +55,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <div className="relative z-10 max-w-3xl mx-auto">
           {/* Логотип */}
           <div className="flex justify-center mb-6">
-            <img src="/logo.svg" alt="САУ" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
+            <img src="/logo.svg" alt="САУ — программа для оформления схем аварийного участка" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
           </div>
           {/* Бейдж */}
           <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-medium" style={{ background: 'hsl(var(--warning) / 0.12)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.25)' }}>
@@ -75,6 +76,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <button
               onClick={onEnter}
+              aria-label="Начать работу с программой оформления схем аварийного участка"
               className="flex items-center gap-2 px-7 py-3 rounded font-semibold text-base transition-all hover:opacity-90 hover:scale-105"
               style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', boxShadow: '0 0 32px hsl(var(--primary) / 0.35)' }}
             >
@@ -124,8 +126,8 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-all group-hover:scale-110" style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}>
                   <Icon name={f.icon} size={18} />
                 </div>
-                <div className="font-semibold text-sm mb-1.5">{f.title}</div>
-                <div className="text-xs leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>{f.desc}</div>
+                <h3 className="font-semibold text-sm mb-1.5">{f.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -146,8 +148,8 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
               <div key={i} className="flex gap-6 items-start py-6" style={{ borderBottom: i < 3 ? '1px solid hsl(var(--border))' : 'none' }}>
                 <div className="text-4xl font-black flex-shrink-0" style={{ color: 'hsl(var(--primary) / 0.2)', lineHeight: 1, minWidth: 56 }}>{step.n}</div>
                 <div>
-                  <div className="font-semibold mb-1">{step.title}</div>
-                  <div className="text-sm" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.6 }}>{step.desc}</div>
+                  <h3 className="font-semibold mb-1">{step.title}</h3>
+                  <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.6 }}>{step.desc}</p>
                 </div>
               </div>
             ))}
