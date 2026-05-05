@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Icon from '@/components/ui/icon';
-import { useLicense } from '@/hooks/useLicense';
+import { useLicenseContext } from '@/contexts/LicenseContext';
 
 interface Props {
   onActivated: () => void;
@@ -9,7 +9,7 @@ interface Props {
 
 const ActivatePage: React.FC<Props> = ({ onActivated, onBack }) => {
   const [key, setKey] = useState('');
-  const { activate, loading, error, activated, data, deactivate } = useLicense();
+  const { activate, loading, error, activated, data, deactivate } = useLicenseContext();
   const [success, setSuccess] = useState(false);
 
   const handleActivate = async () => {
@@ -23,6 +23,17 @@ const ActivatePage: React.FC<Props> = ({ onActivated, onBack }) => {
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const getDaysLeft = (d: string) => {
+    const days = Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
+    return days;
+  };
+
+  const formatDaysLeft = (days: number) => {
+    if (days <= 0) return 'истёк';
+    const word = days === 1 ? 'день' : days >= 2 && days <= 4 ? 'дня' : 'дней';
+    return `ещё ${days} ${word}`;
+  };
 
   return (
     <div className="flex flex-col items-center justify-center flex-1 p-6" style={{ background: 'hsl(var(--background))' }}>
@@ -49,6 +60,26 @@ const ActivatePage: React.FC<Props> = ({ onActivated, onBack }) => {
                 <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Ключ: </span>{data.key}</div>
                 {data.description && <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Описание: </span>{data.description}</div>}
                 <div><span style={{ color: 'hsl(var(--muted-foreground))' }}>Действует до: </span>{formatDate(data.expires_at)}</div>
+                <div className="pt-1">
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold"
+                    style={{
+                      background: getDaysLeft(data.expires_at) <= 7
+                        ? 'hsl(var(--danger) / 0.15)'
+                        : getDaysLeft(data.expires_at) <= 30
+                          ? 'hsl(var(--warning) / 0.15)'
+                          : 'hsl(var(--safe) / 0.15)',
+                      color: getDaysLeft(data.expires_at) <= 7
+                        ? 'hsl(var(--danger))'
+                        : getDaysLeft(data.expires_at) <= 30
+                          ? 'hsl(var(--warning))'
+                          : 'hsl(var(--safe))',
+                    }}
+                  >
+                    <Icon name="Clock" size={11} />
+                    {formatDaysLeft(getDaysLeft(data.expires_at))}
+                  </span>
+                </div>
               </div>
             </div>
             <div className="flex gap-2">

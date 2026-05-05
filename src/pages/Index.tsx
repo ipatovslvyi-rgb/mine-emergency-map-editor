@@ -11,7 +11,7 @@ import ActivatePage from './ActivatePage';
 import AdminLicensePage from './AdminLicensePage';
 import { useSchemaStore } from '@/store/schemaStore';
 import { defaultFormData, SchemaFormData } from '@/types/schema';
-import { useLicense } from '@/hooks/useLicense';
+import { useLicenseContext } from '@/contexts/LicenseContext';
 import Icon from '@/components/ui/icon';
 
 const Index: React.FC = () => {
@@ -19,9 +19,13 @@ const Index: React.FC = () => {
   const [activeView, setActiveView] = useState<string>('editor');
   const [editorTab, setEditorTab] = useState<'form' | 'preview'>('form');
   const { getActiveSchema, zoom, undo, redo, updateFormData } = useSchemaStore();
-  const { activated, loading: licLoading } = useLicense();
+  const { activated, loading: licLoading, data: licData } = useLicenseContext();
   const isDemo = !licLoading && !activated;
   const schema = getActiveSchema();
+
+  const daysLeft = licData?.expires_at
+    ? Math.ceil((new Date(licData.expires_at).getTime() - Date.now()) / 86400000)
+    : null;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -53,6 +57,11 @@ const Index: React.FC = () => {
       </span>
       {schema && <span style={{ color: 'hsl(var(--foreground))' }}>{schema.name}</span>}
       <span className="flex-1" />
+      {!isDemo && daysLeft !== null && (
+        <span style={{ color: daysLeft <= 7 ? 'hsl(var(--danger))' : daysLeft <= 30 ? 'hsl(var(--warning))' : 'hsl(var(--safe))' }}>
+          Ключ: ещё {daysLeft} {daysLeft === 1 ? 'день' : daysLeft >= 2 && daysLeft <= 4 ? 'дня' : 'дней'}
+        </span>
+      )}
       <span>{new Date().toLocaleDateString('ru-RU')}</span>
     </div>
   );
