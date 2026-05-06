@@ -155,7 +155,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
       </div>
 
       {/* ── ПОДПИСЬ ── */}
-      <div style={{ flexShrink: 0, paddingTop: 4, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
+      <div style={{ flexShrink: 0, paddingTop: 10, display: 'flex', alignItems: 'flex-end', gap: 6 }}>
         <span style={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: fs }}>Руководитель горноспасательных работ:</span>
         <div style={{ flex: 1, borderBottom: '1px solid #000' }} />
         <span style={{ fontStyle: 'italic', borderBottom: '1px solid #000', minWidth: 130, textAlign: 'center', fontSize: fs }}>
