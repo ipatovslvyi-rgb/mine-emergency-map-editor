@@ -114,7 +114,7 @@ h2{font-size:13px;font-weight:700;color:#111827}
       <div><div class="ce">work_studio@internet.ru</div></div>
     </div>
   </div>
-  <div class="footer"><span>САУ v1.001 — Схема аварийного участка</span><span>Все права защищены © 2025</span></div>
+  <div class="footer"><span>САУ v1.002 — Схема аварийного участка</span><span>Все права защищены © 2025</span></div>
 </div>
 </body></html>`;
 }
@@ -293,7 +293,7 @@ const PresentationPage: React.FC<Props> = ({ onBack }) => {
 
               {/* ФУТЕР */}
               <div style={{ borderTop: '1px solid #e5e7eb', padding: '12px 44px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, marginTop: 'auto' }}>
-                <span style={{ fontSize: 8, color: '#9ca3af' }}>САУ v1.001 — Схема аварийного участка</span>
+                <span style={{ fontSize: 8, color: '#9ca3af' }}>САУ v1.002 — Схема аварийного участка</span>
                 <span style={{ fontSize: 8, color: '#9ca3af' }}>Все права защищены © 2025</span>
               </div>
 

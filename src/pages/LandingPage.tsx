@@ -25,7 +25,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <div className="flex items-center gap-2.5">
           <img src="/logo.svg" alt="Логотип САУ — Схема аварийного участка" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
-            v1.001
+            v1.002
           </span>
         </div>
         <button
@@ -178,7 +178,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
 
       {/* ── FOOTER ── */}
       <footer className="px-8 py-4 border-t border-border flex items-center justify-between text-xs flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))', color: 'hsl(var(--muted-foreground))' }}>
-        <span>САУ v1.001</span>
+        <span>САУ v1.002</span>
         <span className="hidden sm:inline">Автоматизированная система документации. Все права защищены.</span>
         <a href="mailto:work_studio@internet.ru" style={{ color: 'hsl(var(--muted-foreground))' }}>work_studio@internet.ru</a>
       </footer>

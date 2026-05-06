@@ -58,7 +58,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
             onDoubleClick={() => onViewChange('admin')}
             title="Двойной клик — панель администратора"
           >
-            v1.001
+            v1.002
           </span>
         </div>
 
