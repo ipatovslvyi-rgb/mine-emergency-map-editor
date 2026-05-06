@@ -96,7 +96,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-border">
           {[
             { value: 'А4', label: 'Альбомный формат документа', icon: 'FileText' },
-            { value: '10+', label: 'Условных обозначений в библиотеке', icon: 'Layers' },
+            { value: '20+', label: 'Условных обозначений в библиотеке', icon: 'Layers' },
             { value: '1 клик', label: 'До готового PDF или печати', icon: 'Printer' },
           ].map((s, i) => (
             <div key={i} className="flex flex-col items-center justify-center gap-1.5 py-8 px-6 text-center">
