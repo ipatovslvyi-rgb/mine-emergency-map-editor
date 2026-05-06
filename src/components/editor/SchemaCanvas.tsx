@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { PlacedSymbol, LegendItem } from '@/types/schema';
 import Icon from '@/components/ui/icon';
 import ImageEditDialog from './ImageEditDialog';
@@ -28,6 +28,20 @@ const SchemaCanvas: React.FC<Props> = ({
   const [selected, setSelected] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setDragging(null);
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,31 +60,56 @@ const SchemaCanvas: React.FC<Props> = ({
     }
   };
 
-  const onMouseDown = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const rect = canvasRef.current?.getBoundingClientRect();
+  const getCanvasRect = () => canvasRef.current?.getBoundingClientRect() ?? null;
+
+  const startDrag = (id: string, clientX: number, clientY: number) => {
+    const rect = getCanvasRect();
     if (!rect) return;
     const sym = placedSymbols.find(s => s.id === id);
     if (!sym) return;
-    const pct = (v: number, total: number) => (v / 100) * total;
-    const absX = pct(sym.x, rect.width);
-    const absY = pct(sym.y, rect.height);
-    setDragging({ id, offX: e.clientX - rect.left - absX, offY: e.clientY - rect.top - absY });
+    const absX = (sym.x / 100) * rect.width;
+    const absY = (sym.y / 100) * rect.height;
+    setDragging({ id, offX: clientX - rect.left - absX, offY: clientY - rect.top - absY });
     setSelected(id);
   };
 
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
+  const moveDrag = (clientX: number, clientY: number) => {
     if (!dragging || !canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left - dragging.offX) / rect.width) * 100;
-    const y = ((e.clientY - rect.top - dragging.offY) / rect.height) * 100;
+    const rect = getCanvasRect();
+    if (!rect) return;
+    const x = ((clientX - rect.left - dragging.offX) / rect.width) * 100;
+    const y = ((clientY - rect.top - dragging.offY) / rect.height) * 100;
     onPlacedChange(placedSymbols.map(s =>
       s.id === dragging.id ? { ...s, x: Math.max(0, Math.min(95, x)), y: Math.max(0, Math.min(95, y)) } : s
     ));
+  };
+
+  const onMouseDown = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startDrag(id, e.clientX, e.clientY);
+  };
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    moveDrag(e.clientX, e.clientY);
   }, [dragging, placedSymbols, onPlacedChange]);
 
   const onMouseUp = () => setDragging(null);
+
+  const onTouchStart = (e: React.TouchEvent, id: string) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    startDrag(id, touch.clientX, touch.clientY);
+  };
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    moveDrag(touch.clientX, touch.clientY);
+  }, [dragging, placedSymbols, onPlacedChange]);
+
+  const onTouchEnd = () => setDragging(null);
 
   const deleteSelected = () => {
     if (!selected) return;
@@ -88,23 +127,42 @@ const SchemaCanvas: React.FC<Props> = ({
     <div className="flex flex-col h-full" style={{ minHeight: 0 }}>
 
       {/* Панель символов */}
-      <div className="flex-shrink-0 border-b border-border p-2" style={{ background: 'hsl(var(--card))' }}>
-        <div className="text-xs mb-1.5 font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
-          Нажмите на символ — он появится на схеме:
+      <div className="flex-shrink-0 border-b border-border" style={{ background: 'hsl(var(--card))', padding: isMobile ? '6px 8px' : '8px' }}>
+        <div className="text-xs mb-1.5 font-medium text-center" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          {isMobile ? 'Нажмите символ:' : 'Нажмите на символ — он появится на схеме:'}
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile
+              ? 'repeat(auto-fill, minmax(36px, 1fr))'
+              : 'repeat(auto-fill, minmax(52px, 1fr))',
+            gap: isMobile ? 4 : 6,
+          }}
+        >
           {legendSymbols.map(sym => (
             <button
               key={sym.imageUrl}
               title={sym.label}
               onClick={() => addSymbol(sym)}
-              className="flex flex-col items-center gap-0.5 rounded p-1 transition-all hover:border-primary"
-              style={{ border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', minWidth: 44 }}
+              className="flex flex-col items-center justify-center rounded transition-all hover:border-primary"
+              style={{
+                border: '1px solid hsl(var(--border))',
+                background: 'hsl(var(--background))',
+                padding: isMobile ? '3px' : '4px',
+                gap: isMobile ? 1 : 2,
+              }}
             >
-              <img src={sym.imageUrl} alt={sym.label} style={{ width: 28, height: 28, objectFit: 'contain' }} />
-              <span style={{ fontSize: 8, color: 'hsl(var(--muted-foreground))', maxWidth: 44, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                {sym.label}
-              </span>
+              <img
+                src={sym.imageUrl}
+                alt={sym.label}
+                style={{ width: isMobile ? 22 : 28, height: isMobile ? 22 : 28, objectFit: 'contain' }}
+              />
+              {!isMobile && (
+                <span style={{ fontSize: 8, color: 'hsl(var(--muted-foreground))', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  {sym.label}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -113,7 +171,7 @@ const SchemaCanvas: React.FC<Props> = ({
       {/* Инструменты выделенного */}
       {selected && (
         <div className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-border text-xs" style={{ background: 'hsl(var(--muted))' }}>
-          <span style={{ color: 'hsl(var(--muted-foreground))' }}>Выбран символ:</span>
+          <span style={{ color: 'hsl(var(--muted-foreground))' }}>Выбран:</span>
           <button onClick={() => resizeSelected(-4)} className="px-2 py-0.5 rounded border border-border hover:border-primary" style={{ background: 'hsl(var(--card))' }}>−</button>
           <span style={{ color: 'hsl(var(--muted-foreground))' }}>размер</span>
           <button onClick={() => resizeSelected(4)} className="px-2 py-0.5 rounded border border-border hover:border-primary" style={{ background: 'hsl(var(--card))' }}>+</button>
@@ -125,7 +183,7 @@ const SchemaCanvas: React.FC<Props> = ({
           >
             <Icon name="Trash2" size={11} /> Удалить
           </button>
-          <button onClick={() => setSelected(null)} className="px-2 py-0.5 rounded border border-border text-xs">Снять выбор</button>
+          <button onClick={() => setSelected(null)} className="px-2 py-0.5 rounded border border-border text-xs">✕</button>
         </div>
       )}
 
@@ -137,11 +195,14 @@ const SchemaCanvas: React.FC<Props> = ({
           background: imageUrl ? 'transparent' : 'hsl(var(--card))',
           cursor: dragging ? 'grabbing' : 'default',
           borderRadius: 0,
+          touchAction: dragging ? 'none' : 'auto',
         }}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
         onClick={() => setSelected(null)}
+        onTouchMove={dragging ? onTouchMove : undefined}
+        onTouchEnd={onTouchEnd}
         onDragOver={e => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={e => {
@@ -196,14 +257,14 @@ const SchemaCanvas: React.FC<Props> = ({
               style={{ background: 'rgba(37,99,235,0.85)', color: '#fff' }}
               title="Обрезать, масштабировать, повернуть"
             >
-              <Icon name="Crop" size={11} /> Редактировать
+              <Icon name="Crop" size={11} /> {isMobile ? '' : 'Редактировать'}
             </button>
             <button
               onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}
               className="flex items-center gap-1 px-2 py-1 rounded text-xs"
               style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}
             >
-              <Icon name="ImagePlus" size={11} /> Сменить
+              <Icon name="ImagePlus" size={11} /> {isMobile ? '' : 'Сменить'}
             </button>
             <button
               onClick={e => { e.stopPropagation(); onImageUpload(''); }}
@@ -226,15 +287,17 @@ const SchemaCanvas: React.FC<Props> = ({
               top: `${sym.y}%`,
               width: sym.size,
               height: sym.size,
-              cursor: 'grab',
+              cursor: dragging?.id === sym.id ? 'grabbing' : 'grab',
               zIndex: selected === sym.id ? 20 : 10,
               outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
               borderRadius: 4,
               boxSizing: 'border-box',
               transform: 'translate(-50%, -50%)',
+              touchAction: 'none',
             }}
             onMouseDown={e => onMouseDown(e, sym.id)}
             onClick={e => { e.stopPropagation(); setSelected(sym.id); }}
+            onTouchStart={e => onTouchStart(e, sym.id)}
           >
             <img src={sym.imageUrl} alt={sym.label} style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', display: 'block' }} />
           </div>
