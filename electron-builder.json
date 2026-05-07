@@ -20,7 +20,7 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "public/favicon.ico"
+    "icon": "public/logo.ico"
   },
   "nsis": {
     "oneClick": false,
@@ -32,7 +32,7 @@
   },
   "mac": {
     "target": "dmg",
-    "icon": "public/favicon.ico"
+    "icon": "public/logo.ico"
   },
   "linux": {
     "target": "AppImage"
