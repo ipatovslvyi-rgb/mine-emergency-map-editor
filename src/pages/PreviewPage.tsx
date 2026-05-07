@@ -18,75 +18,90 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
   const sheetRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
-  const toBase64 = (url: string): Promise<string> =>
+  const svgUrlToBase64 = (url: string): string => {
+    if (url.startsWith('data:image/svg+xml;utf8,')) {
+      const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+      const b64 = btoa(unescape(encodeURIComponent(svgStr)));
+      return `data:image/svg+xml;base64,${b64}`;
+    }
+    return url;
+  };
+
+  const fetchImageAsBase64 = (url: string): Promise<string> =>
     new Promise((resolve) => {
-      // SVG data URL — конвертируем напрямую без canvas
-      if (url.startsWith('data:image/svg+xml;utf8,')) {
-        const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
-        const b64 = btoa(unescape(encodeURIComponent(svgStr)));
-        resolve(`data:image/svg+xml;base64,${b64}`);
-        return;
-      }
-      if (url.startsWith('data:')) {
-        resolve(url);
-        return;
-      }
+      if (url.startsWith('data:image/svg+xml;utf8,')) { resolve(svgUrlToBase64(url)); return; }
+      if (url.startsWith('data:')) { resolve(url); return; }
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         const c = document.createElement('canvas');
-        c.width = img.naturalWidth;
-        c.height = img.naturalHeight;
+        c.width = img.naturalWidth || 64;
+        c.height = img.naturalHeight || 64;
         c.getContext('2d')!.drawImage(img, 0, 0);
         try { resolve(c.toDataURL()); } catch { resolve(url); }
       };
       img.onerror = () => resolve(url);
-      img.src = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+      img.src = url + (url.includes('?') ? '&' : '?') + '_nc=' + Date.now();
     });
 
   const handleDownloadImage = async () => {
     if (!sheetRef.current) return;
     setExporting(true);
     try {
-      const font = new FontFace(
-        'Times New Roman',
-        'local("Times New Roman"), local("TimesNewRoman")'
-      );
-      try { await font.load(); document.fonts.add(font); } catch { /* системный шрифт — игнорируем */ }
       await document.fonts.ready;
 
-      // Собираем все уникальные URL картинок (легенда + схема + символы)
+      // Собираем все уникальные URL картинок
       const allUrls = new Set<string>();
       data.legendItems.forEach(i => i.imageUrl && allUrls.add(i.imageUrl));
       (data.placedSymbols ?? []).forEach(s => s.imageUrl && allUrls.add(s.imageUrl));
       if (data.schemaImageUrl) allUrls.add(data.schemaImageUrl);
 
-      // Конвертируем все в base64
       const b64Map: Record<string, string> = {};
-      await Promise.all([...allUrls].map(async url => {
-        b64Map[url] = await toBase64(url);
-      }));
+      await Promise.all([...allUrls].map(async url => { b64Map[url] = await fetchImageAsBase64(url); }));
 
-      const canvas = await html2canvas(sheetRef.current, {
-        scale: 3,
+      // Создаём offscreen div с фиксированным размером A4 альбомным (px при 96dpi = 297mm*3.7795 x 210mm*3.7795)
+      const PW = 3508; const PH = 2480; // A4 альбомный 300dpi
+      const container = document.createElement('div');
+      container.style.cssText = `position:fixed;left:-9999px;top:0;width:${PW}px;height:${PH}px;background:#fff;overflow:hidden;`;
+      document.body.appendChild(container);
+
+      // Рендерим через ReactDOM в offscreen
+      const { createRoot } = await import('react-dom/client');
+      const { default: PD } = await import('@/components/editor/PrintDocument');
+      const React2 = await import('react');
+
+      // Заменяем imageUrl на base64 в данных
+      const patchedData = {
+        ...data,
+        schemaImageUrl: data.schemaImageUrl ? (b64Map[data.schemaImageUrl] || data.schemaImageUrl) : data.schemaImageUrl,
+        legendItems: data.legendItems.map(i => ({ ...i, imageUrl: b64Map[i.imageUrl] || i.imageUrl })),
+        placedSymbols: (data.placedSymbols ?? []).map(s => ({ ...s, imageUrl: b64Map[s.imageUrl] || s.imageUrl })),
+      };
+
+      // Внутренний div с паддингами как в preview
+      const inner = document.createElement('div');
+      inner.style.cssText = `position:absolute;inset:0;padding:${PH*0.0952}px ${PW*0.0337}px ${PH*0.0952}px ${PW*0.101}px;box-sizing:border-box;`;
+      container.appendChild(inner);
+
+      const root = createRoot(inner);
+      await new Promise<void>(res => {
+        root.render(React2.createElement(PD, { data: patchedData, schemaName, scale: PW / 700 }));
+        setTimeout(res, 300);
+      });
+
+      const canvas = await html2canvas(container, {
+        scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        onclone: (clonedDoc) => {
-          const els = clonedDoc.querySelectorAll<HTMLElement>('*');
-          els.forEach(el => {
-            const cs = window.getComputedStyle(el);
-            if (cs.fontFamily) el.style.fontFamily = cs.fontFamily;
-            if (cs.fontSize) el.style.fontSize = cs.fontSize;
-          });
-          // Заменяем src всех картинок на base64
-          clonedDoc.querySelectorAll<HTMLImageElement>('img').forEach(img => {
-            const b64 = b64Map[img.src] || b64Map[img.getAttribute('src') || ''];
-            if (b64) img.src = b64;
-          });
-        },
+        width: PW,
+        height: PH,
       });
+
+      root.unmount();
+      document.body.removeChild(container);
+
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
