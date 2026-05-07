@@ -145,9 +145,10 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
         className="rounded-lg shadow-2xl flex flex-col"
         style={{
           background: 'hsl(var(--background))',
-          width: '90vw',
+          width: '95vw',
           maxWidth: 1100,
-          height: '85vh',
+          height: '95dvh',
+          maxHeight: '95dvh',
           border: '1px solid hsl(var(--border))',
         }}
         onClick={e => e.stopPropagation()}
@@ -167,9 +168,9 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden landscape:flex-col portrait:flex-row flex-row">
           {/* Превью */}
-          <div className="flex-1 flex items-center justify-center p-4" style={{ background: 'hsl(var(--muted))' }}>
+          <div className="flex-1 flex items-center justify-center p-2 min-h-0 min-w-0" style={{ background: 'hsl(var(--muted))' }}>
             <div
               ref={previewRef}
               className="relative bg-white shadow-lg overflow-hidden"
@@ -177,7 +178,7 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
                 width: '100%',
                 height: '100%',
                 maxWidth: 700,
-                maxHeight: 500,
+                maxHeight: '100%',
                 cursor: cropMode ? 'crosshair' : 'default',
               }}
               onMouseDown={onCropMouseDown}
@@ -228,7 +229,7 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
           </div>
 
           {/* Панель управления */}
-          <div className="w-72 border-l border-border p-4 overflow-y-auto flex flex-col gap-4" style={{ background: 'hsl(var(--card))' }}>
+          <div className="w-64 landscape:w-full landscape:h-32 landscape:flex-row landscape:flex-wrap landscape:overflow-x-auto landscape:overflow-y-hidden landscape:border-t landscape:border-l-0 border-l border-border p-3 overflow-y-auto flex flex-col landscape:flex-row gap-3" style={{ background: 'hsl(var(--card))' }}>
             {/* Подгонка */}
             <div>
               <div className="text-xs font-semibold mb-2 flex items-center gap-1">
