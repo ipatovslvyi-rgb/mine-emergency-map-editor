@@ -1,6 +1,6 @@
 {
   "appId": "dev.poehali.mine-emergency-map-editor",
-  "productName": "Mine Emergency Map Editor",
+  "productName": "САУ - Схема аварийного участка",
   "directories": {
     "output": "dist-electron"
   },
