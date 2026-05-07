@@ -28,7 +28,10 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "installerLanguages": ["ru_RU", "en_US"],
-    "language": "1049"
+    "language": "1049",
+    "shortcutName": "САУ",
+    "uninstallDisplayName": "САУ — Схема аварийного участка",
+    "include": null
   },
   "mac": {
     "target": "dmg",
