@@ -18,17 +18,43 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
   const sheetRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
+  const toBase64 = (url: string): Promise<string> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        c.getContext('2d')!.drawImage(img, 0, 0);
+        try { resolve(c.toDataURL()); } catch { resolve(url); }
+      };
+      img.onerror = () => resolve(url);
+      img.src = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    });
+
   const handleDownloadImage = async () => {
     if (!sheetRef.current) return;
     setExporting(true);
     try {
-      // Загружаем шрифт явно чтобы html2canvas корректно рендерил текст
       const font = new FontFace(
         'Times New Roman',
         'local("Times New Roman"), local("TimesNewRoman")'
       );
       try { await font.load(); document.fonts.add(font); } catch { /* системный шрифт — игнорируем */ }
       await document.fonts.ready;
+
+      // Собираем все уникальные URL картинок (легенда + схема + символы)
+      const allUrls = new Set<string>();
+      data.legendItems.forEach(i => i.imageUrl && allUrls.add(i.imageUrl));
+      (data.placedSymbols ?? []).forEach(s => s.imageUrl && allUrls.add(s.imageUrl));
+      if (data.schemaImageUrl) allUrls.add(data.schemaImageUrl);
+
+      // Конвертируем все в base64
+      const b64Map: Record<string, string> = {};
+      await Promise.all([...allUrls].map(async url => {
+        b64Map[url] = await toBase64(url);
+      }));
 
       const canvas = await html2canvas(sheetRef.current, {
         scale: 3,
@@ -37,12 +63,16 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
         backgroundColor: '#ffffff',
         logging: false,
         onclone: (clonedDoc) => {
-          // Применяем стили явно к клону для корректного рендера шрифтов
           const els = clonedDoc.querySelectorAll<HTMLElement>('*');
           els.forEach(el => {
             const cs = window.getComputedStyle(el);
             if (cs.fontFamily) el.style.fontFamily = cs.fontFamily;
             if (cs.fontSize) el.style.fontSize = cs.fontSize;
+          });
+          // Заменяем src всех картинок на base64
+          clonedDoc.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+            const b64 = b64Map[img.src] || b64Map[img.getAttribute('src') || ''];
+            if (b64) img.src = b64;
           });
         },
       });
