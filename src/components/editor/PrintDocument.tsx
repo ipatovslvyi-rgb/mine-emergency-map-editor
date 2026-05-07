@@ -1,5 +1,34 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SchemaFormData } from '@/types/schema';
+
+const InlineSvgIcon: React.FC<{ url: string; size: number }> = ({ url, size }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    try {
+      let svgStr = '';
+      if (url.startsWith('data:image/svg+xml;utf8,')) {
+        svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+      } else if (url.startsWith('data:image/svg+xml;base64,')) {
+        svgStr = atob(url.slice('data:image/svg+xml;base64,'.length));
+      }
+      if (svgStr) {
+        ref.current.innerHTML = svgStr;
+        const svg = ref.current.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('width', String(size));
+          svg.setAttribute('height', String(size));
+          svg.style.display = 'block';
+          svg.style.flexShrink = '0';
+        }
+      }
+    } catch (_) { /* ignore */ }
+  }, [url, size]);
+  if (!url.startsWith('data:image/svg+xml')) {
+    return <img src={url} width={size} height={size} style={{ objectFit: 'contain', flexShrink: 0 }} />;
+  }
+  return <div ref={ref} style={{ width: size, height: size, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} />;
+};
 
 interface Props {
   data: SchemaFormData;
@@ -118,20 +147,19 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, scale = 1 }) => {
             <>
               <img src={data.schemaImageUrl} alt="Схема" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
               {(data.placedSymbols ?? []).map(sym => (
-                <img
+                <div
                   key={sym.id}
-                  src={sym.imageUrl}
-                  alt={sym.label}
                   style={{
                     position: 'absolute',
                     left: `${sym.x}%`,
                     top: `${sym.y}%`,
                     width: s(sym.size * 0.6),
                     height: s(sym.size * 0.6),
-                    objectFit: 'contain',
                     transform: 'translate(-50%, -50%)',
                   }}
-                />
+                >
+                  <InlineSvgIcon url={sym.imageUrl} size={s(sym.size * 0.6)} />
+                </div>
               ))}
             </>
           ) : (
@@ -148,9 +176,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, scale = 1 }) => {
           </div>
           {allLegendItems.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: s(3), borderBottom: `${s(1)}px solid #e2e8f0`, padding: `${s(2)}px 0`, fontSize: s(8) }}>
-              {item.imageUrl && (
-                <img src={item.imageUrl} alt={item.label} style={{ width: s(16), height: s(16), objectFit: 'contain', flexShrink: 0 }} />
-              )}
+              {item.imageUrl && <InlineSvgIcon url={item.imageUrl} size={s(16)} />}
               <span style={{ lineHeight: 1.2 }}>{item.label || '\u00A0'}</span>
             </div>
           ))}

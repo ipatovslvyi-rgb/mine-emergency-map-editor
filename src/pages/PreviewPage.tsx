@@ -86,7 +86,7 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
       const root = createRoot(inner);
       await new Promise<void>(res => {
         root.render(React2.createElement(PD, { data: patchedData, schemaName, scale: PW / 700 }));
-        setTimeout(res, 300);
+        setTimeout(res, 600);
       });
 
       const canvas = await html2canvas(container, {
