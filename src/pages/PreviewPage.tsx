@@ -16,7 +16,6 @@ interface Props {
 
 const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDemo, onActivate }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
   const svgUrlToBase64 = (url: string): string => {
@@ -46,18 +45,25 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
     });
 
   const handleDownloadImage = async () => {
-    if (!exportRef.current) return;
+    if (!sheetRef.current) return;
     setExporting(true);
     try {
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 200));
 
-      const canvas = await html2canvas(exportRef.current, {
+      const canvas = await html2canvas(sheetRef.current, {
         scale: 3,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
+        onclone: (_doc, el) => {
+          // Принудительно задаём Arial всем элементам — Times New Roman плохо рендерится html2canvas
+          el.querySelectorAll<HTMLElement>('*').forEach(node => {
+            node.style.fontFamily = 'Arial, Helvetica, sans-serif';
+            node.style.letterSpacing = 'normal';
+            node.style.wordSpacing = 'normal';
+          });
+        },
       });
 
       const url = canvas.toDataURL('image/png');
@@ -186,34 +192,7 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
         </div>
       </div>
 
-      {/* Скрытый блок для экспорта PNG — Arial, фиксированная ширина */}
-      <div
-        ref={exportRef}
-        style={{
-          position: 'fixed',
-          left: -9999,
-          top: 0,
-          width: 1100,
-          aspectRatio: '297 / 210',
-          background: '#ffffff',
-          overflow: 'hidden',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            paddingTop: '9.52%',
-            paddingRight: '3.37%',
-            paddingBottom: '9.52%',
-            paddingLeft: '10.1%',
-            boxSizing: 'border-box',
-          }}
-        >
-          <PrintDocument data={data} schemaName={schemaName} forExport />
-        </div>
-      </div>
+
     </div>
   );
 };
