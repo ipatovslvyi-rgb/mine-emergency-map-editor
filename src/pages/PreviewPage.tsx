@@ -20,6 +20,17 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
 
   const toBase64 = (url: string): Promise<string> =>
     new Promise((resolve) => {
+      // SVG data URL — конвертируем напрямую без canvas
+      if (url.startsWith('data:image/svg+xml;utf8,')) {
+        const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+        const b64 = btoa(unescape(encodeURIComponent(svgStr)));
+        resolve(`data:image/svg+xml;base64,${b64}`);
+        return;
+      }
+      if (url.startsWith('data:')) {
+        resolve(url);
+        return;
+      }
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
