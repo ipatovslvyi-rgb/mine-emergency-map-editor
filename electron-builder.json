@@ -30,9 +30,7 @@
     "installerLanguages": ["ru_RU", "en_US"],
     "language": "1049",
     "shortcutName": "САУ",
-    "uninstallDisplayName": "САУ — Схема аварийного участка",
-    "installerSidebar": null,
-    "defaultInstallDir": "$PROGRAMFILES\\САУ"
+    "uninstallDisplayName": "САУ — Схема аварийного участка"
   },
   "mac": {
     "target": "dmg",
