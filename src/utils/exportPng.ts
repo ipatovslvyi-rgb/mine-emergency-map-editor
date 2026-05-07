@@ -23,10 +23,29 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (url.startsWith('data:image/svg+xml;utf8,')) {
       const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+    } else if (url.startsWith('data:')) {
+      img.src = url;
     } else {
       img.src = url.includes('?') ? url + '&_nc=' + Date.now() : url + '?_nc=' + Date.now();
     }
   });
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && cur) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = test;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines;
 }
 
 function UL(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, minW: number) {
@@ -307,20 +326,33 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
       .map(sym => ({ imageUrl: sym.imageUrl, label: sym.label })),
   ];
 
+  const legContentW = legendW - sc(12);
+  const labelMaxW = legContentW - sc(20);
+
   for (const item of allLegend) {
-    if (legY > schemaAreaY + schemaAreaH - sc(10)) break;
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = sc(0.5);
-    ctx.beginPath(); ctx.moveTo(legX, legY + sc(3)); ctx.lineTo(legX + legendW - sc(12), legY + sc(3)); ctx.stroke();
+    if (legY > schemaAreaY + schemaAreaH - sc(14)) break;
 
     if (item.imageUrl) {
       const symImg = await loadImage(item.imageUrl);
-      if (symImg) ctx.drawImage(symImg, legX, legY - sc(fs), sc(16), sc(16));
+      if (symImg) ctx.drawImage(symImg, legX, legY - sc(fs), sc(14), sc(14));
     }
-    ctx.font = font(8);
+    ctx.font = font(7.5);
     ctx.fillStyle = '#000';
-    ctx.fillText(item.label || '', legX + sc(19), legY);
-    legY += sc(fs + 3);
+    const lines = wrapText(ctx, item.label || '', labelMaxW);
+    let textY = legY;
+    for (const line of lines) {
+      if (textY > schemaAreaY + schemaAreaH - sc(4)) break;
+      ctx.fillText(line, legX + sc(17), textY);
+      textY += sc(8.5);
+    }
+    const blockH = Math.max(sc(fs + 4), lines.length * sc(8.5) + sc(2));
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = sc(0.5);
+    ctx.beginPath();
+    ctx.moveTo(legX, legY + blockH - sc(2));
+    ctx.lineTo(legX + legContentW, legY + blockH - sc(2));
+    ctx.stroke();
+    legY += blockH;
   }
 
   // ── ПОДПИСЬ ──
