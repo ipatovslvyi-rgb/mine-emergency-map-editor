@@ -33,10 +33,10 @@ const InlineSvgIcon: React.FC<{ url: string; size: number }> = ({ url, size }) =
 interface Props {
   data: SchemaFormData;
   schemaName: string;
-  scale?: number;
+  forExport?: boolean;
 }
 
-const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
+const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false }) => {
   const V = (val: string, fallback = '___') => val?.trim() || fallback;
 
   const allLegendItems = [
@@ -60,7 +60,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
     <div
       className="print-document"
       style={{
-        fontFamily: "'Times New Roman', Times, serif",
+        fontFamily: forExport ? "Arial, Helvetica, sans-serif" : "'Times New Roman', Times, serif",
         fontSize: fs,
         color: '#000',
         background: '#fff',
@@ -145,7 +145,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
         <div style={{ flex: 1, position: 'relative', borderRight: `${s(1)}px solid #64748b`, overflow: 'hidden' }}>
           {data.schemaImageUrl ? (
             <>
-              <img src={data.schemaImageUrl} alt="Схема" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${data.schemaImageUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
               {(data.placedSymbols ?? []).map(sym => (
                 <div
                   key={sym.id}

@@ -16,6 +16,7 @@ interface Props {
 
 const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDemo, onActivate }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
   const svgUrlToBase64 = (url: string): string => {
@@ -45,20 +46,13 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
     });
 
   const handleDownloadImage = async () => {
-    if (!sheetRef.current) return;
+    if (!exportRef.current) return;
     setExporting(true);
     try {
       await document.fonts.ready;
+      await new Promise(r => setTimeout(r, 200));
 
-      // Патчим схему: заменяем внешние URL на base64
-      if (data.schemaImageUrl && !data.schemaImageUrl.startsWith('data:')) {
-        const b64 = await fetchImageAsBase64(data.schemaImageUrl);
-        const imgs = sheetRef.current.querySelectorAll<HTMLImageElement>('img[alt="Схема"]');
-        imgs.forEach(img => { img.src = b64; });
-        await new Promise(r => setTimeout(r, 100));
-      }
-
-      const canvas = await html2canvas(sheetRef.current, {
+      const canvas = await html2canvas(exportRef.current, {
         scale: 3,
         useCORS: true,
         allowTaint: true,
@@ -189,6 +183,35 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
               <PrintDocument data={data} schemaName={schemaName} />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Скрытый блок для экспорта PNG — Arial, фиксированная ширина */}
+      <div
+        ref={exportRef}
+        style={{
+          position: 'fixed',
+          left: -9999,
+          top: 0,
+          width: 1100,
+          aspectRatio: '297 / 210',
+          background: '#ffffff',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            paddingTop: '9.52%',
+            paddingRight: '3.37%',
+            paddingBottom: '9.52%',
+            paddingLeft: '10.1%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <PrintDocument data={data} schemaName={schemaName} forExport />
         </div>
       </div>
     </div>
