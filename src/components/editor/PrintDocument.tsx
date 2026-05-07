@@ -145,7 +145,7 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false })
         <div style={{ flex: 1, position: 'relative', borderRight: `${s(1)}px solid #64748b`, overflow: 'hidden' }}>
           {data.schemaImageUrl ? (
             <>
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${data.schemaImageUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
+              <img src={data.schemaImageUrl} alt="Схема" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
               {(data.placedSymbols ?? []).map(sym => (
                 <div
                   key={sym.id}
