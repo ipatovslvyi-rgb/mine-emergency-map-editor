@@ -3,7 +3,7 @@ import { SchemaFormData } from '@/types/schema';
 import PrintDocument from '@/components/editor/PrintDocument';
 import Icon from '@/components/ui/icon';
 import { exportToExcel } from '@/utils/exportExcel';
-import html2canvas from 'html2canvas';
+import { exportToPng } from '@/utils/exportPng';
 
 interface Props {
   data: SchemaFormData;
@@ -18,59 +18,10 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
   const sheetRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
-  const svgUrlToBase64 = (url: string): string => {
-    if (url.startsWith('data:image/svg+xml;utf8,')) {
-      const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
-      const b64 = btoa(unescape(encodeURIComponent(svgStr)));
-      return `data:image/svg+xml;base64,${b64}`;
-    }
-    return url;
-  };
-
-  const fetchImageAsBase64 = (url: string): Promise<string> =>
-    new Promise((resolve) => {
-      if (url.startsWith('data:image/svg+xml;utf8,')) { resolve(svgUrlToBase64(url)); return; }
-      if (url.startsWith('data:')) { resolve(url); return; }
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width = img.naturalWidth || 64;
-        c.height = img.naturalHeight || 64;
-        c.getContext('2d')!.drawImage(img, 0, 0);
-        try { resolve(c.toDataURL()); } catch { resolve(url); }
-      };
-      img.onerror = () => resolve(url);
-      img.src = url + (url.includes('?') ? '&' : '?') + '_nc=' + Date.now();
-    });
-
   const handleDownloadImage = async () => {
-    if (!sheetRef.current) return;
     setExporting(true);
     try {
-      await document.fonts.ready;
-
-      const canvas = await html2canvas(sheetRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (_doc, el) => {
-          // Принудительно задаём Arial всем элементам — Times New Roman плохо рендерится html2canvas
-          el.querySelectorAll<HTMLElement>('*').forEach(node => {
-            node.style.fontFamily = 'Arial, Helvetica, sans-serif';
-            node.style.letterSpacing = 'normal';
-            node.style.wordSpacing = 'normal';
-          });
-        },
-      });
-
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${schemaName || 'схема'}_${data.date.replace(/\./g, '-')}.png`;
-      a.click();
+      await exportToPng(data, schemaName);
     } finally {
       setExporting(false);
     }
