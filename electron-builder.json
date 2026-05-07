@@ -31,6 +31,5 @@
   },
   "linux": {
     "target": "AppImage"
-  },
-  "main": "electron/main.js"
+  }
 }
