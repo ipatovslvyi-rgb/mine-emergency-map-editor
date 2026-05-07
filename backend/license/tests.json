@@ -12,6 +12,22 @@
       "path": "/",
       "body": {"key": "INVALID-KEY-000"},
       "expectedStatus": 404
+    },
+    {
+      "name": "check-update — нет обновления",
+      "method": "GET",
+      "path": "/?action=check-update&version=1.0.0",
+      "expectedStatus": 200,
+      "expectedBody": {"has_update": false},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "check-update — есть обновление",
+      "method": "GET",
+      "path": "/?action=check-update&version=0.9.0",
+      "expectedStatus": 200,
+      "expectedBody": {"has_update": true},
+      "bodyMatcher": "partial"
     }
   ]
 }

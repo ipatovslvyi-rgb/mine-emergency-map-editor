@@ -3,6 +3,9 @@ import os
 import psycopg2
 from datetime import date
 
+CURRENT_VERSION = "1.0.0"
+DOWNLOAD_URL = ""
+
 
 def get_conn():
     return psycopg2.connect(os.environ['DATABASE_URL'])
@@ -20,6 +23,23 @@ def handler(event: dict, context) -> dict:
         return {'statusCode': 200, 'headers': cors, 'body': ''}
 
     method = event.get('httpMethod', 'GET')
+
+    if method == 'GET':
+        params = event.get('queryStringParameters') or {}
+        action = params.get('action', '')
+        if action == 'check-update':
+            client_version = params.get('version', '0.0.0')
+            has_update = _version_gt(CURRENT_VERSION, client_version)
+            return {
+                'statusCode': 200,
+                'headers': {**cors, 'Content-Type': 'application/json'},
+                'body': json.dumps({
+                    'current_version': CURRENT_VERSION,
+                    'has_update': has_update,
+                    'download_url': DOWNLOAD_URL if has_update else '',
+                }),
+            }
+        return {'statusCode': 400, 'headers': cors, 'body': json.dumps({'error': 'Unknown action'})}
 
     if method == 'POST':
         body = json.loads(event.get('body') or '{}')
@@ -52,3 +72,9 @@ def handler(event: dict, context) -> dict:
         })}
 
     return {'statusCode': 405, 'headers': cors, 'body': json.dumps({'error': 'Method not allowed'})}
+
+
+def _version_gt(a: str, b: str) -> bool:
+    def parts(v):
+        return [int(x) for x in v.split('.')]
+    return parts(a) > parts(b)
