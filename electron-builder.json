@@ -4,9 +4,13 @@
   "directories": {
     "output": "dist-electron"
   },
+  "npmRebuild": false,
+  "buildDependenciesFromSource": false,
+  "nodeGypRebuild": false,
   "files": [
     "dist/**/*",
-    "electron/**/*"
+    "electron/**/*",
+    "!**/node_modules/**/*"
   ],
   "win": {
     "target": [
