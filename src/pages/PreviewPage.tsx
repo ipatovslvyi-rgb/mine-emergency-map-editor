@@ -50,57 +50,21 @@ const PreviewPage: React.FC<Props> = ({ data, schemaName, onClose, onPrint, isDe
     try {
       await document.fonts.ready;
 
-      // Собираем все уникальные URL картинок
-      const allUrls = new Set<string>();
-      data.legendItems.forEach(i => i.imageUrl && allUrls.add(i.imageUrl));
-      (data.placedSymbols ?? []).forEach(s => s.imageUrl && allUrls.add(s.imageUrl));
-      if (data.schemaImageUrl) allUrls.add(data.schemaImageUrl);
+      // Патчим схему: заменяем внешние URL на base64
+      if (data.schemaImageUrl && !data.schemaImageUrl.startsWith('data:')) {
+        const b64 = await fetchImageAsBase64(data.schemaImageUrl);
+        const imgs = sheetRef.current.querySelectorAll<HTMLImageElement>('img[alt="Схема"]');
+        imgs.forEach(img => { img.src = b64; });
+        await new Promise(r => setTimeout(r, 100));
+      }
 
-      const b64Map: Record<string, string> = {};
-      await Promise.all([...allUrls].map(async url => { b64Map[url] = await fetchImageAsBase64(url); }));
-
-      // Создаём offscreen div с фиксированным размером A4 альбомным (px при 96dpi = 297mm*3.7795 x 210mm*3.7795)
-      const PW = 3508; const PH = 2480; // A4 альбомный 300dpi
-      const container = document.createElement('div');
-      container.style.cssText = `position:fixed;left:-9999px;top:0;width:${PW}px;height:${PH}px;background:#fff;overflow:hidden;`;
-      document.body.appendChild(container);
-
-      // Рендерим через ReactDOM в offscreen
-      const { createRoot } = await import('react-dom/client');
-      const { default: PD } = await import('@/components/editor/PrintDocument');
-      const React2 = await import('react');
-
-      // Заменяем imageUrl на base64 в данных
-      const patchedData = {
-        ...data,
-        schemaImageUrl: data.schemaImageUrl ? (b64Map[data.schemaImageUrl] || data.schemaImageUrl) : data.schemaImageUrl,
-        legendItems: data.legendItems.map(i => ({ ...i, imageUrl: b64Map[i.imageUrl] || i.imageUrl })),
-        placedSymbols: (data.placedSymbols ?? []).map(s => ({ ...s, imageUrl: b64Map[s.imageUrl] || s.imageUrl })),
-      };
-
-      // Внутренний div с паддингами как в preview
-      const inner = document.createElement('div');
-      inner.style.cssText = `position:absolute;inset:0;padding:${PH*0.0952}px ${PW*0.0337}px ${PH*0.0952}px ${PW*0.101}px;box-sizing:border-box;`;
-      container.appendChild(inner);
-
-      const root = createRoot(inner);
-      await new Promise<void>(res => {
-        root.render(React2.createElement(PD, { data: patchedData, schemaName, scale: PW / 700 }));
-        setTimeout(res, 600);
-      });
-
-      const canvas = await html2canvas(container, {
-        scale: 1,
+      const canvas = await html2canvas(sheetRef.current, {
+        scale: 3,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: PW,
-        height: PH,
       });
-
-      root.unmount();
-      document.body.removeChild(container);
 
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');

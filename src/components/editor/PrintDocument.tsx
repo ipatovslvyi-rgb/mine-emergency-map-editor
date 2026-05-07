@@ -36,7 +36,7 @@ interface Props {
   scale?: number;
 }
 
-const PrintDocument: React.FC<Props> = ({ data, schemaName, scale = 1 }) => {
+const PrintDocument: React.FC<Props> = ({ data, schemaName }) => {
   const V = (val: string, fallback = '___') => val?.trim() || fallback;
 
   const allLegendItems = [
@@ -46,15 +46,15 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, scale = 1 }) => {
       .map(sym => ({ imageUrl: sym.imageUrl, label: sym.label })),
   ];
 
-  const s = (v: number) => v * scale;
+  const s = (v: number) => v;
 
   const UL = (val: string, minW = 80) => (
-    <span style={{ display: 'inline-block', borderBottom: `${s(1)}px solid #000`, minWidth: s(minW), paddingBottom: 0 }}>
+    <span style={{ display: 'inline-block', borderBottom: '1px solid #000', minWidth: minW, paddingBottom: 0 }}>
       {val?.trim() || '\u00A0'}
     </span>
   );
 
-  const fs = s(9);
+  const fs = 9;
 
   return (
     <div
