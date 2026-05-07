@@ -1,0 +1,36 @@
+{
+  "appId": "dev.poehali.mine-emergency-map-editor",
+  "productName": "Mine Emergency Map Editor",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "public/favicon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "installerLanguages": ["ru_RU", "en_US"],
+    "language": "1049"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "public/favicon.ico"
+  },
+  "linux": {
+    "target": "AppImage"
+  },
+  "main": "electron/main.js"
+}
