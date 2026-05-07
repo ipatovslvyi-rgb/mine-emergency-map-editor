@@ -1,5 +1,6 @@
 import React from 'react';
 import Icon from '@/components/ui/icon';
+import logoUrl from '/logo.svg';
 
 interface Props {
   onEnter: () => void;
@@ -23,7 +24,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
       {/* ── NAV ── */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }} aria-label="Основная навигация">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.svg" alt="Логотип САУ — Схема аварийного участка" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
+          <img src={logoUrl} alt="Логотип САУ — Схема аварийного участка" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
             v1.002
           </span>
@@ -55,7 +56,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <div className="relative z-10 max-w-3xl mx-auto">
           {/* Логотип */}
           <div className="flex justify-center mb-6">
-            <img src="/logo.svg" alt="САУ — программа для оформления схем аварийного участка" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
+            <img src={logoUrl} alt="САУ — программа для оформления схем аварийного участка" style={{ width: 80, height: 80, borderRadius: 20, boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }} />
           </div>
           {/* Бейдж */}
           <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-medium" style={{ background: 'hsl(var(--warning) / 0.12)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.25)' }}>

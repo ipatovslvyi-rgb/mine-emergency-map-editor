@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import logoUrl from '/logo.svg';
 
 interface Props {
   onBack: () => void;
@@ -88,7 +89,7 @@ h2{font-size:13px;font-weight:700;color:#111827}
     <div class="hgrid"></div><div class="hc1"></div><div class="hc2"></div>
     <div class="hi">
       <div class="lr">
-        <img src="${logoUrl}" alt="САУ" class="li">
+        <img src="${logoPrintUrl}" alt="САУ" class="li">
         <div><div class="ls">Автоматизированная система документации</div><div class="le">work_studio@internet.ru</div></div>
       </div>
       <h1>Схема<br><span>аварийного участка</span></h1>
@@ -122,7 +123,7 @@ h2{font-size:13px;font-weight:700;color:#111827}
 const PresentationPage: React.FC<Props> = ({ onBack }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const logoUrl = window.location.origin + '/logo.svg';
+  const logoPrintUrl = window.location.origin + '/logo.svg';
 
   // Вычисляем масштаб под размер контейнера
   useEffect(() => {

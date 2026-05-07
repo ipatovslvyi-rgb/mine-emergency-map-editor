@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSchemaStore } from '@/store/schemaStore';
 import Icon from '@/components/ui/icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import logoUrl from '/logo.svg';
 
 interface TopBarProps {
   activeView: string;
@@ -47,7 +48,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
         {/* Лого */}
         <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
           <img
-            src="/logo.svg" alt="САУ"
+            src={logoUrl} alt="САУ"
             className="w-7 h-7 rounded cursor-pointer hover:opacity-80 transition-opacity"
             style={{ objectFit: 'contain' }}
             onClick={onHome}
