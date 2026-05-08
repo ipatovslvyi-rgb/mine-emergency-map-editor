@@ -10,6 +10,7 @@ import LandingPage from './LandingPage';
 import ActivatePage from './ActivatePage';
 import AdminLicensePage from './AdminLicensePage';
 import PresentationPage from './PresentationPage';
+import FilePage from './FilePage';
 import { useSchemaStore } from '@/store/schemaStore';
 import { defaultFormData, SchemaFormData } from '@/types/schema';
 import { useLicenseContext } from '@/contexts/LicenseContext';
@@ -75,7 +76,7 @@ const Index: React.FC = () => {
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
       <TopBar
         activeView={activeView}
-        onViewChange={(v) => v === 'home' ? setShowLanding(true) : setActiveView(v)}
+        onViewChange={(v) => v === 'home' ? setShowLanding(true) : setActiveView(v as string)}
         onExport={handleExport}
         onHome={() => setShowLanding(true)}
         isDemo={isDemo}
@@ -162,6 +163,8 @@ const Index: React.FC = () => {
           <AdminLicensePage />
         ) : activeView === 'presentation' ? (
           <PresentationPage onBack={() => setActiveView('editor')} />
+        ) : activeView === 'file' ? (
+          <FilePage onOpenEditor={() => setActiveView('editor')} />
         ) : (
           <HelpPage />
         )}

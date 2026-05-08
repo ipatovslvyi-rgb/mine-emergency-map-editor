@@ -23,13 +23,15 @@ function exportSchemaToJson(schema: ReturnType<typeof useSchemaStore.getState>['
 }
 
 const NAV_ITEMS = [
-  { id: 'home', label: 'Главная', icon: 'House' },
+  { id: 'file', label: 'Файл', icon: 'FolderOpen' },
   { id: 'editor', label: 'Редактор', icon: 'PenTool' },
-  { id: 'schemas', label: 'Схемы', icon: 'FolderOpen' },
+  { id: 'schemas', label: 'Схемы', icon: 'Map' },
   { id: 'settings', label: 'Настройки', icon: 'Settings2' },
   { id: 'help', label: 'Справка', icon: 'BookOpen' },
   { id: 'presentation', label: 'Презентация', icon: 'Presentation' },
 ];
+
+const BACK_VIEWS = ['schemas', 'settings', 'help', 'presentation', 'activate', 'file'];
 
 const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onHome, isDemo }) => {
   const { getActiveSchema, renameSchema } = useSchemaStore();
@@ -49,11 +51,17 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
     setMenuOpen(false);
   };
 
+  const handleBack = () => {
+    onViewChange('editor');
+    setMenuOpen(false);
+  };
+
   const activeItem = NAV_ITEMS.find(i => i.id === activeView);
+  const canGoBack = BACK_VIEWS.includes(activeView);
 
   return (
     <>
-      <div className="toolbar-bg border-b border-border flex items-center h-11 px-2 md:px-3 gap-1 md:gap-2 flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }}>
+      <div className="toolbar-bg border-b border-border flex items-center h-12 px-2 md:px-3 gap-1 md:gap-2 flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))' }}>
 
         {/* Лого */}
         <div className="flex items-center gap-1.5 mr-1 md:mr-2 flex-shrink-0">
@@ -90,11 +98,26 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
           ))}
         </div>
 
-        {/* Мобиле: текущий раздел */}
-        <div className="flex md:hidden items-center gap-1.5 flex-1">
+        {/* Мобиле: кнопка назад + текущий раздел */}
+        <div className="flex md:hidden items-center gap-2 flex-1 min-w-0">
+          {canGoBack && (
+            <button
+              className="flex items-center justify-center w-9 h-9 rounded transition-colors flex-shrink-0"
+              style={{ color: 'hsl(var(--foreground))', background: 'hsl(var(--muted))' }}
+              onClick={handleBack}
+              aria-label="Назад"
+            >
+              <Icon name="ChevronLeft" size={18} />
+            </button>
+          )}
           {activeItem && (
-            <span className="text-xs font-medium" style={{ color: 'hsl(var(--foreground))' }}>
+            <span className="text-sm font-medium truncate" style={{ color: 'hsl(var(--foreground))' }}>
               {activeItem.label}
+            </span>
+          )}
+          {activeView === 'editor' && schema && (
+            <span className="text-xs truncate" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              {schema.name}
             </span>
           )}
         </div>
@@ -132,11 +155,11 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
         {isDemo && (
           <button
             onClick={() => handleNav('activate')}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold mr-1 transition-all hover:opacity-80"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-semibold mr-1 transition-all hover:opacity-80"
             style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.4)' }}
           >
-            <Icon name="Lock" size={11} />
-            <span className="hidden sm:inline">Демо · Активировать</span>
+            <Icon name="Lock" size={12} />
+            <span className="hidden sm:inline">Активировать</span>
           </button>
         )}
 
@@ -187,12 +210,12 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
 
         {/* Бургер — только мобиле */}
         <button
-          className="md:hidden flex items-center justify-center w-8 h-8 rounded transition-colors"
+          className="md:hidden flex items-center justify-center w-10 h-10 rounded transition-colors flex-shrink-0"
           style={{ color: 'hsl(var(--foreground))' }}
           onClick={() => setMenuOpen(v => !v)}
           aria-label="Меню"
         >
-          <Icon name={menuOpen ? 'X' : 'Menu'} size={18} />
+          <Icon name={menuOpen ? 'X' : 'Menu'} size={20} />
         </button>
       </div>
 
@@ -207,20 +230,32 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
           />
           {/* Панель */}
           <div
-            className="fixed top-11 left-0 right-0 z-50 md:hidden border-b border-border"
-            style={{ background: 'hsl(var(--toolbar-bg))' }}
+            className="fixed top-12 left-0 right-0 z-50 md:hidden border-b border-border overflow-y-auto"
+            style={{ background: 'hsl(var(--toolbar-bg))', maxHeight: 'calc(100vh - 48px)' }}
           >
+            {/* Кнопка Назад в меню */}
+            {canGoBack && (
+              <button
+                className="w-full flex items-center gap-3 px-4 py-4 text-sm font-medium border-b-2 border-border transition-colors"
+                style={{ color: 'hsl(var(--primary))', background: 'hsl(var(--primary) / 0.06)' }}
+                onClick={handleBack}
+              >
+                <Icon name="ChevronLeft" size={18} />
+                Назад к редактору
+              </button>
+            )}
+
             {NAV_ITEMS.map(item => (
               <button
                 key={item.id}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors border-b border-border last:border-0"
+                className="w-full flex items-center gap-3 px-4 py-4 text-sm transition-colors border-b border-border last:border-0"
                 style={{
                   color: activeView === item.id ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
                   background: activeView === item.id ? 'hsl(var(--primary) / 0.08)' : 'transparent',
                 }}
                 onClick={() => handleNav(item.id)}
               >
-                <Icon name={item.icon} size={16} />
+                <Icon name={item.icon} size={18} />
                 {item.label}
                 {activeView === item.id && (
                   <Icon name="Check" size={14} style={{ marginLeft: 'auto', color: 'hsl(var(--primary))' }} />
@@ -230,30 +265,30 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
 
             {/* Кнопки экспорта в меню если редактор */}
             {activeView === 'editor' && (
-              <div className="flex gap-2 p-3 border-t border-border flex-wrap">
+              <div className="p-3 border-t border-border grid grid-cols-3 gap-2">
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded text-xs font-medium"
                   style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
                   onClick={() => { onExport('preview'); setMenuOpen(false); }}
                 >
-                  <Icon name="Eye" size={13} />
-                  Предпросмотр
+                  <Icon name="Eye" size={16} />
+                  Просмотр
                 </button>
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded text-xs font-medium"
                   style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
                   onClick={() => { if (schema) exportSchemaToJson(schema); setMenuOpen(false); }}
                 >
-                  <Icon name="Download" size={13} />
+                  <Icon name="Download" size={16} />
                   JSON
                 </button>
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded text-xs font-medium"
                   style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
                   onClick={() => { onExport('print'); setMenuOpen(false); }}
                 >
-                  <Icon name="Printer" size={13} />
-                  Печать / PDF
+                  <Icon name="Printer" size={16} />
+                  Печать
                 </button>
               </div>
             )}

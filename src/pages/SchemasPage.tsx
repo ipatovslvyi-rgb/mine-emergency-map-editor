@@ -78,32 +78,33 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
   const schemaToDelete = schemas.find(s => s.id === deleteConfirmId);
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 animate-fade-in">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 animate-fade-in">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between mb-6 gap-3">
           <div>
             <h1 className="text-lg font-semibold">Мои схемы</h1>
             <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {schemas.length} схем сохранено
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
-              style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded text-sm font-medium transition-all hover:opacity-80"
+              style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
               onClick={handleImportClick}
               title="Импортировать схему из файла .json"
             >
-              <Icon name="Upload" size={15} />
-              Импорт
+              <Icon name="Upload" size={16} />
+              <span className="hidden sm:inline">Импорт</span>
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
+              className="flex items-center gap-2 px-3 py-2.5 rounded text-sm font-medium transition-all hover:opacity-80"
               style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
               onClick={() => setShowCreate(true)}
             >
-              <Icon name="Plus" size={15} />
-              Новая схема
+              <Icon name="Plus" size={16} />
+              <span className="hidden sm:inline">Новая схема</span>
+              <span className="sm:hidden">Новая</span>
             </button>
           </div>
         </div>
@@ -191,9 +192,9 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
                 ) : (
                   <div className="font-medium text-sm truncate">{schema.name}</div>
                 )}
-                <div className="text-xs mt-0.5 flex items-center gap-3" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                  <span>{schema.elements.length} элементов</span>
-                  <span>v{schema.version}</span>
+                <div className="text-xs mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  <span>{schema.elements.length} эл.</span>
+                  <span className="hidden sm:inline">v{schema.version}</span>
                   <span>Изм: {formatDate(schema.updatedAt)}</span>
                 </div>
               </div>
@@ -205,29 +206,29 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
                 </span>
               )}
 
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                 <button
-                  className="tool-btn w-8 h-8"
+                  className="tool-btn w-10 h-10"
                   title="Переименовать"
                   onClick={() => { setRenamingId(schema.id); setRenameVal(schema.name); }}
                 >
-                  <Icon name="Pencil" size={13} />
+                  <Icon name="Pencil" size={15} />
                 </button>
                 <button
-                  className="tool-btn w-8 h-8"
+                  className="tool-btn w-10 h-10"
                   title="Дублировать"
                   onClick={() => duplicateSchema(schema.id)}
                 >
-                  <Icon name="Copy" size={13} />
+                  <Icon name="Copy" size={15} />
                 </button>
                 <button
-                  className="tool-btn w-8 h-8"
+                  className="tool-btn w-10 h-10"
                   title="Удалить"
                   onClick={(e) => handleDeleteClick(e, schema.id)}
                   style={{ opacity: schemas.length <= 1 ? 0.3 : 1, color: 'hsl(var(--destructive))' }}
                   disabled={schemas.length <= 1}
                 >
-                  <Icon name="Trash2" size={13} />
+                  <Icon name="Trash2" size={15} />
                 </button>
               </div>
             </div>
