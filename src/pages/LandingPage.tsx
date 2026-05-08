@@ -179,7 +179,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
 
       {/* ── FOOTER ── */}
       <footer className="px-8 py-4 border-t border-border flex items-center justify-between text-xs flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))', color: 'hsl(var(--muted-foreground))' }}>
-        <span>САУ v1.002</span>
+        <span>САУ v1.003</span>
         <span className="hidden sm:inline">Автоматизированная система документации. Все права защищены.</span>
         <a href="mailto:work_studio@internet.ru" style={{ color: 'hsl(var(--muted-foreground))' }}>work_studio@internet.ru</a>
       </footer>
