@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
-import logoUrl from '/logo.svg';
+import LogoSvg from '@/components/ui/LogoSvg';
 
 interface Props {
   onBack: () => void;
@@ -31,6 +31,27 @@ const STEPS = [
 
 const SHEET_W = 794;
 const SHEET_H = 1123;
+
+const LOGO_SVG_RAW = [
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">',
+  '<defs>',
+  '<linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">',
+  '<stop offset="0%" stop-color="#1a2235"/>',
+  '<stop offset="100%" stop-color="#0d1520"/>',
+  '</linearGradient>',
+  '<linearGradient id="arc" x1="0" y1="0" x2="1" y2="1">',
+  '<stop offset="0%" stop-color="#f97316" stop-opacity="0"/>',
+  '<stop offset="40%" stop-color="#f97316" stop-opacity="1"/>',
+  '<stop offset="100%" stop-color="#fb923c" stop-opacity="0.3"/>',
+  '</linearGradient>',
+  '</defs>',
+  '<rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>',
+  '<rect x="3" y="3" width="506" height="506" rx="110" ry="110" fill="none" stroke="#f97316" stroke-width="3" stroke-opacity="0.25"/>',
+  '<path d="M 110 290 A 170 170 0 0 1 195 130" stroke="url(#arc)" stroke-width="8" stroke-linecap="round" fill="none"/>',
+  '<text x="258" y="320" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="210" font-weight="900" fill="#f97316">\u0421\u0410\u0423</text>',
+  '</svg>',
+].join('');
+const LOGO_DATA_URL = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(LOGO_SVG_RAW)))}`;
 
 function buildPrintHTML(logoUrl: string) {
   return `<!DOCTYPE html>
@@ -123,7 +144,7 @@ h2{font-size:13px;font-weight:700;color:#111827}
 const PresentationPage: React.FC<Props> = ({ onBack }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const logoPrintUrl = window.location.origin + '/logo.svg';
+  const logoPrintUrl = LOGO_DATA_URL;
 
   // Вычисляем масштаб под размер контейнера
   useEffect(() => {
@@ -139,7 +160,7 @@ const PresentationPage: React.FC<Props> = ({ onBack }) => {
   }, []);
 
   const handlePrint = () => {
-    const html = buildPrintHTML(logoUrl);
+    const html = buildPrintHTML(logoPrintUrl);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const iframe = document.createElement('iframe');
@@ -205,7 +226,7 @@ const PresentationPage: React.FC<Props> = ({ onBack }) => {
                 <div style={{ position: 'absolute', right: -10, top: -10, width: 160, height: 160, borderRadius: '50%', border: '1px solid rgba(249,115,22,.12)' }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 24 }}>
-                    <img src={logoUrl} alt="САУ" style={{ width: 52, height: 52, borderRadius: 11, flexShrink: 0 }} />
+                    <LogoSvg style={{ width: 52, height: 52, borderRadius: 11, flexShrink: 0 }} />
                     <div>
                       <div style={{ color: '#f97316', fontSize: 9, fontWeight: 600, letterSpacing: '.13em', textTransform: 'uppercase', marginBottom: 2 }}>Автоматизированная система документации</div>
                       <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 9 }}>work_studio@internet.ru</div>
