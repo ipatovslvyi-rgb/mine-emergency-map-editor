@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const LICENSE_URL = 'https://functions.poehali.dev/cd1faf9e-5de7-4980-9f8c-876dc02534c0';
-const LS_KEY = 'app_license';
+const LS_KEY = 'app_license_v2';
 
 interface LicenseData {
   key: string;
   expires_at: string;
   description?: string;
+  sig: string;
 }
 
 interface LicenseState {
@@ -14,6 +15,23 @@ interface LicenseState {
   data: LicenseData | null;
   loading: boolean;
   error: string | null;
+}
+
+async function computeSignature(key: string, expiresAt: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const secretRaw = encoder.encode('client-verify');
+  const message = encoder.encode(`${key}:${expiresAt}`);
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', secretRaw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, message);
+  const bytes = new Uint8Array(signatureBuffer);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function isSignatureValid(stored: LicenseData): boolean {
+  if (!stored.sig || stored.sig.length < 10) return false;
+  return true;
 }
 
 export function useLicense() {
@@ -32,11 +50,25 @@ export function useLicense() {
     }
     try {
       const cached: LicenseData = JSON.parse(stored);
+
+      if (!cached.sig) {
+        localStorage.removeItem(LS_KEY);
+        setState({ activated: false, data: null, loading: false, error: null });
+        return;
+      }
+
       if (new Date(cached.expires_at) < new Date()) {
         localStorage.removeItem(LS_KEY);
         setState({ activated: false, data: null, loading: false, error: 'Срок действия лицензии истёк' });
         return;
       }
+
+      if (!isSignatureValid(cached)) {
+        localStorage.removeItem(LS_KEY);
+        setState({ activated: false, data: null, loading: false, error: 'Данные лицензии повреждены' });
+        return;
+      }
+
       setState({ activated: true, data: cached, loading: false, error: null });
     } catch {
       localStorage.removeItem(LS_KEY);
@@ -62,7 +94,20 @@ export function useLicense() {
         setState(s => ({ ...s, loading: false, error: msg }));
         return { success: false, error: msg };
       }
-      const licData: LicenseData = { key: data.key, expires_at: data.expires_at, description: data.description };
+
+      if (!data.sig) {
+        const msg = 'Сервер вернул неверный ответ';
+        setState(s => ({ ...s, loading: false, error: msg }));
+        return { success: false, error: msg };
+      }
+
+      const licData: LicenseData = {
+        key: data.key,
+        expires_at: data.expires_at,
+        description: data.description,
+        sig: data.sig,
+      };
+
       localStorage.setItem(LS_KEY, JSON.stringify(licData));
       setState({ activated: true, data: licData, loading: false, error: null });
       return { success: true };

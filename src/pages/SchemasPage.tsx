@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSchemaStore } from '@/store/schemaStore';
+import { SchemaData } from '@/types/schema';
 import Icon from '@/components/ui/icon';
 
 interface SchemasPageProps {
@@ -7,11 +8,14 @@ interface SchemasPageProps {
 }
 
 const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
-  const { schemas, activeSchemaId, setActiveSchema, createSchema, deleteSchema, duplicateSchema, renameSchema } = useSchemaStore();
+  const { schemas, activeSchemaId, setActiveSchema, createSchema, deleteSchema, duplicateSchema, renameSchema, importSchema } = useSchemaStore();
   const [newName, setNewName] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = () => {
     if (!newName.trim()) return;
@@ -26,10 +30,52 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
     onOpen();
   };
 
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (schemas.length <= 1) return;
+    setDeleteConfirmId(id);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteConfirmId) return;
+    deleteSchema(deleteConfirmId);
+    setDeleteConfirmId(null);
+  };
+
+  const handleImportClick = () => {
+    setImportError(null);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.endsWith('.json')) {
+      setImportError('Выберите файл формата .json');
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string) as SchemaData;
+        if (!data.elements || !data.name) throw new Error('Неверный формат');
+        importSchema(data);
+        onOpen();
+      } catch {
+        setImportError('Файл повреждён или имеет неверный формат');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
+
+  const schemaToDelete = schemas.find(s => s.id === deleteConfirmId);
 
   return (
     <div className="flex-1 overflow-y-auto p-6 animate-fade-in">
@@ -41,15 +87,47 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
               {schemas.length} схем сохранено
             </p>
           </div>
-          <button
-            className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
-            style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
-            onClick={() => setShowCreate(true)}
-          >
-            <Icon name="Plus" size={15} />
-            Новая схема
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
+              style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
+              onClick={handleImportClick}
+              title="Импортировать схему из файла .json"
+            >
+              <Icon name="Upload" size={15} />
+              Импорт
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
+              style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+              onClick={() => setShowCreate(true)}
+            >
+              <Icon name="Plus" size={15} />
+              Новая схема
+            </button>
+          </div>
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
+        {importError && (
+          <div className="p-3 rounded-lg mb-4 border text-sm animate-scale-in"
+            style={{ background: 'hsl(var(--destructive) / 0.1)', borderColor: 'hsl(var(--destructive) / 0.4)', color: 'hsl(var(--destructive))' }}>
+            <div className="flex items-center gap-2">
+              <Icon name="AlertCircle" size={14} />
+              {importError}
+              <button className="ml-auto" onClick={() => setImportError(null)}>
+                <Icon name="X" size={12} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {showCreate && (
           <div className="p-4 rounded-lg mb-4 border animate-scale-in" style={{ background: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}>
@@ -143,10 +221,11 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
                   <Icon name="Copy" size={13} />
                 </button>
                 <button
-                  className="tool-btn w-8 h-8 text-danger"
+                  className="tool-btn w-8 h-8"
                   title="Удалить"
-                  onClick={() => schemas.length > 1 && deleteSchema(schema.id)}
-                  style={{ opacity: schemas.length <= 1 ? 0.3 : 1 }}
+                  onClick={(e) => handleDeleteClick(e, schema.id)}
+                  style={{ opacity: schemas.length <= 1 ? 0.3 : 1, color: 'hsl(var(--destructive))' }}
+                  disabled={schemas.length <= 1}
                 >
                   <Icon name="Trash2" size={13} />
                 </button>
@@ -155,6 +234,40 @@ const SchemasPage: React.FC<SchemasPageProps> = ({ onOpen }) => {
           ))}
         </div>
       </div>
+
+      {deleteConfirmId && schemaToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }}>
+          <div className="rounded-xl border p-6 w-full max-w-sm shadow-xl animate-scale-in"
+            style={{ background: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'hsl(var(--destructive) / 0.15)' }}>
+                <Icon name="Trash2" size={18} style={{ color: 'hsl(var(--destructive))' }} />
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Удалить схему?</div>
+                <div className="text-xs mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>Это действие нельзя отменить</div>
+              </div>
+            </div>
+            <div className="text-sm mb-4 px-1 py-2 rounded"
+              style={{ background: 'hsl(var(--muted))', color: 'hsl(var(--foreground))' }}>
+              «{schemaToDelete.name}»
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="flex-1 py-2 rounded text-sm font-medium transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--destructive))', color: 'white' }}
+                onClick={handleDeleteConfirm}
+              >Удалить</button>
+              <button
+                className="flex-1 py-2 rounded text-sm transition-all hover:opacity-80"
+                style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
+                onClick={() => setDeleteConfirmId(null)}
+              >Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

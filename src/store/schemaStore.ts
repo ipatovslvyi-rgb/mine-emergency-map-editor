@@ -41,6 +41,7 @@ interface SchemaStore {
   duplicateSchema: (id: string) => void;
   renameSchema: (id: string, name: string) => void;
   updateFormData: (id: string, formData: SchemaFormData) => void;
+  importSchema: (schema: SchemaData) => void;
 
   addElement: (element: SchemaElement) => void;
   updateElement: (id: string, updates: Partial<SchemaElement>) => void;
@@ -149,6 +150,20 @@ export const useSchemaStore = create<SchemaStore>((set, get) => ({
   renameSchema: (id, name) => {
     set(state => ({
       schemas: state.schemas.map(s => s.id === id ? { ...s, name, updatedAt: new Date().toISOString() } : s)
+    }));
+  },
+
+  importSchema: (schema) => {
+    const imported: SchemaData = {
+      ...schema,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    set(state => ({
+      schemas: [...state.schemas, imported],
+      activeSchemaId: imported.id,
+      selectedElementIds: [],
     }));
   },
 
