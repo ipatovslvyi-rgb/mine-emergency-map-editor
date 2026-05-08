@@ -139,7 +139,7 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
             <div className="flex justify-between">
               <span>Версия</span>
-              <span className="font-mono-tech">1.0.0</span>
+              <span className="font-mono-tech">1.003</span>
             </div>
             <div className="flex justify-between">
               <span>Назначение</span>

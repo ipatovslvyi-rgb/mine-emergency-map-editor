@@ -26,7 +26,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <div className="flex items-center gap-2.5">
           <img src={logoUrl} alt="Логотип САУ — Схема аварийного участка" className="w-9 h-9 rounded" style={{ objectFit: 'contain' }} />
           <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--warning) / 0.15)', color: 'hsl(var(--warning))', border: '1px solid hsl(var(--warning) / 0.3)' }}>
-            v1.002
+            v1.003
           </span>
         </div>
         <button
