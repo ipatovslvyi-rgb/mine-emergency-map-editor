@@ -12,6 +12,16 @@ interface TopBarProps {
   isDemo?: boolean;
 }
 
+function exportSchemaToJson(schema: ReturnType<typeof useSchemaStore.getState>['schemas'][0]) {
+  const blob = new Blob([JSON.stringify(schema, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${schema.name.replace(/[^a-zA-Zа-яА-Я0-9_\- ]/g, '')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 const NAV_ITEMS = [
   { id: 'home', label: 'Главная', icon: 'House' },
   { id: 'editor', label: 'Редактор', icon: 'PenTool' },
@@ -149,6 +159,19 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all hover:opacity-80"
+                  style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                  onClick={() => schema && exportSchemaToJson(schema)}
+                >
+                  <Icon name="Download" size={13} />
+                  JSON
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Сохранить схему как файл для резервной копии</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
                   style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
                   onClick={() => onExport('print')}
@@ -207,7 +230,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
 
             {/* Кнопки экспорта в меню если редактор */}
             {activeView === 'editor' && (
-              <div className="flex gap-2 p-3 border-t border-border">
+              <div className="flex gap-2 p-3 border-t border-border flex-wrap">
                 <button
                   className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
                   style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
@@ -215,6 +238,14 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
                 >
                   <Icon name="Eye" size={13} />
                   Предпросмотр
+                </button>
+                <button
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
+                  style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border))' }}
+                  onClick={() => { if (schema) exportSchemaToJson(schema); setMenuOpen(false); }}
+                >
+                  <Icon name="Download" size={13} />
+                  JSON
                 </button>
                 <button
                   className="flex-1 flex items-center justify-center gap-2 py-2 rounded text-xs font-medium"
