@@ -140,8 +140,8 @@ const SchemaCanvas: React.FC<Props> = ({
         </div>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(36px, 1fr))' : 'repeat(auto-fill, minmax(52px, 1fr))',
-          gap: isMobile ? 4 : 6,
+          gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(44px, 1fr))' : 'repeat(auto-fill, minmax(52px, 1fr))',
+          gap: isMobile ? 6 : 6,
         }}>
           {legendSymbols.map(sym => (
             <button
@@ -149,9 +149,9 @@ const SchemaCanvas: React.FC<Props> = ({
               title={sym.label}
               onClick={() => addSymbol(sym)}
               className="flex flex-col items-center justify-center rounded transition-all hover:border-primary"
-              style={{ border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', padding: isMobile ? '3px' : '4px', gap: isMobile ? 1 : 2 }}
+              style={{ border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))', padding: isMobile ? '6px' : '4px', gap: isMobile ? 2 : 2, minHeight: isMobile ? 44 : 'auto' }}
             >
-              <img src={sym.imageUrl} alt={sym.label} style={{ width: isMobile ? 22 : 28, height: isMobile ? 22 : 28, objectFit: 'contain' }} />
+              <img src={sym.imageUrl} alt={sym.label} style={{ width: isMobile ? 26 : 28, height: isMobile ? 26 : 28, objectFit: 'contain' }} />
               {!isMobile && (
                 <span style={{ fontSize: 8, color: 'hsl(var(--muted-foreground))', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   {sym.label}

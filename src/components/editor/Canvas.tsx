@@ -26,39 +26,35 @@ const Canvas: React.FC = () => {
 
   if (!schema) return <div className="flex-1 canvas-bg flex items-center justify-center text-muted-foreground">Нет активной схемы</div>;
 
-  const getCanvasPoint = (e: React.MouseEvent): Point => {
+  const getCanvasPoint = (clientX: number, clientY: number): Point => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return { x: 0, y: 0 };
-    const x = (e.clientX - rect.left) / zoom;
-    const y = (e.clientY - rect.top) / zoom;
+    const x = (clientX - rect.left) / zoom;
+    const y = (clientY - rect.top) / zoom;
     return { x: snapToGrid(x, gridSize), y: snapToGrid(y, gridSize) };
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    const pt = getCanvasPoint(e);
+  const handlePointerDown = (clientX: number, clientY: number, button = 0) => {
+    if (button !== 0) return;
+    const pt = getCanvasPoint(clientX, clientY);
 
     if (activeTool === 'pan') {
-      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+      setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
       return;
     }
-
     if (activeTool === 'image') {
       fileInputRef.current?.click();
       return;
     }
-
     if (activeTool === 'select') {
       clearSelection();
       return;
     }
-
     if (['line', 'arrow', 'rect', 'ellipse'].includes(activeTool)) {
       setDrawing(true);
       setStartPt(pt);
       setCurrentPt(pt);
     }
-
     if (activeTool === 'text') {
       const id = Date.now().toString();
       addElement({
@@ -78,35 +74,29 @@ const Canvas: React.FC = () => {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (clientX: number, clientY: number) => {
     if (activeTool === 'pan' && panStart) {
-      setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
+      setPanOffset({ x: clientX - panStart.x, y: clientY - panStart.y });
       return;
     }
-    if (drawing) {
-      setCurrentPt(getCanvasPoint(e));
-    }
+    if (drawing) setCurrentPt(getCanvasPoint(clientX, clientY));
     if (dragging) {
-      const pt = getCanvasPoint(e);
-      updateElement(dragging.id, {
-        x: pt.x - dragging.ox,
-        y: pt.y - dragging.oy,
-      });
+      const pt = getCanvasPoint(clientX, clientY);
+      updateElement(dragging.id, { x: pt.x - dragging.ox, y: pt.y - dragging.oy });
     }
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
+  const handlePointerUp = (clientX: number, clientY: number) => {
     if (activeTool === 'pan') {
       setPanStart(null);
       return;
     }
     if (drawing) {
       setDrawing(false);
-      const pt = getCanvasPoint(e);
+      const pt = getCanvasPoint(clientX, clientY);
       const dx = Math.abs(pt.x - startPt.x);
       const dy = Math.abs(pt.y - startPt.y);
       if (dx < 3 && dy < 3) return;
-
       const base = {
         id: Date.now().toString(),
         strokeColor,
@@ -115,7 +105,6 @@ const Canvas: React.FC = () => {
         opacity: 1,
         zIndex: schema.elements.length,
       };
-
       if (activeTool === 'line') {
         addElement({ ...base, type: 'line', x: startPt.x, y: startPt.y, x2: pt.x, y2: pt.y });
       } else if (activeTool === 'arrow') {
@@ -133,10 +122,38 @@ const Canvas: React.FC = () => {
     setDragging(null);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => handlePointerDown(e.clientX, e.clientY, e.button);
+  const handleMouseMove = (e: React.MouseEvent) => handlePointerMove(e.clientX, e.clientY);
+  const handleMouseUp = (e: React.MouseEvent) => handlePointerUp(e.clientX, e.clientY);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, 0);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const t = e.changedTouches[0];
+    handlePointerUp(t.clientX, t.clientY);
+  };
+
   const handleElementMouseDown = (e: React.MouseEvent, el: SchemaElement) => {
     if (activeTool !== 'select') return;
     e.stopPropagation();
-    const pt = getCanvasPoint(e);
+    const pt = getCanvasPoint(e.clientX, e.clientY);
+    setSelectedElements([el.id]);
+    setDragging({ id: el.id, ox: pt.x - el.x, oy: pt.y - el.y });
+  };
+
+  const handleElementTouchStart = (e: React.TouchEvent, el: SchemaElement) => {
+    if (activeTool !== 'select') return;
+    e.stopPropagation();
+    e.preventDefault();
+    const pt = getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY);
     setSelectedElements([el.id]);
     setDragging({ id: el.id, ox: pt.x - el.x, oy: pt.y - el.y });
   };
@@ -189,8 +206,9 @@ const Canvas: React.FC = () => {
       const x2 = el.x2 !== undefined && el.x2 >= el.x ? Math.abs((el.x2 || el.x) - el.x) : 0;
       const y2 = el.y2 !== undefined && el.y2 >= el.y ? Math.abs((el.y2 || el.y) - el.y) : 0;
       return (
-        <svg key={el.id} style={{ ...style, overflow: 'visible' }} width={w + 4} height={h + 4}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <svg key={el.id} style={{ ...style, overflow: 'visible', touchAction: 'none' }} width={w + 4} height={h + 4}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <line x1={x1} y1={y1} x2={x2} y2={y2} {...svgProps} />
         </svg>
       );
@@ -211,8 +229,9 @@ const Canvas: React.FC = () => {
       const w = Math.abs(dx) + 20; const h = Math.abs(dy) + 20;
       const ox = el.x - minX + 10; const oy = el.y - minY + 10;
       return (
-        <svg key={el.id} style={{ ...style, overflow: 'visible', left: el.x - ox, top: el.y - oy }} width={w} height={h}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <svg key={el.id} style={{ ...style, overflow: 'visible', left: el.x - ox, top: el.y - oy, touchAction: 'none' }} width={w} height={h}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <line x1={ox} y1={oy} x2={ox + (x2 - el.x)} y2={oy + (y2 - el.y)} {...svgProps} />
           <polygon points={`${ox + (x2-el.x)},${oy + (y2-el.y)} ${ox + (ax-el.x)},${oy + (ay-el.y)} ${ox + (bx-el.x)},${oy + (by-el.y)}`}
             fill={el.strokeColor || strokeColor} />
@@ -222,8 +241,9 @@ const Canvas: React.FC = () => {
 
     if (el.type === 'rect') {
       return (
-        <svg key={el.id} style={{ ...style, overflow: 'visible' }} width={el.width || 100} height={el.height || 60}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <svg key={el.id} style={{ ...style, overflow: 'visible', touchAction: 'none' }} width={el.width || 100} height={el.height || 60}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <rect x={0} y={0} width={el.width || 100} height={el.height || 60} rx={2} {...svgProps} />
         </svg>
       );
@@ -233,8 +253,9 @@ const Canvas: React.FC = () => {
       const rx = (el.width || 80) / 2;
       const ry = (el.height || 50) / 2;
       return (
-        <svg key={el.id} style={{ ...style, overflow: 'visible' }} width={el.width || 80} height={el.height || 50}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <svg key={el.id} style={{ ...style, overflow: 'visible', touchAction: 'none' }} width={el.width || 80} height={el.height || 50}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <ellipse cx={rx} cy={ry} rx={rx} ry={ry} {...svgProps} />
         </svg>
       );
@@ -242,8 +263,9 @@ const Canvas: React.FC = () => {
 
     if (el.type === 'text') {
       return (
-        <div key={el.id} style={{ ...style }}
+        <div key={el.id} style={{ ...style, touchAction: 'none' }}
           onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}
           onDoubleClick={() => setTextEditing(el.id)}
         >
           {textEditing === el.id ? (
@@ -267,8 +289,9 @@ const Canvas: React.FC = () => {
 
     if (el.type === 'image') {
       return (
-        <div key={el.id} style={{ ...style, width: el.width || 200, height: el.height || 150 }}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <div key={el.id} style={{ ...style, width: el.width || 200, height: el.height || 150, touchAction: 'none' }}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <img src={el.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
       );
@@ -278,8 +301,9 @@ const Canvas: React.FC = () => {
       const sym = getSymbolById(el.symbolId || '');
       if (!sym) return null;
       return (
-        <div key={el.id} style={{ ...style, textAlign: 'center' }}
-          onMouseDown={ev => handleElementMouseDown(ev, el)}>
+        <div key={el.id} style={{ ...style, textAlign: 'center', touchAction: 'none' }}
+          onMouseDown={ev => handleElementMouseDown(ev, el)}
+          onTouchStart={ev => handleElementTouchStart(ev, el)}>
           <SymbolRenderer content={sym.content} type={sym.type} color={el.color || sym.color} size={el.width || 40} />
           {el.label && (
             <div style={{ fontSize: 10, color: 'hsl(210 20% 75%)', marginTop: 2, whiteSpace: 'nowrap', fontFamily: "'IBM Plex Sans', sans-serif" }}>
@@ -344,11 +368,14 @@ const Canvas: React.FC = () => {
     <div className="flex-1 overflow-hidden relative" style={{ background: 'hsl(var(--canvas-bg))' }}>
       <div
         className="absolute inset-0 overflow-auto"
-        style={{ cursor: activeTool === 'pan' ? (panStart ? 'grabbing' : 'grab') : activeTool === 'select' ? 'default' : 'crosshair' }}
+        style={{ cursor: activeTool === 'pan' ? (panStart ? 'grabbing' : 'grab') : activeTool === 'select' ? 'default' : 'crosshair', touchAction: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={() => { setDragging(null); setDrawing(false); setPanStart(null); }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div
           style={{
