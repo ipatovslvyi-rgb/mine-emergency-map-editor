@@ -36,6 +36,8 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
   const [crop, setCrop] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const drawingRef = useRef<{ startX: number; startY: number } | null>(null);
 
+  const pinchRef = useRef<{ dist: number; scaleStart: number } | null>(null);
+
   const [imgSize, setImgSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
 
   const isLandscape = useOrientation();
@@ -71,6 +73,36 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
   }, []);
 
   const endCrop = useCallback(() => { drawingRef.current = null; }, []);
+
+  const getPinchDist = (touches: React.TouchList) =>
+    Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+
+  const handlePreviewTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      pinchRef.current = { dist: getPinchDist(e.touches), scaleStart: scale };
+    } else if (e.touches.length === 1 && cropMode) {
+      e.preventDefault();
+      startCrop(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, [scale, cropMode, startCrop]);
+
+  const handlePreviewTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const newDist = getPinchDist(e.touches);
+      const ratio = newDist / pinchRef.current.dist;
+      setScale(Math.min(3, Math.max(0.2, pinchRef.current.scaleStart * ratio)));
+    } else if (e.touches.length === 1 && cropMode) {
+      e.preventDefault();
+      moveCrop(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, [cropMode, moveCrop]);
+
+  const handlePreviewTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) pinchRef.current = null;
+    endCrop();
+  }, [endCrop]);
 
   const resetAll = () => {
     setScale(1); setOffsetX(0); setOffsetY(0);
@@ -255,15 +287,15 @@ const ImageEditDialog: React.FC<Props> = ({ imageUrl, onSave, onClose }) => {
                 maxWidth: isLandscape ? 700 : '100%',
                 maxHeight: '100%',
                 cursor: cropMode ? 'crosshair' : 'default',
-                touchAction: cropMode ? 'none' : 'auto',
+                touchAction: 'none',
               }}
               onMouseDown={e => startCrop(e.clientX, e.clientY)}
               onMouseMove={e => moveCrop(e.clientX, e.clientY)}
               onMouseUp={endCrop}
               onMouseLeave={endCrop}
-              onTouchStart={e => { if (cropMode) { e.preventDefault(); startCrop(e.touches[0].clientX, e.touches[0].clientY); } }}
-              onTouchMove={e => { if (cropMode) { e.preventDefault(); moveCrop(e.touches[0].clientX, e.touches[0].clientY); } }}
-              onTouchEnd={endCrop}
+              onTouchStart={handlePreviewTouchStart}
+              onTouchMove={handlePreviewTouchMove}
+              onTouchEnd={handlePreviewTouchEnd}
             >
               <img
                 ref={imgRef}
