@@ -155,6 +155,17 @@ const ActivatePage: React.FC<Props> = ({ onActivated, onBack }) => {
               {loading ? 'Проверка...' : 'Активировать'}
             </button>
 
+            <a
+              href="https://vk.me/+79625244698"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"
+              style={{ background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.3)' }}
+            >
+              <Icon name="MessageCircle" size={15} />
+              Купить лицензию (написать в VK)
+            </a>
+
             <button
               onClick={onBack}
               className="w-full py-2 rounded-lg text-xs"
