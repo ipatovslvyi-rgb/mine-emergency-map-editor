@@ -3,12 +3,18 @@ import { useState, useEffect, useCallback } from 'react';
 const LICENSE_URL = 'https://functions.poehali.dev/cd1faf9e-5de7-4980-9f8c-876dc02534c0';
 const LS_KEY = 'app_license_v2';
 const DEMO_KEY = 'DEMO-DEMO-DEMO-DEMO';
-const DEMO_LICENSE: LicenseData = {
-  key: DEMO_KEY,
-  expires_at: '2099-12-31',
-  description: 'Демо-доступ',
-  sig: 'demo-sig-builtin-0000000000000000',
-};
+const DEMO_DAYS = 10;
+
+function makeDemoLicense(): LicenseData {
+  const expires = new Date();
+  expires.setDate(expires.getDate() + DEMO_DAYS);
+  return {
+    key: DEMO_KEY,
+    expires_at: expires.toISOString().split('T')[0],
+    description: 'Демо-доступ (10 дней)',
+    sig: 'demo-sig-builtin-0000000000000000',
+  };
+}
 
 interface LicenseData {
   key: string;
@@ -38,7 +44,7 @@ async function computeSignature(key: string, expiresAt: string): Promise<string>
 
 function isSignatureValid(stored: LicenseData): boolean {
   if (!stored.sig || stored.sig.length < 10) return false;
-  if (stored.key === DEMO_KEY && stored.sig === DEMO_LICENSE.sig) return true;
+  if (stored.key === DEMO_KEY && stored.sig === 'demo-sig-builtin-0000000000000000') return true;
   return true;
 }
 
@@ -92,8 +98,24 @@ export function useLicense() {
     setState(s => ({ ...s, loading: true, error: null }));
 
     if (key.trim().toUpperCase() === DEMO_KEY) {
-      localStorage.setItem(LS_KEY, JSON.stringify(DEMO_LICENSE));
-      setState({ activated: true, data: DEMO_LICENSE, loading: false, error: null });
+      const existing = localStorage.getItem(LS_KEY);
+      let demoData: LicenseData;
+      if (existing) {
+        try {
+          const parsed: LicenseData = JSON.parse(existing);
+          if (parsed.key === DEMO_KEY) {
+            demoData = parsed;
+          } else {
+            demoData = makeDemoLicense();
+          }
+        } catch {
+          demoData = makeDemoLicense();
+        }
+      } else {
+        demoData = makeDemoLicense();
+      }
+      localStorage.setItem(LS_KEY, JSON.stringify(demoData));
+      setState({ activated: true, data: demoData, loading: false, error: null });
       return { success: true };
     }
 
