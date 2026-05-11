@@ -49,6 +49,20 @@ const ActivatePage: React.FC<Props> = ({ onActivated, onBack }) => {
           </div>
         </div>
 
+        <div
+          className="rounded-lg px-3 py-2.5 flex items-start gap-2 cursor-pointer"
+          style={{ background: 'hsl(var(--primary) / 0.08)', border: '1px dashed hsl(var(--primary) / 0.4)' }}
+          onClick={() => setKey('DEMO-DEMO-DEMO-DEMO')}
+        >
+          <Icon name="Gift" size={14} style={{ color: 'hsl(var(--primary))', marginTop: 2, flexShrink: 0 }} />
+          <div>
+            <div className="text-xs font-semibold" style={{ color: 'hsl(var(--primary))' }}>Демо-доступ</div>
+            <div className="text-xs mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Нажмите, чтобы вставить ключ: <span className="font-mono font-semibold">DEMO-DEMO-DEMO-DEMO</span>
+            </div>
+          </div>
+        </div>
+
         {activated && data ? (
           <div className="space-y-4">
             <div className="rounded-lg p-4 space-y-2" style={{ background: 'hsl(var(--safe) / 0.1)', border: '1px solid hsl(var(--safe) / 0.3)' }}>
