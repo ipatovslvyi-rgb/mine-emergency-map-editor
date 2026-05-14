@@ -54,8 +54,7 @@ const SchemaCanvas: React.FC<Props> = ({
   const strokesRef = useRef(strokes);
   useEffect(() => { strokesRef.current = strokes; }, [strokes]);
 
-  // Для сохранения нарисованного поверх фона (без самого фона)
-  const drawLayerRef = useRef<HTMLCanvasElement | null>(null);
+
 
   const isDrawing = useRef(false);
   const currentStroke = useRef<DrawPoint[]>([]);
@@ -93,7 +92,8 @@ const SchemaCanvas: React.FC<Props> = ({
     img.src = imageUrl;
   }, [imageUrl]);
 
-  // Рисуем всё на mainCanvas: фон + draw layer
+  // Единый рендер: фон → карандаш (source-over) → ластик (destination-out)
+  // Всё в один проход на mainCanvas
   const redrawAll = useCallback(() => {
     const canvas = mainCanvasRef.current;
     const container = containerRef.current;
@@ -110,7 +110,7 @@ const SchemaCanvas: React.FC<Props> = ({
 
     ctx.clearRect(0, 0, W, H);
 
-    // Рисуем фоновое изображение (contain)
+    // 1. Фоновое изображение
     const img = loadedImageRef.current;
     if (img) {
       const scale = Math.min(W / img.naturalWidth, H / img.naturalHeight);
@@ -121,42 +121,12 @@ const SchemaCanvas: React.FC<Props> = ({
       ctx.drawImage(img, dx, dy, dw, dh);
     }
 
-    // Поверх рисуем draw layer (если есть)
-    if (drawLayerRef.current) {
-      ctx.drawImage(drawLayerRef.current, 0, 0);
-    }
-  }, []);
-
-  // Синхронизируем strokes в drawLayer и затем перерисовываем
-  const redrawDrawLayer = useCallback(() => {
-    const canvas = mainCanvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const W = container.clientWidth || canvas.width;
-    const H = container.clientHeight || canvas.height;
-
-    if (!drawLayerRef.current) {
-      drawLayerRef.current = document.createElement('canvas');
-    }
-    const dl = drawLayerRef.current;
-    dl.width = W;
-    dl.height = H;
-    const ctx = dl.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, W, H);
-
+    // 2. Штрихи карандаша и ластика поверх (ластик стирает фон)
     strokesRef.current.forEach(stroke => {
       if (stroke.points.length < 2) return;
       ctx.save();
-      if (stroke.eraser) {
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.strokeStyle = 'rgba(0,0,0,1)';
-      } else {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = stroke.color;
-      }
+      ctx.globalCompositeOperation = stroke.eraser ? 'destination-out' : 'source-over';
+      ctx.strokeStyle = stroke.eraser ? 'rgba(0,0,0,1)' : stroke.color;
       ctx.lineWidth = stroke.width;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -166,15 +136,15 @@ const SchemaCanvas: React.FC<Props> = ({
       ctx.stroke();
       ctx.restore();
     });
+  }, []);
 
-    redrawAll();
-  }, [redrawAll]);
+  // Алиас для совместимости
+  const redrawDrawLayer = redrawAll;
 
   useEffect(() => { redrawDrawLayer(); }, [strokes, redrawDrawLayer]);
 
-  // При смене imageUrl сбрасываем draw layer
+  // При смене imageUrl сбрасываем рисунок
   useEffect(() => {
-    drawLayerRef.current = null;
     setStrokes([]);
   }, [imageUrl]);
 
@@ -618,8 +588,8 @@ const SchemaCanvas: React.FC<Props> = ({
               position: 'absolute',
               left: `${sym.x}%`,
               top: `${sym.y}%`,
-              width: sym.size,
-              height: sym.isSample && sym.label === 'Расстояние' ? sym.size * 0.4 : sym.size,
+              width: sym.isSample && sym.label === 'Расстояние' ? sym.size * 2 : sym.size,
+              height: sym.isSample && sym.label === 'Расстояние' ? 40 : sym.size,
               cursor: activeTool !== 'select' ? 'default' : isDragging && selected === sym.id ? 'grabbing' : 'grab',
               zIndex: selected === sym.id ? 25 : 15,
               outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
@@ -655,63 +625,123 @@ const SchemaCanvas: React.FC<Props> = ({
             }}
           >
             {sym.isSample ? (
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <img
-                  src={sym.imageUrl}
-                  alt={sym.label}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', display: 'block' }}
-                  draggable={false}
-                />
-                {/* Редактируемая цифра/текст */}
-                {editingSampleId === sym.id ? (
-                  <input
-                    autoFocus
-                    type="text"
-                    value={sym.sampleNumber ?? ''}
-                    onChange={e => {
-                      const val = e.target.value.slice(0, 6);
-                      onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, sampleNumber: val } : s));
-                    }}
-                    onBlur={() => setEditingSampleId(null)}
-                    onClick={e => e.stopPropagation()}
-                    style={{
-                      position: 'absolute',
-                      top: sym.label === 'Расстояние' ? '15%' : '45%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '70%',
-                      textAlign: 'center',
-                      fontSize: Math.max(10, sym.size * 0.22),
-                      fontWeight: 900,
-                      background: 'rgba(255,255,255,0.92)',
-                      border: '1px solid #333',
-                      borderRadius: 3,
-                      color: '#212121',
-                      padding: 0,
-                      outline: 'none',
-                      zIndex: 5,
-                    }}
-                  />
+              <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: sym.label === 'Расстояние' ? 'flex-end' : 'center' }}>
+                {/* Текст сверху для "Расстояние", внутри для отбора проб */}
+                {sym.label === 'Расстояние' ? (
+                  <>
+                    {/* Текст над стрелкой */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      {editingSampleId === sym.id ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          value={sym.sampleNumber ?? ''}
+                          onChange={e => {
+                            const val = e.target.value.slice(0, 8);
+                            onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, sampleNumber: val } : s));
+                          }}
+                          onBlur={() => setEditingSampleId(null)}
+                          onClick={e => e.stopPropagation()}
+                          style={{
+                            width: '80%',
+                            textAlign: 'center',
+                            fontSize: Math.max(10, sym.size * 0.2),
+                            fontWeight: 700,
+                            background: 'rgba(255,255,255,0.9)',
+                            border: '1px solid #333',
+                            borderRadius: 3,
+                            color: '#212121',
+                            padding: '0 2px',
+                            outline: 'none',
+                          }}
+                        />
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: Math.max(10, sym.size * 0.2),
+                            fontWeight: 700,
+                            color: '#212121',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            whiteSpace: 'nowrap',
+                            background: 'rgba(255,255,255,0.7)',
+                            borderRadius: 2,
+                            padding: '0 2px',
+                          }}
+                          onDoubleClick={e => { e.stopPropagation(); setEditingSampleId(sym.id); }}
+                          title="Двойной клик — изменить"
+                        >
+                          {sym.sampleNumber || '—'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Стрелка снизу */}
+                    <img
+                      src={sym.imageUrl}
+                      alt={sym.label}
+                      style={{ width: '100%', height: '40%', objectFit: 'fill', pointerEvents: 'none', display: 'block', position: 'absolute', bottom: 0 }}
+                      draggable={false}
+                    />
+                  </>
                 ) : (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: sym.label === 'Расстояние' ? '12%' : '45%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      fontSize: Math.max(10, sym.size * 0.22),
-                      fontWeight: 900,
-                      color: sym.label === 'Расстояние' ? '#212121' : '#e65100',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                      whiteSpace: 'nowrap',
-                      pointerEvents: 'auto',
-                    }}
-                    onDoubleClick={e => { e.stopPropagation(); setEditingSampleId(sym.id); }}
-                    title="Двойной клик — изменить"
-                  >
-                    {sym.sampleNumber ?? ''}
-                  </span>
+                  <>
+                    <img
+                      src={sym.imageUrl}
+                      alt={sym.label}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', display: 'block' }}
+                      draggable={false}
+                    />
+                    {editingSampleId === sym.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={sym.sampleNumber ?? ''}
+                        onChange={e => {
+                          const val = e.target.value.slice(0, 6);
+                          onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, sampleNumber: val } : s));
+                        }}
+                        onBlur={() => setEditingSampleId(null)}
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          top: '45%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '60%',
+                          textAlign: 'center',
+                          fontSize: Math.max(10, sym.size * 0.28),
+                          fontWeight: 900,
+                          background: 'rgba(255,249,196,0.95)',
+                          border: '1px solid #f57f17',
+                          borderRadius: 3,
+                          color: '#e65100',
+                          padding: 0,
+                          outline: 'none',
+                          zIndex: 5,
+                        }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '45%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          fontSize: Math.max(10, sym.size * 0.28),
+                          fontWeight: 900,
+                          color: '#e65100',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          whiteSpace: 'nowrap',
+                          pointerEvents: 'auto',
+                        }}
+                        onDoubleClick={e => { e.stopPropagation(); setEditingSampleId(sym.id); }}
+                        title="Двойной клик — изменить"
+                      >
+                        {sym.sampleNumber ?? ''}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
