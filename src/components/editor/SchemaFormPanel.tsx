@@ -64,6 +64,24 @@ const SVG_FIRE_SPREAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64
 // Направление воздушной струи: стрелка вдоль линии
 const SVG_AIRFLOW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="6" y1="26" x2="58" y2="26" stroke="#0277bd" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="38" x2="58" y2="38" stroke="#0277bd" stroke-width="2.5" stroke-linecap="round"/><polygon points="48,20 62,32 48,44" fill="#0277bd"/></svg>`;
 
+// Свежая струя воздуха: жирная красная стрелка (ГОСТ)
+const SVG_FRESH_AIR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32"><line x1="4" y1="16" x2="48" y2="16" stroke="#c62828" stroke-width="6" stroke-linecap="round"/><polygon points="44,6 64,16 44,26" fill="#c62828"/></svg>`;
+
+// Исходящая струя воздуха: жирная синяя стрелка (ГОСТ)
+const SVG_EXHAUST_AIR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32"><line x1="4" y1="16" x2="48" y2="16" stroke="#1565c0" stroke-width="6" stroke-linecap="round"/><polygon points="44,6 64,16 44,26" fill="#1565c0"/></svg>`;
+
+// Отделение в движении (в прямоугольнике) — правое направление (ГОСТ)
+const SVG_SQUAD_MOVING_RECT_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="2" y="2" width="76" height="44" rx="4" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="28" cy="24" r="16" fill="none" stroke="#1b5e20" stroke-width="2.5"/><text x="28" y="30" text-anchor="middle" font-family="Arial Black,Arial" font-size="18" font-weight="900" fill="#1b5e20">5</text><polyline points="48,16 62,24 48,32" fill="none" stroke="#1b5e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Отделение в движении (в прямоугольнике) — левое направление (ГОСТ)
+const SVG_SQUAD_MOVING_RECT_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="2" y="2" width="76" height="44" rx="4" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="52" cy="24" r="16" fill="none" stroke="#1b5e20" stroke-width="2.5"/><text x="52" y="30" text-anchor="middle" font-family="Arial Black,Arial" font-size="18" font-weight="900" fill="#1b5e20">5</text><polyline points="32,16 18,24 32,32" fill="none" stroke="#1b5e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Место обнаружения пострадавшего без признаков жизни (ГОСТ: крест в круге)
+const SVG_VICTIM_DEAD_GOST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#ffebee" stroke="#b71c1c" stroke-width="2.5"/><line x1="16" y1="16" x2="48" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/><line x1="48" y1="16" x2="16" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/></svg>`;
+
+// Место обнаружения пострадавшего с признаками жизни (ГОСТ: человек в круге)
+const SVG_VICTIM_ALIVE_GOST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff3e0" stroke="#e65100" stroke-width="2.5"/><circle cx="32" cy="20" r="7" fill="none" stroke="#e65100" stroke-width="2.5"/><line x1="32" y1="27" x2="32" y2="44" stroke="#e65100" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="34" x2="44" y2="34" stroke="#e65100" stroke-width="2.5" stroke-linecap="round"/><line x1="32" y1="44" x2="24" y2="56" stroke="#e65100" stroke-width="2.5" stroke-linecap="round"/><line x1="32" y1="44" x2="40" y2="56" stroke="#e65100" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+
 // Вентиляционная перемычка: две параллельные линии с поперечными штрихами
 const SVG_VENT_WALL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><line x1="32" y1="6" x2="32" y2="58" stroke="#37474f" stroke-width="4" stroke-linecap="round"/><line x1="22" y1="6" x2="22" y2="58" stroke="#37474f" stroke-width="4" stroke-linecap="round"/><line x1="6" y1="18" x2="22" y2="18" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="28" x2="22" y2="28" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="38" x2="22" y2="38" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="48" x2="22" y2="48" stroke="#37474f" stroke-width="2" stroke-linecap="round"/><line x1="32" y1="18" x2="58" y2="18" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/><line x1="32" y1="32" x2="58" y2="32" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/><line x1="32" y1="46" x2="58" y2="46" stroke="#546e7a" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
@@ -73,7 +91,7 @@ const SVG_VENT_DOOR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 6
 // Шлюз вентиляционный: прямоугольник с двумя линиями
 const SVG_VENT_LOCK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="14" y="14" width="36" height="36" rx="2" fill="#e0f2f1" stroke="#00695c" stroke-width="2.5"/><line x1="14" y1="32" x2="50" y2="32" stroke="#00695c" stroke-width="2"/><line x1="32" y1="14" x2="32" y2="50" stroke="#00695c" stroke-width="2"/><text x="32" y="13" text-anchor="middle" font-family="Arial" font-size="9" fill="#00695c">Ш</text></svg>`;
 
-export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
+export const LEGEND_SYMBOLS: { imageUrl: string; label: string; isSample?: boolean }[] = [
   // Существующие
   { imageUrl: svgToDataUrl(SVG_FIRE), label: 'Пожар' },
   { imageUrl: svgToDataUrl(SVG_EXPLOSION), label: 'Место взрыва' },
@@ -81,22 +99,25 @@ export const LEGEND_SYMBOLS: { imageUrl: string; label: string }[] = [
   { imageUrl: svgToDataUrl(SVG_BEACON), label: 'Считыватель системы позиционирования' },
   { imageUrl: svgToDataUrl(SVG_BUILDING), label: 'Надшахтное здание' },
   { imageUrl: svgToDataUrl(SVG_VEHICLE), label: 'Самоходное двигательное оборудование' },
-  { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD), label: 'Место обнаружения пострадавшего без признаков жизни' },
-  { imageUrl: svgToDataUrl(SVG_VICTIM_INJURED), label: 'Место обнаружения пострадавшего с признаками жизни' },
-  { imageUrl: svgToDataUrl(SVG_SQUAD), label: 'Отделение в движении' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD_GOST), label: 'Место обнаружения пострадавшего без признаков жизни' },
+  { imageUrl: svgToDataUrl(SVG_VICTIM_ALIVE_GOST), label: 'Место обнаружения пострадавшего с признаками жизни' },
+  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_RIGHT), label: 'Отделение в движении (вправо)' },
+  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_LEFT), label: 'Отделение в движении (влево)' },
   { imageUrl: svgToDataUrl(SVG_WATER), label: 'Прорыв воды, рассола' },
   // ГОСТ новые
   { imageUrl: svgToDataUrl(SVG_SQUAD_STATIC), label: 'Отделение на месте работ' },
   { imageUrl: svgToDataUrl(SVG_BASE_UNDERGROUND), label: 'Подземная горноспасательная база (ПБ)' },
   { imageUrl: svgToDataUrl(SVG_BASE_GROUND), label: 'Наземная база (НБ)' },
   { imageUrl: svgToDataUrl(SVG_SAFETY_POST), label: 'Пост безопасности' },
-  { imageUrl: svgToDataUrl(SVG_SAMPLE), label: 'Место отбора проб' },
+  { imageUrl: svgToDataUrl(SVG_SAMPLE), label: 'Место отбора проб', isSample: true },
   { imageUrl: svgToDataUrl(SVG_FIRE_SOURCE), label: 'Очаг пожара' },
   { imageUrl: svgToDataUrl(SVG_BROKEN_SUPPORT), label: 'Горная выработка с нарушенной крепью' },
   { imageUrl: svgToDataUrl(SVG_COLLAPSE_ZONE), label: 'Зона обрушения горных пород' },
   { imageUrl: svgToDataUrl(SVG_SLUDGE), label: 'Прорыв заиловочной массы и плывунов' },
   { imageUrl: svgToDataUrl(SVG_OUTBURST), label: 'Место выброса (В) или горного удара (У)' },
   { imageUrl: svgToDataUrl(SVG_FIRE_SPREAD), label: 'Распространение пожара по горным выработкам' },
+  { imageUrl: svgToDataUrl(SVG_FRESH_AIR), label: 'Свежая струя воздуха' },
+  { imageUrl: svgToDataUrl(SVG_EXHAUST_AIR), label: 'Исходящая струя воздуха' },
   { imageUrl: svgToDataUrl(SVG_AIRFLOW), label: 'Направление воздушной струи' },
   { imageUrl: svgToDataUrl(SVG_VENT_WALL), label: 'Вентиляционная перемычка' },
   { imageUrl: svgToDataUrl(SVG_VENT_DOOR), label: 'Вентиляционная дверь' },

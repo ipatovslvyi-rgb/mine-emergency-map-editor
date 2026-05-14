@@ -72,6 +72,10 @@ export interface PlacedSymbol {
   x: number;
   y: number;
   size: number;
+  rotation?: number;
+  sampleNumber?: string;
+  isSample?: boolean;
+  drawingData?: string;
 }
 
 export interface SchemaFormData {
