@@ -124,7 +124,7 @@ export const defaultFormData = (): SchemaFormData => ({
     noNo2: '0,00',
     so2_2: '0,00',
     temperature: '0,00',
-    smokeLevel: 'средняя от 5 до 10м',
+    smokeLevel: 'средняя от 5 до 10м.',
   },
   legendItems: [],
   supervisor: '',

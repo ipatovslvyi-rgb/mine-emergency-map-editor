@@ -160,18 +160,18 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false })
                 >
                   <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <InlineSvgIcon url={sym.imageUrl} size={s(sym.size * 0.6)} />
-                    {sym.isSample && (
+                    {sym.isSample && (sym.sampleNumber ?? '') !== '' && (
                       <span style={{
                         position: 'absolute',
-                        bottom: '18%',
+                        top: sym.label === 'Расстояние' ? '10%' : '45%',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        fontSize: s(sym.size * 0.6 * 0.28),
+                        fontSize: s(Math.max(8, sym.size * 0.6 * 0.22)),
                         fontWeight: 900,
-                        color: '#e65100',
+                        color: sym.label === 'Расстояние' ? '#212121' : '#e65100',
                         whiteSpace: 'nowrap',
                       }}>
-                        {sym.sampleNumber ?? '1'}
+                        {sym.sampleNumber}
                       </span>
                     )}
                   </div>

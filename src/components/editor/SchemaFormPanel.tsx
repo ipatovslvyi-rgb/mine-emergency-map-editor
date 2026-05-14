@@ -40,8 +40,8 @@ const SVG_BASE_GROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64
 // Пост безопасности: круг с флажком (ГОСТ)
 const SVG_SAFETY_POST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="38" r="14" fill="#fff" stroke="#1a237e" stroke-width="2.5"/><line x1="32" y1="10" x2="32" y2="24" stroke="#1a237e" stroke-width="2.5" stroke-linecap="round"/><polygon points="32,10 46,16 32,22" fill="#1a237e"/></svg>`;
 
-// Место отбора проб: треугольник с номером (ГОСТ)
-const SVG_SAMPLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="32,8 58,54 6,54" fill="#fff9c4" stroke="#f57f17" stroke-width="2.5" stroke-linejoin="round"/><text x="32" y="48" text-anchor="middle" font-family="Arial Black, Arial" font-size="18" font-weight="900" fill="#e65100">4</text></svg>`;
+// Место отбора проб: треугольник без цифры (ГОСТ) — цифра вводится отдельно
+const SVG_SAMPLE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="32,8 58,54 6,54" fill="#fff9c4" stroke="#f57f17" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
 
 // Очаг пожара (реалистичное пламя)
 const SVG_FIRE_SOURCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72"><path d="M32 68 C14 68 8 52 14 40 C17 33 22 30 22 22 C25 28 24 34 27 37 C28 31 30 24 34 16 C37 28 34 34 37 40 C40 34 38 28 41 22 C46 32 49 42 45 52 C48 60 36 70 32 68 Z" fill="#ef4444"/><path d="M32 68 C18 68 16 56 20 47 C22 41 26 38 26 32 C28 36 28 42 30 45 C32 39 33 31 36 25 C39 35 37 41 39 47 C41 41 40 34 43 28 C46 37 47 47 44 56 C45 62 38 70 32 68 Z" fill="#fbbf24"/><path d="M32 66 C22 66 21 57 24 51 C25 46 28 44 28 39 C29 43 30 49 32 51 C34 46 35 40 36 36 C39 43 38 50 40 54 C40 60 36 67 32 66 Z" fill="#fef08a"/><ellipse cx="32" cy="68" rx="14" ry="4" fill="#c62828" opacity="0.3"/></svg>`;
@@ -75,6 +75,9 @@ const SVG_SQUAD_MOVING_RECT_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" vie
 
 // Отделение в движении (в прямоугольнике) — левое направление (ГОСТ)
 const SVG_SQUAD_MOVING_RECT_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="2" y="2" width="76" height="44" rx="4" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="52" cy="24" r="16" fill="none" stroke="#1b5e20" stroke-width="2.5"/><text x="52" y="30" text-anchor="middle" font-family="Arial Black,Arial" font-size="18" font-weight="900" fill="#1b5e20">5</text><polyline points="32,16 18,24 32,32" fill="none" stroke="#1b5e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Расстояние: двунаправленная стрелка с полем для цифры по центру
+const SVG_DISTANCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 32"><polygon points="0,16 12,8 12,24" fill="#212121"/><line x1="12" y1="16" x2="84" y2="16" stroke="#212121" stroke-width="3" stroke-linecap="round"/><polygon points="96,16 84,8 84,24" fill="#212121"/><rect x="32" y="6" width="32" height="20" rx="3" fill="#fff" stroke="#212121" stroke-width="1.5"/><text x="48" y="20" text-anchor="middle" font-family="Arial Black,Arial" font-size="13" font-weight="900" fill="#212121">м</text></svg>`;
 
 // Место обнаружения пострадавшего без признаков жизни (ГОСТ: крест в круге)
 const SVG_VICTIM_DEAD_GOST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#ffebee" stroke="#b71c1c" stroke-width="2.5"/><line x1="16" y1="16" x2="48" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/><line x1="48" y1="16" x2="16" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/></svg>`;
@@ -122,6 +125,7 @@ export const LEGEND_SYMBOLS: { imageUrl: string; label: string; isSample?: boole
   { imageUrl: svgToDataUrl(SVG_VENT_WALL), label: 'Вентиляционная перемычка' },
   { imageUrl: svgToDataUrl(SVG_VENT_DOOR), label: 'Вентиляционная дверь' },
   { imageUrl: svgToDataUrl(SVG_VENT_LOCK), label: 'Шлюз вентиляционный' },
+  { imageUrl: svgToDataUrl(SVG_DISTANCE), label: 'Расстояние', isSample: true },
 ];
 
 interface Props {
@@ -236,7 +240,11 @@ const SchemaFormPanel: React.FC<Props> = ({ data, onChange, isDemo }) => {
           ))}
           <div>
             <label className={lbl} style={{ color: 'hsl(var(--muted-foreground))' }}>Задымлённость</label>
-            <input type="text" value={data.atmosphere.smokeLevel} onChange={e => setAtm('smokeLevel', e.target.value)} placeholder="средняя от 5 до 10м" className={inp} style={{ color: 'hsl(var(--foreground))' }} />
+            <select value={data.atmosphere.smokeLevel} onChange={e => setAtm('smokeLevel', e.target.value)} className={inp} style={{ color: 'hsl(var(--foreground))', background: 'hsl(var(--card))' }}>
+              <option value="слабая от 10м.">слабая от 10м.</option>
+              <option value="средняя от 5 до 10м.">средняя от 5 до 10м.</option>
+              <option value="сильная менее 5м.">сильная менее 5м.</option>
+            </select>
           </div>
         </Section>
 
