@@ -391,6 +391,7 @@ const SchemaCanvas: React.FC<Props> = ({
         imageUrl={imageUrl}
         placedSymbols={placedSymbols}
         activeTool={activeTool}
+        pencilWidth={pencilWidth}
         selected={selected}
         isDragging={isDragging}
         dragOver={dragOver}

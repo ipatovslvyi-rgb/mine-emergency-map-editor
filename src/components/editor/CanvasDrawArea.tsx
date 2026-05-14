@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { PlacedSymbol } from '@/types/schema';
 import Icon from '@/components/ui/icon';
 import { ActiveTool } from './CanvasToolbar';
@@ -8,6 +8,7 @@ export interface DrawStroke { points: DrawPoint[]; color: string; width: number;
 
 interface Props {
   imageUrl: string;
+  pencilWidth: number;
   placedSymbols: PlacedSymbol[];
   activeTool: ActiveTool;
   selected: string | null;
@@ -63,9 +64,12 @@ const CanvasDrawArea: React.FC<Props> = ({
   onEditImage,
   onRemoveImage,
   onPlacedChange,
+  pencilWidth,
   onSetEditingSampleId,
 }) => {
   const isDrawTool = activeTool === 'pencil' || activeTool === 'eraser';
+  const [eraserPos, setEraserPos] = useState<{ x: number; y: number } | null>(null);
+  const eraserSize = pencilWidth * 4;
 
   return (
     <div
@@ -73,8 +77,15 @@ const CanvasDrawArea: React.FC<Props> = ({
       className="flex-1 relative overflow-hidden"
       style={{
         background: imageUrl ? '#1e1e1e' : 'hsl(var(--card))',
-        cursor: isDrawTool ? (activeTool === 'pencil' ? 'crosshair' : 'cell') : isDragging ? 'grabbing' : 'default',
+        cursor: isDrawTool ? (activeTool === 'eraser' ? 'none' : 'crosshair') : isDragging ? 'grabbing' : 'default',
       }}
+      onMouseMove={e => {
+        if (activeTool === 'eraser') {
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (rect) setEraserPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        }
+      }}
+      onMouseLeave={() => setEraserPos(null)}
       onDragOver={e => { e.preventDefault(); onDragOver(); }}
       onDragLeave={onDragLeave}
       onDrop={e => {
@@ -94,7 +105,7 @@ const CanvasDrawArea: React.FC<Props> = ({
             width: '100%',
             height: '100%',
             display: 'block',
-            cursor: isDrawTool ? (activeTool === 'pencil' ? 'crosshair' : 'cell') : 'default',
+            cursor: activeTool === 'eraser' ? 'none' : isDrawTool ? 'crosshair' : 'default',
             zIndex: 1,
             pointerEvents: isDrawTool ? 'auto' : 'none',
           }}
@@ -103,9 +114,13 @@ const CanvasDrawArea: React.FC<Props> = ({
           }}
           onMouseMove={e => {
             if (isDrawTool) onMoveDraw(e.clientX, e.clientY);
+            if (activeTool === 'eraser') {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setEraserPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+            }
           }}
           onMouseUp={onEndDraw}
-          onMouseLeave={onEndDraw}
+          onMouseLeave={() => { onEndDraw(); setEraserPos(null); }}
           onTouchStart={e => {
             if (isDrawTool) { e.preventDefault(); onStartDraw(e.touches[0].clientX, e.touches[0].clientY); }
           }}
@@ -132,6 +147,25 @@ const CanvasDrawArea: React.FC<Props> = ({
           </button>
           <div className="text-xs hidden md:block" style={{ color: 'hsl(var(--muted-foreground))' }}>или перетащите PNG, JPG, SVG</div>
         </div>
+      )}
+
+      {/* Курсор-ластик */}
+      {activeTool === 'eraser' && eraserPos && (
+        <div
+          style={{
+            position: 'absolute',
+            left: eraserPos.x,
+            top: eraserPos.y,
+            width: eraserSize,
+            height: eraserSize,
+            transform: 'translate(-50%, -50%)',
+            borderRadius: '50%',
+            border: '2px solid rgba(0,0,0,0.7)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
+            pointerEvents: 'none',
+            zIndex: 100,
+          }}
+        />
       )}
 
       {/* Кнопки управления картинкой */}
