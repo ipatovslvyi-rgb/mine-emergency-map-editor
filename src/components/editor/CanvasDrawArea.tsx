@@ -197,19 +197,8 @@ const CanvasDrawArea: React.FC<Props> = ({
           {sym.isSample ? (
             <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               {sym.label === 'Расстояние' ? (
-                /* Белый блок с текстом и стрелкой — видно на любом фоне */
-                <div style={{
-                  display: 'inline-flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#fff',
-                  border: '1.5px solid #212121',
-                  borderRadius: 6,
-                  padding: '3px 8px',
-                  gap: 2,
-                  minWidth: sym.arrowWidth ?? 120,
-                }}>
+                /* Текст + стрелка, без фона, на всю ширину контейнера */
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
                   {/* Текст */}
                   {editingSampleId === sym.id ? (
                     <input
@@ -223,14 +212,15 @@ const CanvasDrawArea: React.FC<Props> = ({
                       onBlur={() => onSetEditingSampleId(null)}
                       onClick={e => e.stopPropagation()}
                       style={{
-                        width: '100%',
+                        width: '80%',
                         textAlign: 'center',
                         fontSize: Math.max(10, sym.size),
                         fontWeight: 700,
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#212121',
-                        padding: 0,
+                        background: 'rgba(255,255,255,0.75)',
+                        border: '1px solid #e53935',
+                        borderRadius: 3,
+                        color: '#e53935',
+                        padding: '0 2px',
                         outline: 'none',
                       }}
                     />
@@ -239,7 +229,8 @@ const CanvasDrawArea: React.FC<Props> = ({
                       style={{
                         fontSize: Math.max(10, sym.size),
                         fontWeight: 700,
-                        color: '#212121',
+                        color: '#e53935',
+                        textShadow: '0 0 3px #fff, 0 0 6px #fff',
                         cursor: 'pointer',
                         userSelect: 'none',
                         whiteSpace: 'nowrap',
@@ -251,11 +242,11 @@ const CanvasDrawArea: React.FC<Props> = ({
                       {sym.sampleNumber || '—'}
                     </span>
                   )}
-                  {/* Стрелка — растягивается на всю ширину блока */}
+                  {/* Стрелка — width: 100% от контейнера шириной arrowWidth */}
                   <img
                     src={sym.imageUrl}
                     alt={sym.label}
-                    style={{ width: '100%', height: Math.max(12, sym.size * 0.6), objectFit: 'fill', pointerEvents: 'none', display: 'block' }}
+                    style={{ width: '100%', height: Math.max(12, sym.size * 0.8), objectFit: 'fill', pointerEvents: 'none', display: 'block' }}
                     draggable={false}
                   />
                 </div>

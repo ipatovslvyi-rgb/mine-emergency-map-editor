@@ -77,7 +77,7 @@ const SVG_SQUAD_MOVING_RECT_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" vie
 const SVG_SQUAD_MOVING_RECT_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40"><rect x="18" y="2" width="60" height="36" fill="white" stroke="#212121" stroke-width="2.5"/><text x="48" y="27" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#212121">5</text><line x1="18" y1="20" x2="4" y2="20" stroke="#212121" stroke-width="2.5" stroke-linecap="round"/><polygon points="4,20 12,15 12,25" fill="#212121"/></svg>`;
 
 // Расстояние: двунаправленная стрелка с полем для цифры по центру
-const SVG_DISTANCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 16"><polygon points="0,8 12,2 12,14" fill="#212121"/><line x1="0" y1="8" x2="96" y2="8" stroke="#212121" stroke-width="2.5" stroke-linecap="round"/><polygon points="96,8 84,2 84,14" fill="#212121"/></svg>`;
+const SVG_DISTANCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 16" preserveAspectRatio="none"><polygon points="0,8 12,2 12,14" fill="#e53935"/><line x1="0" y1="8" x2="96" y2="8" stroke="#e53935" stroke-width="2.5" stroke-linecap="round"/><polygon points="96,8 84,2 84,14" fill="#e53935"/></svg>`;
 
 // Место обнаружения пострадавшего без признаков жизни (ГОСТ: крест в круге)
 const SVG_VICTIM_DEAD_GOST = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#ffebee" stroke="#b71c1c" stroke-width="2.5"/><line x1="16" y1="16" x2="48" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/><line x1="48" y1="16" x2="16" y2="48" stroke="#b71c1c" stroke-width="4" stroke-linecap="round"/></svg>`;
