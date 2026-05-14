@@ -158,8 +158,8 @@ const CanvasDrawArea: React.FC<Props> = ({
             position: 'absolute',
             left: `${sym.x}%`,
             top: `${sym.y}%`,
-            width: sym.isSample && sym.label === 'Расстояние' ? sym.size : sym.size,
-            height: sym.isSample && sym.label === 'Расстояние' ? Math.round(sym.size * 0.5) : sym.size,
+            width: sym.isSample && sym.label === 'Расстояние' ? (sym.arrowWidth ?? sym.size) : sym.size,
+            height: sym.isSample && sym.label === 'Расстояние' ? Math.round(sym.size * 0.9) : sym.size,
             cursor: activeTool !== 'select' ? 'default' : isDragging && selected === sym.id ? 'grabbing' : 'grab',
             zIndex: selected === sym.id ? 25 : 15,
             outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
@@ -243,11 +243,11 @@ const CanvasDrawArea: React.FC<Props> = ({
                       {sym.sampleNumber || '—'}
                     </span>
                   )}
-                  {/* Стрелка */}
+                  {/* Стрелка — ширина управляется arrowWidth независимо от size */}
                   <img
                     src={sym.imageUrl}
                     alt={sym.label}
-                    style={{ width: '100%', height: Math.max(10, Math.round(sym.size * 0.22)), objectFit: 'fill', pointerEvents: 'none', display: 'block', flexShrink: 0 }}
+                    style={{ width: sym.arrowWidth ?? sym.size, height: Math.max(10, Math.round(sym.size * 0.22)), objectFit: 'fill', pointerEvents: 'none', display: 'block', flexShrink: 0 }}
                     draggable={false}
                   />
                 </div>

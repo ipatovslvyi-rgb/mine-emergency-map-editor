@@ -27,6 +27,7 @@ interface Props {
   onRotationInputChange: (val: string) => void;
   onApplyRotation: (deg: number) => void;
   onSampleNumberChange: (val: string) => void;
+  onResizeArrow: (delta: number) => void;
   onDeleteSelected: () => void;
 }
 
@@ -50,6 +51,7 @@ const CanvasToolbar: React.FC<Props> = ({
   onRotationInputChange,
   onApplyRotation,
   onSampleNumberChange,
+  onResizeArrow,
   onDeleteSelected,
   placedSymbols,
 }) => {
@@ -169,7 +171,7 @@ const CanvasToolbar: React.FC<Props> = ({
             <>
               <div className="h-4 w-px" style={{ background: 'hsl(var(--border))' }} />
               <span style={{ color: 'hsl(var(--muted-foreground))' }}>
-                {selectedSym.label === 'Расстояние' ? 'м:' : '№:'}
+                {selectedSym.label === 'Расстояние' ? 'м:' : 'чел:'}
               </span>
               <input
                 type="text"
@@ -178,6 +180,14 @@ const CanvasToolbar: React.FC<Props> = ({
                 onChange={e => onSampleNumberChange(e.target.value.slice(0, 6))}
                 style={{ width: 44, padding: '1px 4px', fontSize: 12, borderRadius: 3, border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', color: 'hsl(var(--foreground))', textAlign: 'center' }}
               />
+              {selectedSym.label === 'Расстояние' && (
+                <>
+                  <div className="h-4 w-px" style={{ background: 'hsl(var(--border))' }} />
+                  <button onClick={() => onResizeArrow(-20)} className="px-2 py-0.5 rounded border border-border" style={{ background: 'hsl(var(--card))' }} title="Уменьшить ширину стрелки">−</button>
+                  <span style={{ color: 'hsl(var(--muted-foreground))' }}>стрелка</span>
+                  <button onClick={() => onResizeArrow(20)} className="px-2 py-0.5 rounded border border-border" style={{ background: 'hsl(var(--card))' }} title="Увеличить ширину стрелки">+</button>
+                </>
+              )}
             </>
           )}
 

@@ -28,8 +28,8 @@ const SVG_WATER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><
 
 /* ── ГОСТ-символы ── */
 
-// Отделение на месте работ: круг с цифрой 5
-const SVG_SQUAD_STATIC = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><text x="32" y="41" text-anchor="middle" font-family="Arial Black,Arial" font-size="26" font-weight="900" fill="#1b5e20">5</text></svg>`;
+// Отделение на месте работ: прямоугольник с цифрой (ГОСТ)
+const SVG_SQUAD_STATIC = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40"><rect x="2" y="2" width="60" height="36" fill="white" stroke="#212121" stroke-width="2.5"/><text x="32" y="27" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#212121">5</text></svg>`;
 
 // Подземная горноспасательная база: прямоугольник «ПБ»
 const SVG_BASE_UNDERGROUND = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="8" y="14" width="48" height="36" rx="3" fill="#fff8e1" stroke="#e65100" stroke-width="2.5"/><text x="32" y="38" text-anchor="middle" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#e65100">ПБ</text></svg>`;
@@ -70,11 +70,11 @@ const SVG_FRESH_AIR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 3
 // Исходящая струя воздуха: жирная синяя стрелка (ГОСТ)
 const SVG_EXHAUST_AIR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32"><line x1="4" y1="16" x2="48" y2="16" stroke="#1565c0" stroke-width="6" stroke-linecap="round"/><polygon points="44,6 64,16 44,26" fill="#1565c0"/></svg>`;
 
-// Отделение в движении (в прямоугольнике) — правое направление (ГОСТ)
-const SVG_SQUAD_MOVING_RECT_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="2" y="2" width="76" height="44" rx="4" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="28" cy="24" r="16" fill="none" stroke="#1b5e20" stroke-width="2.5"/><text x="28" y="30" text-anchor="middle" font-family="Arial Black,Arial" font-size="18" font-weight="900" fill="#1b5e20">5</text><polyline points="48,16 62,24 48,32" fill="none" stroke="#1b5e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Отделение в движении — прямоугольник с цифрой и стрелкой вправо (ГОСТ)
+const SVG_SQUAD_MOVING_RECT_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40"><rect x="2" y="2" width="60" height="36" fill="white" stroke="#212121" stroke-width="2.5"/><text x="32" y="27" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#212121">5</text><line x1="62" y1="20" x2="76" y2="20" stroke="#212121" stroke-width="2.5" stroke-linecap="round"/><polygon points="76,20 68,15 68,25" fill="#212121"/></svg>`;
 
-// Отделение в движении (в прямоугольнике) — левое направление (ГОСТ)
-const SVG_SQUAD_MOVING_RECT_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 48"><rect x="2" y="2" width="76" height="44" rx="4" fill="#e8f5e9" stroke="#1b5e20" stroke-width="2.5"/><circle cx="52" cy="24" r="16" fill="none" stroke="#1b5e20" stroke-width="2.5"/><text x="52" y="30" text-anchor="middle" font-family="Arial Black,Arial" font-size="18" font-weight="900" fill="#1b5e20">5</text><polyline points="32,16 18,24 32,32" fill="none" stroke="#1b5e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Отделение в движении — прямоугольник с цифрой и стрелкой влево (ГОСТ)
+const SVG_SQUAD_MOVING_RECT_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40"><rect x="18" y="2" width="60" height="36" fill="white" stroke="#212121" stroke-width="2.5"/><text x="48" y="27" text-anchor="middle" font-family="Arial Black,Arial" font-size="22" font-weight="900" fill="#212121">5</text><line x1="18" y1="20" x2="4" y2="20" stroke="#212121" stroke-width="2.5" stroke-linecap="round"/><polygon points="4,20 12,15 12,25" fill="#212121"/></svg>`;
 
 // Расстояние: двунаправленная стрелка с полем для цифры по центру
 const SVG_DISTANCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 16"><polygon points="0,8 12,2 12,14" fill="#212121"/><line x1="0" y1="8" x2="96" y2="8" stroke="#212121" stroke-width="2.5" stroke-linecap="round"/><polygon points="96,8 84,2 84,14" fill="#212121"/></svg>`;
@@ -104,11 +104,11 @@ export const LEGEND_SYMBOLS: { imageUrl: string; label: string; isSample?: boole
   { imageUrl: svgToDataUrl(SVG_VEHICLE), label: 'Самоходное двигательное оборудование' },
   { imageUrl: svgToDataUrl(SVG_VICTIM_DEAD_GOST), label: 'Место обнаружения пострадавшего без признаков жизни' },
   { imageUrl: svgToDataUrl(SVG_VICTIM_ALIVE_GOST), label: 'Место обнаружения пострадавшего с признаками жизни' },
-  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_RIGHT), label: 'Отделение в движении (вправо)' },
-  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_LEFT), label: 'Отделение в движении (влево)' },
+  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_RIGHT), label: 'Отделение в движении (вправо)', isSample: true },
+  { imageUrl: svgToDataUrl(SVG_SQUAD_MOVING_RECT_LEFT), label: 'Отделение в движении (влево)', isSample: true },
   { imageUrl: svgToDataUrl(SVG_WATER), label: 'Прорыв воды, рассола' },
   // ГОСТ новые
-  { imageUrl: svgToDataUrl(SVG_SQUAD_STATIC), label: 'Отделение на месте работ' },
+  { imageUrl: svgToDataUrl(SVG_SQUAD_STATIC), label: 'Отделение на месте работ', isSample: true },
   { imageUrl: svgToDataUrl(SVG_BASE_UNDERGROUND), label: 'Подземная горноспасательная база (ПБ)' },
   { imageUrl: svgToDataUrl(SVG_BASE_GROUND), label: 'Наземная база (НБ)' },
   { imageUrl: svgToDataUrl(SVG_SAFETY_POST), label: 'Пост безопасности' },

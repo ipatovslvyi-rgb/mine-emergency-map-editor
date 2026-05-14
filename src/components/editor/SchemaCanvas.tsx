@@ -269,7 +269,8 @@ const SchemaCanvas: React.FC<Props> = ({
       label: sym.label,
       x: 10,
       y: 10,
-      size: sym.isSample && sym.label === 'Расстояние' ? 120 : 40,
+      size: sym.isSample && sym.label === 'Расстояние' ? 40 : 40,
+      arrowWidth: sym.isSample && sym.label === 'Расстояние' ? 120 : undefined,
       rotation: 0,
       isSample: sym.isSample,
       sampleNumber: sym.isSample ? '' : undefined,
@@ -289,6 +290,14 @@ const SchemaCanvas: React.FC<Props> = ({
     onPlacedChange(placedSymbols.map(s =>
       s.id === selected ? { ...s, size: Math.max(16, Math.min(300, s.size + delta)) } : s
     ));
+  };
+
+  const resizeArrow = (delta: number) => {
+    onPlacedChange(placedSymbols.map(s => {
+      if (s.id !== selected) return s;
+      const current = s.arrowWidth ?? s.size;
+      return { ...s, arrowWidth: Math.max(40, Math.min(600, current + delta)) };
+    }));
   };
 
   const applyRotation = (deg: number) => {
@@ -342,6 +351,7 @@ const SchemaCanvas: React.FC<Props> = ({
         onRotationInputChange={setRotationInput}
         onApplyRotation={applyRotation}
         onSampleNumberChange={val => onPlacedChange(placedSymbols.map(s => s.id === selected ? { ...s, sampleNumber: val } : s))}
+        onResizeArrow={resizeArrow}
         onDeleteSelected={deleteSelected}
       />
 
