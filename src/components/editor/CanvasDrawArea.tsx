@@ -158,8 +158,8 @@ const CanvasDrawArea: React.FC<Props> = ({
             position: 'absolute',
             left: `${sym.x}%`,
             top: `${sym.y}%`,
-            width: sym.isSample && sym.label === 'Расстояние' ? (sym.arrowWidth ?? sym.size) : sym.size,
-            height: sym.isSample && sym.label === 'Расстояние' ? Math.round(sym.size * 0.9) : sym.size,
+            width: sym.isSample && sym.label === 'Расстояние' ? (sym.arrowWidth ?? 120) : sym.size,
+            height: sym.isSample && sym.label === 'Расстояние' ? Math.max(40, sym.size * 2.5) : sym.size,
             cursor: activeTool !== 'select' ? 'default' : isDragging && selected === sym.id ? 'grabbing' : 'grab',
             zIndex: selected === sym.id ? 25 : 15,
             outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
@@ -197,8 +197,19 @@ const CanvasDrawArea: React.FC<Props> = ({
           {sym.isSample ? (
             <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               {sym.label === 'Расстояние' ? (
-                /* Текст сверху + стрелка снизу, пропорционально sym.size */
-                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                /* Белый блок с текстом и стрелкой — видно на любом фоне */
+                <div style={{
+                  display: 'inline-flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#fff',
+                  border: '1.5px solid #212121',
+                  borderRadius: 6,
+                  padding: '3px 8px',
+                  gap: 2,
+                  minWidth: sym.arrowWidth ?? 120,
+                }}>
                   {/* Текст */}
                   {editingSampleId === sym.id ? (
                     <input
@@ -212,30 +223,27 @@ const CanvasDrawArea: React.FC<Props> = ({
                       onBlur={() => onSetEditingSampleId(null)}
                       onClick={e => e.stopPropagation()}
                       style={{
-                        width: '90%',
+                        width: '100%',
                         textAlign: 'center',
-                        fontSize: Math.max(9, Math.round(sym.size * 0.22)),
+                        fontSize: Math.max(10, sym.size),
                         fontWeight: 700,
-                        background: 'rgba(255,255,255,0.95)',
-                        border: '1px solid #333',
-                        borderRadius: 3,
+                        background: 'transparent',
+                        border: 'none',
                         color: '#212121',
-                        padding: '0 2px',
+                        padding: 0,
                         outline: 'none',
-                        flexShrink: 0,
                       }}
                     />
                   ) : (
                     <span
                       style={{
-                        fontSize: Math.max(9, Math.round(sym.size * 0.22)),
+                        fontSize: Math.max(10, sym.size),
                         fontWeight: 700,
                         color: '#212121',
                         cursor: 'pointer',
                         userSelect: 'none',
                         whiteSpace: 'nowrap',
                         lineHeight: 1,
-                        flexShrink: 0,
                       }}
                       onDoubleClick={e => { e.stopPropagation(); onSetEditingSampleId(sym.id); }}
                       title="Двойной клик — изменить"
@@ -243,11 +251,11 @@ const CanvasDrawArea: React.FC<Props> = ({
                       {sym.sampleNumber || '—'}
                     </span>
                   )}
-                  {/* Стрелка — ширина управляется arrowWidth независимо от size */}
+                  {/* Стрелка — растягивается на всю ширину блока */}
                   <img
                     src={sym.imageUrl}
                     alt={sym.label}
-                    style={{ width: sym.arrowWidth ?? sym.size, height: Math.max(10, Math.round(sym.size * 0.22)), objectFit: 'fill', pointerEvents: 'none', display: 'block', flexShrink: 0 }}
+                    style={{ width: '100%', height: Math.max(12, sym.size * 0.6), objectFit: 'fill', pointerEvents: 'none', display: 'block' }}
                     draggable={false}
                   />
                 </div>
