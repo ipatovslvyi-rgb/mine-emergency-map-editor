@@ -270,7 +270,7 @@ const SchemaCanvas: React.FC<Props> = ({
       label: sym.label,
       x: 10,
       y: 10,
-      size: sym.isSample && sym.label === 'Расстояние' ? 80 : 40,
+      size: sym.isSample && sym.label === 'Расстояние' ? 120 : 40,
       rotation: 0,
       isSample: sym.isSample,
       sampleNumber: sym.isSample ? '' : undefined,
@@ -588,8 +588,8 @@ const SchemaCanvas: React.FC<Props> = ({
               position: 'absolute',
               left: `${sym.x}%`,
               top: `${sym.y}%`,
-              width: sym.isSample && sym.label === 'Расстояние' ? sym.size * 2 : sym.size,
-              height: sym.isSample && sym.label === 'Расстояние' ? 40 : sym.size,
+              width: sym.isSample && sym.label === 'Расстояние' ? sym.size : sym.size,
+              height: sym.isSample && sym.label === 'Расстояние' ? Math.round(sym.size * 0.5) : sym.size,
               cursor: activeTool !== 'select' ? 'default' : isDragging && selected === sym.id ? 'grabbing' : 'grab',
               zIndex: selected === sym.id ? 25 : 15,
               outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
@@ -625,64 +625,62 @@ const SchemaCanvas: React.FC<Props> = ({
             }}
           >
             {sym.isSample ? (
-              <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: sym.label === 'Расстояние' ? 'flex-end' : 'center' }}>
-                {/* Текст сверху для "Расстояние", внутри для отбора проб */}
+              <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 {sym.label === 'Расстояние' ? (
-                  <>
-                    {/* Текст над стрелкой */}
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      {editingSampleId === sym.id ? (
-                        <input
-                          autoFocus
-                          type="text"
-                          value={sym.sampleNumber ?? ''}
-                          onChange={e => {
-                            const val = e.target.value.slice(0, 8);
-                            onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, sampleNumber: val } : s));
-                          }}
-                          onBlur={() => setEditingSampleId(null)}
-                          onClick={e => e.stopPropagation()}
-                          style={{
-                            width: '80%',
-                            textAlign: 'center',
-                            fontSize: Math.max(10, sym.size * 0.2),
-                            fontWeight: 700,
-                            background: 'rgba(255,255,255,0.9)',
-                            border: '1px solid #333',
-                            borderRadius: 3,
-                            color: '#212121',
-                            padding: '0 2px',
-                            outline: 'none',
-                          }}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: Math.max(10, sym.size * 0.2),
-                            fontWeight: 700,
-                            color: '#212121',
-                            cursor: 'pointer',
-                            userSelect: 'none',
-                            whiteSpace: 'nowrap',
-                            background: 'rgba(255,255,255,0.7)',
-                            borderRadius: 2,
-                            padding: '0 2px',
-                          }}
-                          onDoubleClick={e => { e.stopPropagation(); setEditingSampleId(sym.id); }}
-                          title="Двойной клик — изменить"
-                        >
-                          {sym.sampleNumber || '—'}
-                        </span>
-                      )}
-                    </div>
-                    {/* Стрелка снизу */}
+                  /* Текст сверху + стрелка снизу, пропорционально sym.size */
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                    {/* Текст */}
+                    {editingSampleId === sym.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={sym.sampleNumber ?? ''}
+                        onChange={e => {
+                          const val = e.target.value.slice(0, 8);
+                          onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, sampleNumber: val } : s));
+                        }}
+                        onBlur={() => setEditingSampleId(null)}
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          width: '90%',
+                          textAlign: 'center',
+                          fontSize: Math.max(9, Math.round(sym.size * 0.22)),
+                          fontWeight: 700,
+                          background: 'rgba(255,255,255,0.95)',
+                          border: '1px solid #333',
+                          borderRadius: 3,
+                          color: '#212121',
+                          padding: '0 2px',
+                          outline: 'none',
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: Math.max(9, Math.round(sym.size * 0.22)),
+                          fontWeight: 700,
+                          color: '#212121',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          whiteSpace: 'nowrap',
+                          lineHeight: 1,
+                          flexShrink: 0,
+                        }}
+                        onDoubleClick={e => { e.stopPropagation(); setEditingSampleId(sym.id); }}
+                        title="Двойной клик — изменить"
+                      >
+                        {sym.sampleNumber || '—'}
+                      </span>
+                    )}
+                    {/* Стрелка */}
                     <img
                       src={sym.imageUrl}
                       alt={sym.label}
-                      style={{ width: '100%', height: '40%', objectFit: 'fill', pointerEvents: 'none', display: 'block', position: 'absolute', bottom: 0 }}
+                      style={{ width: '100%', height: Math.max(10, Math.round(sym.size * 0.22)), objectFit: 'fill', pointerEvents: 'none', display: 'block', flexShrink: 0 }}
                       draggable={false}
                     />
-                  </>
+                  </div>
                 ) : (
                   <>
                     <img
