@@ -28,6 +28,7 @@ interface Props {
   onApplyRotation: (deg: number) => void;
   onSampleNumberChange: (val: string) => void;
   onResizeArrow: (delta: number) => void;
+  onTextColorChange: (color: string) => void;
   onDeleteSelected: () => void;
 }
 
@@ -52,6 +53,7 @@ const CanvasToolbar: React.FC<Props> = ({
   onApplyRotation,
   onSampleNumberChange,
   onResizeArrow,
+  onTextColorChange,
   onDeleteSelected,
   placedSymbols,
 }) => {
@@ -167,6 +169,20 @@ const CanvasToolbar: React.FC<Props> = ({
           />
           <span style={{ color: 'hsl(var(--muted-foreground))' }}>°</span>
 
+          {selectedSym.isTextBlock && (
+            <>
+              <div className="h-4 w-px" style={{ background: 'hsl(var(--border))' }} />
+              <span style={{ color: 'hsl(var(--muted-foreground))' }}>цвет:</span>
+              <input
+                type="color"
+                value={selectedSym.textColor ?? '#212121'}
+                onChange={e => onTextColorChange(e.target.value)}
+                onClick={e => e.stopPropagation()}
+                style={{ width: 28, height: 22, padding: 1, border: '1px solid hsl(var(--border))', borderRadius: 3, cursor: 'pointer', background: 'none' }}
+                title="Цвет текста"
+              />
+            </>
+          )}
           {selectedSym.isSample && (
             <>
               <div className="h-4 w-px" style={{ background: 'hsl(var(--border))' }} />

@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from '@/components/ui/icon';
 
 interface SymbolEntry {
   imageUrl: string;
@@ -10,9 +11,10 @@ interface Props {
   legendSymbols: SymbolEntry[];
   isMobile: boolean;
   onAddSymbol: (sym: SymbolEntry) => void;
+  onAddTextBlock: () => void;
 }
 
-const CanvasSymbolsPalette: React.FC<Props> = ({ legendSymbols, isMobile, onAddSymbol }) => (
+const CanvasSymbolsPalette: React.FC<Props> = ({ legendSymbols, isMobile, onAddSymbol, onAddTextBlock }) => (
   <div className="flex-shrink-0 border-b border-border" style={{ background: 'hsl(var(--card))', padding: isMobile ? '6px 8px' : '8px' }}>
     <div className="text-xs mb-1.5 font-medium text-center" style={{ color: 'hsl(var(--muted-foreground))' }}>
       {isMobile ? 'Нажмите символ:' : 'Нажмите на символ — он появится на схеме:'}
@@ -22,6 +24,21 @@ const CanvasSymbolsPalette: React.FC<Props> = ({ legendSymbols, isMobile, onAddS
       gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(44px, 1fr))' : 'repeat(auto-fill, minmax(52px, 1fr))',
       gap: 6,
     }}>
+      {/* Кнопка текстового блока */}
+      <button
+        title="Текстовый блок"
+        onClick={onAddTextBlock}
+        className="flex flex-col items-center justify-center rounded transition-all hover:border-primary"
+        style={{ border: '1px solid hsl(var(--primary))', background: 'hsl(var(--primary) / 0.07)', padding: isMobile ? '6px' : '4px', gap: 2, minHeight: isMobile ? 44 : 'auto' }}
+      >
+        <Icon name="Type" size={isMobile ? 22 : 24} style={{ color: 'hsl(var(--primary))' }} />
+        {!isMobile && (
+          <span style={{ fontSize: 8, color: 'hsl(var(--primary))', width: '100%', textAlign: 'center', fontWeight: 600 }}>
+            Текст
+          </span>
+        )}
+      </button>
+
       {legendSymbols.map(sym => (
         <button
           key={sym.imageUrl + sym.label}

@@ -8,7 +8,7 @@ const SettingsPage: React.FC = () => {
     colorScheme, setColorScheme, paperSize, setPaperSize, orientation, setOrientation,
   } = useSchemaStore();
 
-  const PAPER_SIZES = ['A4', 'A3', 'A2', 'A1'];
+  const PAPER_SIZES = ['A0', 'A1', 'A2', 'A3', 'A4'];
   const COLOR_SCHEMES = [
     { id: 'dark', label: 'Тёмная', desc: 'Стандарт для ночных смен' },
     { id: 'light', label: 'Светлая', desc: 'Для печати и дневного использования' },

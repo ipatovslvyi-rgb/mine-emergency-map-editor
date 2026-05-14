@@ -311,6 +311,56 @@ const CanvasDrawArea: React.FC<Props> = ({
                 </>
               )}
             </div>
+          ) : sym.isTextBlock ? (
+            /* Текстовый блок — редактируемый по двойному клику */
+            editingSampleId === sym.id ? (
+              <textarea
+                autoFocus
+                value={sym.textContent ?? ''}
+                onChange={e => onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, textContent: e.target.value } : s))}
+                onBlur={() => onSetEditingSampleId(null)}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  fontSize: sym.size,
+                  fontWeight: 600,
+                  color: sym.textColor ?? '#212121',
+                  background: 'rgba(255,255,255,0.92)',
+                  border: '1px solid hsl(var(--primary))',
+                  borderRadius: 4,
+                  padding: '4px 6px',
+                  resize: 'none',
+                  outline: 'none',
+                  lineHeight: 1.4,
+                  fontFamily: 'Arial, sans-serif',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  fontSize: sym.size,
+                  fontWeight: 600,
+                  color: sym.textColor ?? '#212121',
+                  textShadow: '0 0 4px #fff, 0 0 8px #fff',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.4,
+                  fontFamily: 'Arial, sans-serif',
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  padding: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                }}
+                onDoubleClick={e => { e.stopPropagation(); onSetEditingSampleId(sym.id); }}
+                title="Двойной клик — редактировать"
+              >
+                {sym.textContent || 'Текст'}
+              </div>
+            )
           ) : (
             <img
               src={sym.imageUrl}

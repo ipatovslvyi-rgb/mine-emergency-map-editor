@@ -77,6 +77,9 @@ export interface PlacedSymbol {
   isSample?: boolean;
   drawingData?: string;
   arrowWidth?: number;
+  isTextBlock?: boolean;
+  textContent?: string;
+  textColor?: string;
 }
 
 export interface SchemaFormData {

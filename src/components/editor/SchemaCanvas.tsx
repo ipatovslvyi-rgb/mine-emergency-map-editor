@@ -114,8 +114,8 @@ const SchemaCanvas: React.FC<Props> = ({
     strokesRef.current.forEach(stroke => {
       if (stroke.points.length < 2) return;
       ctx.save();
-      ctx.globalCompositeOperation = stroke.eraser ? 'destination-out' : 'source-over';
-      ctx.strokeStyle = stroke.eraser ? 'rgba(0,0,0,1)' : stroke.color;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = stroke.eraser ? '#ffffff' : stroke.color;
       ctx.lineWidth = stroke.width;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -160,11 +160,10 @@ const SchemaCanvas: React.FC<Props> = ({
     if (pts.length < 2) return;
 
     ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
     if (activeTool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.strokeStyle = '#ffffff';
     } else {
-      ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = pencilColor;
     }
     ctx.lineWidth = activeTool === 'eraser' ? pencilWidth * 4 : pencilWidth;
@@ -253,6 +252,21 @@ const SchemaCanvas: React.FC<Props> = ({
     };
   }, [activeTool]);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (placedRef.current.find(s => s.id === selected)) {
+          onPlacedRef.current(placedRef.current.filter(s => s.id !== selected));
+          setSelected(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selected]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -278,6 +292,22 @@ const SchemaCanvas: React.FC<Props> = ({
     if (!legendItems.some(l => l.imageUrl === sym.imageUrl)) {
       onLegendAdd({ imageUrl: sym.imageUrl, label: sym.label });
     }
+  };
+
+  const addTextBlock = () => {
+    const id = Date.now().toString();
+    onPlacedChange([...placedSymbols, {
+      id,
+      imageUrl: '',
+      label: 'Текст',
+      x: 20,
+      y: 20,
+      size: 16,
+      rotation: 0,
+      isTextBlock: true,
+      textContent: 'Текст',
+      textColor: '#212121',
+    }]);
   };
 
   const deleteSelected = () => {
@@ -328,6 +358,7 @@ const SchemaCanvas: React.FC<Props> = ({
         legendSymbols={legendSymbols}
         isMobile={isMobile}
         onAddSymbol={addSymbol}
+        onAddTextBlock={addTextBlock}
       />
 
       <CanvasToolbar
@@ -352,6 +383,7 @@ const SchemaCanvas: React.FC<Props> = ({
         onApplyRotation={applyRotation}
         onSampleNumberChange={val => onPlacedChange(placedSymbols.map(s => s.id === selected ? { ...s, sampleNumber: val } : s))}
         onResizeArrow={resizeArrow}
+        onTextColorChange={color => onPlacedChange(placedSymbols.map(s => s.id === selected ? { ...s, textColor: color } : s))}
         onDeleteSelected={deleteSelected}
       />
 
