@@ -158,11 +158,12 @@ const CanvasDrawArea: React.FC<Props> = ({
             position: 'absolute',
             left: `${sym.x}%`,
             top: `${sym.y}%`,
-            width: sym.isSample && sym.label === 'Расстояние' ? (sym.arrowWidth ?? 120) : sym.size,
-            height: sym.isSample && sym.label === 'Расстояние' ? Math.max(40, sym.size * 2.5) : sym.size,
+            width: sym.isTextBlock ? 'auto' : sym.isSample && sym.label === 'Расстояние' ? (sym.arrowWidth ?? 120) : sym.size,
+            height: sym.isTextBlock ? 'auto' : sym.isSample && sym.label === 'Расстояние' ? Math.max(40, sym.size * 2.5) : sym.size,
+            minWidth: sym.isTextBlock ? 40 : undefined,
             cursor: activeTool !== 'select' ? 'default' : isDragging && selected === sym.id ? 'grabbing' : 'grab',
             zIndex: selected === sym.id ? 25 : 15,
-            outline: selected === sym.id ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+            outline: activeTool === 'eraser' ? 'none' : selected === sym.id && !sym.isTextBlock ? '2px solid hsl(var(--primary))' : selected === sym.id && sym.isTextBlock ? '1px dashed hsl(var(--primary))' : 'none',
             borderRadius: 4,
             boxSizing: 'border-box',
             transform: `translate(-50%, -50%) rotate(${sym.rotation ?? 0}deg)`,
@@ -312,54 +313,51 @@ const CanvasDrawArea: React.FC<Props> = ({
               )}
             </div>
           ) : sym.isTextBlock ? (
-            /* Текстовый блок — редактируемый по двойному клику */
+            /* Текстовый блок — горизонтальный, редактируется по двойному клику */
             editingSampleId === sym.id ? (
-              <textarea
+              <input
                 autoFocus
+                type="text"
                 value={sym.textContent ?? ''}
                 onChange={e => onPlacedChange(placedSymbols.map(s => s.id === sym.id ? { ...s, textContent: e.target.value } : s))}
                 onBlur={() => onSetEditingSampleId(null)}
+                onKeyDown={e => { if (e.key === 'Enter') onSetEditingSampleId(null); e.stopPropagation(); }}
                 onClick={e => e.stopPropagation()}
                 style={{
-                  width: '100%',
-                  height: '100%',
                   fontSize: sym.size,
                   fontWeight: 600,
                   color: sym.textColor ?? '#212121',
-                  background: 'rgba(255,255,255,0.92)',
+                  background: 'rgba(255,255,255,0.95)',
                   border: '1px solid hsl(var(--primary))',
-                  borderRadius: 4,
-                  padding: '4px 6px',
-                  resize: 'none',
+                  borderRadius: 3,
+                  padding: '2px 6px',
                   outline: 'none',
-                  lineHeight: 1.4,
                   fontFamily: 'Arial, sans-serif',
+                  whiteSpace: 'nowrap',
+                  minWidth: 40,
+                  width: 'auto',
                 }}
               />
             ) : (
-              <div
+              <span
                 style={{
-                  width: '100%',
-                  height: '100%',
                   fontSize: sym.size,
                   fontWeight: 600,
                   color: sym.textColor ?? '#212121',
                   textShadow: '0 0 4px #fff, 0 0 8px #fff',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  lineHeight: 1.4,
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.3,
                   fontFamily: 'Arial, sans-serif',
                   cursor: 'grab',
                   userSelect: 'none',
                   padding: '2px 4px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
+                  display: 'inline-block',
                 }}
                 onDoubleClick={e => { e.stopPropagation(); onSetEditingSampleId(sym.id); }}
                 title="Двойной клик — редактировать"
               >
                 {sym.textContent || 'Текст'}
-              </div>
+              </span>
             )
           ) : (
             <img
