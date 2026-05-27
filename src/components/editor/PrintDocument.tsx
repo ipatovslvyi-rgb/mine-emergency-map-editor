@@ -1,33 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { SchemaFormData } from '@/types/schema';
 
 const InlineSvgIcon: React.FC<{ url: string; size: number }> = ({ url, size }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    try {
-      let svgStr = '';
-      if (url.startsWith('data:image/svg+xml;utf8,')) {
-        svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
-      } else if (url.startsWith('data:image/svg+xml;base64,')) {
-        svgStr = atob(url.slice('data:image/svg+xml;base64,'.length));
-      }
-      if (svgStr) {
-        ref.current.innerHTML = svgStr;
-        const svg = ref.current.querySelector('svg');
-        if (svg) {
-          svg.setAttribute('width', String(size));
-          svg.setAttribute('height', String(size));
-          svg.style.display = 'block';
-          svg.style.flexShrink = '0';
-        }
-      }
-    } catch (_) { /* ignore */ }
-  }, [url, size]);
   if (!url.startsWith('data:image/svg+xml')) {
     return <img src={url} width={size} height={size} style={{ objectFit: 'contain', flexShrink: 0 }} />;
   }
-  return <div ref={ref} style={{ width: size, height: size, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} />;
+  try {
+    let svgStr = '';
+    if (url.startsWith('data:image/svg+xml;utf8,')) {
+      svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+    } else if (url.startsWith('data:image/svg+xml;base64,')) {
+      svgStr = atob(url.slice('data:image/svg+xml;base64,'.length));
+    }
+    if (svgStr) {
+      const sized = svgStr.replace(/<svg/, `<svg width="${size}" height="${size}" style="display:block;flex-shrink:0"`);
+      return <div style={{ width: size, height: size, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} dangerouslySetInnerHTML={{ __html: sized }} />;
+    }
+  } catch (_) { /* ignore */ }
+  return <div style={{ width: size, height: size, flexShrink: 0 }} />;
 };
 
 interface Props {
