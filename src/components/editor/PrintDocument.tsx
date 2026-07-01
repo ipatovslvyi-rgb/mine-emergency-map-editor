@@ -1,9 +1,11 @@
 import React from 'react';
 import { SchemaFormData } from '@/types/schema';
 
-const InlineSvgIcon: React.FC<{ url: string; size: number }> = ({ url, size }) => {
+const InlineSvgIcon: React.FC<{ url: string; size: number; wide?: number }> = ({ url, size, wide }) => {
+  const w = wide ?? size;
+  const h = size;
   if (!url.startsWith('data:image/svg+xml')) {
-    return <img src={url} width={size} height={size} style={{ objectFit: 'contain', flexShrink: 0 }} />;
+    return <img src={url} width={w} height={h} style={{ objectFit: 'fill', flexShrink: 0, display: 'block' }} />;
   }
   try {
     let svgStr = '';
@@ -13,11 +15,14 @@ const InlineSvgIcon: React.FC<{ url: string; size: number }> = ({ url, size }) =
       svgStr = atob(url.slice('data:image/svg+xml;base64,'.length));
     }
     if (svgStr) {
-      const sized = svgStr.replace(/<svg/, `<svg width="${size}" height="${size}" style="display:block;flex-shrink:0"`);
-      return <div style={{ width: size, height: size, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} dangerouslySetInnerHTML={{ __html: sized }} />;
+      const sized = svgStr.replace(/<svg([^>]*)>/, (_m, attrs) => {
+        const cleaned = attrs.replace(/\s*(width|height|style)="[^"]*"/g, '');
+        return `<svg${cleaned} width="${w}" height="${h}" style="display:block;flex-shrink:0">`;
+      });
+      return <div style={{ width: w, height: h, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: sized }} />;
     }
   } catch (_) { /* ignore */ }
-  return <div style={{ width: size, height: size, flexShrink: 0 }} />;
+  return <div style={{ width: w, height: h, flexShrink: 0 }} />;
 };
 
 interface Props {
@@ -136,37 +141,57 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false })
           {data.schemaImageUrl ? (
             <>
               <img src={data.schemaImageUrl} alt="Схема" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-              {(data.placedSymbols ?? []).map(sym => (
-                <div
-                  key={sym.id}
-                  style={{
-                    position: 'absolute',
-                    left: `${sym.x}%`,
-                    top: `${sym.y}%`,
-                    width: s(sym.size * 0.6),
-                    height: s(sym.size * 0.6),
-                    transform: `translate(-50%, -50%) rotate(${sym.rotation ?? 0}deg)`,
-                  }}
-                >
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <InlineSvgIcon url={sym.imageUrl} size={s(sym.size * 0.6)} />
-                    {sym.isSample && (sym.sampleNumber ?? '') !== '' && (
+              {(data.placedSymbols ?? []).map(sym => {
+                const isDistance = sym.isSample && sym.label === 'Расстояние';
+                const symW = isDistance ? s((sym.arrowWidth ?? 120) * 0.6) : s(sym.size * 0.6);
+                const symH = isDistance ? s(Math.max(8, sym.size * 0.6 * 0.8)) : s(sym.size * 0.6);
+                return (
+                  <div
+                    key={sym.id}
+                    style={{
+                      position: 'absolute',
+                      left: `${sym.x}%`,
+                      top: `${sym.y}%`,
+                      width: symW,
+                      height: isDistance ? s(Math.max(24, sym.size * 0.6 * 2.5)) : symH,
+                      transform: `translate(-50%, -50%) rotate(${sym.rotation ?? 0}deg)`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {isDistance && (sym.sampleNumber ?? '') !== '' && (
+                      <span style={{
+                        fontSize: s(Math.max(8, sym.size * 0.6 * 0.22)),
+                        fontWeight: 900,
+                        color: '#212121',
+                        whiteSpace: 'nowrap',
+                        lineHeight: 1,
+                      }}>
+                        {sym.sampleNumber}
+                      </span>
+                    )}
+                    <div style={{ width: symW, height: symH, position: 'relative' }}>
+                      <InlineSvgIcon url={sym.imageUrl} size={symH} wide={isDistance ? symW : undefined} />
+                    </div>
+                    {!isDistance && sym.isSample && (sym.sampleNumber ?? '') !== '' && (
                       <span style={{
                         position: 'absolute',
-                        top: sym.label === 'Расстояние' ? '10%' : '45%',
+                        top: '45%',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         fontSize: s(Math.max(8, sym.size * 0.6 * 0.22)),
                         fontWeight: 900,
-                        color: sym.label === 'Расстояние' ? '#212121' : '#e65100',
+                        color: '#e65100',
                         whiteSpace: 'nowrap',
                       }}>
                         {sym.sampleNumber}
                       </span>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </>
           ) : (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -180,12 +205,16 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false })
           <div style={{ fontWeight: 700, textDecoration: 'underline', textAlign: 'center', fontSize: fs, marginBottom: s(4) }}>
             Условные обозначения:
           </div>
-          {allLegendItems.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: s(3), borderBottom: `${s(1)}px solid #e2e8f0`, padding: `${s(2)}px 0`, fontSize: s(8) }}>
-              {item.imageUrl && <InlineSvgIcon url={item.imageUrl} size={s(16)} />}
-              <span style={{ lineHeight: 1.2 }}>{item.label || '\u00A0'}</span>
-            </div>
-          ))}
+          {allLegendItems.map((item, i) => {
+            const isWide = item.imageUrl?.includes('preserveAspectRatio') ||
+              ['Расстояние','Свежая струя','Исходящая струя','Направление воздушной'].some(k => item.label?.startsWith(k));
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: s(3), borderBottom: `${s(1)}px solid #e2e8f0`, padding: `${s(2)}px 0`, fontSize: s(8) }}>
+                {item.imageUrl && <InlineSvgIcon url={item.imageUrl} size={s(10)} wide={isWide ? s(32) : s(16)} />}
+                <span style={{ lineHeight: 1.2, flex: 1 }}>{item.label || '\u00A0'}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

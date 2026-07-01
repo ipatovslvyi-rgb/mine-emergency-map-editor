@@ -300,12 +300,43 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
 
       // Символы поверх схемы
       for (const sym of (data.placedSymbols ?? [])) {
-        const symImg = await loadImage(sym.imageUrl);
+        const isDistance = sym.isSample && sym.label === 'Расстояние';
+        const symW = isDistance ? sc((sym.arrowWidth ?? 120) * 0.6) : sc(sym.size * 0.6);
+        const symH = isDistance ? sc(Math.max(8, sym.size * 0.6 * 0.8)) : sc(sym.size * 0.6);
+        const symImg = await loadImage(sym.imageUrl, symW, symH);
         if (symImg) {
-          const sz = sc(sym.size * 0.6);
-          const sx = schemaAreaX + (sym.x / 100) * schemaAreaW - sz / 2;
-          const sy = schemaAreaY + (sym.y / 100) * schemaAreaH - sz / 2;
-          ctx.drawImage(symImg, sx, sy, sz, sz);
+          const cx = schemaAreaX + (sym.x / 100) * schemaAreaW;
+          const cy = schemaAreaY + (sym.y / 100) * schemaAreaH;
+          if (isDistance) {
+            const totalH = sc(Math.max(24, sym.size * 0.6 * 2.5));
+            const rotation = ((sym.rotation ?? 0) * Math.PI) / 180;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotation);
+            if ((sym.sampleNumber ?? '') !== '') {
+              ctx.font = `900 ${sc(Math.max(8, sym.size * 0.6 * 0.22))}px Arial`;
+              ctx.fillStyle = '#212121';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'alphabetic';
+              ctx.fillText(sym.sampleNumber!, 0, -totalH / 2 + sc(10));
+            }
+            ctx.drawImage(symImg, -symW / 2, -symH / 2, symW, symH);
+            ctx.restore();
+          } else {
+            const rotation = ((sym.rotation ?? 0) * Math.PI) / 180;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotation);
+            ctx.drawImage(symImg, -symW / 2, -symH / 2, symW, symH);
+            if (sym.isSample && (sym.sampleNumber ?? '') !== '') {
+              ctx.font = `900 ${sc(Math.max(8, sym.size * 0.6 * 0.22))}px Arial`;
+              ctx.fillStyle = '#e65100';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(sym.sampleNumber!, 0, 0);
+            }
+            ctx.restore();
+          }
         }
       }
     }
