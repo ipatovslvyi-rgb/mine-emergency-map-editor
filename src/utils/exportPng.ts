@@ -13,7 +13,7 @@ const PAD_RIGHT = 0.0337 * W * SCALE;
 
 function sc(v: number) { return v * SCALE; }
 
-async function loadImage(url: string): Promise<HTMLImageElement | null> {
+async function loadImage(url: string, targetW?: number, targetH?: number): Promise<HTMLImageElement | null> {
   if (!url) return null;
   return new Promise(resolve => {
     const img = new Image();
@@ -21,7 +21,13 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     if (url.startsWith('data:image/svg+xml;utf8,')) {
-      const svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+      let svgStr = decodeURIComponent(url.slice('data:image/svg+xml;utf8,'.length));
+      if (targetW && targetH) {
+        svgStr = svgStr.replace(/<svg([^>]*)>/, (_m, attrs) => {
+          const a = attrs.replace(/\s*(width|height)="[^"]*"/g, '');
+          return `<svg${a} width="${targetW}" height="${targetH}">`;
+        });
+      }
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
     } else if (url.startsWith('data:')) {
       img.src = url;
@@ -332,17 +338,21 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
   for (const item of allLegend) {
     if (legY > schemaAreaY + schemaAreaH - sc(14)) break;
 
+    const iconH = sc(14);
+    const iconW = sc(32); // широкий слот для горизонтальных иконок (стрелки)
+    const iconY = legY - sc(fs);
+
     if (item.imageUrl) {
-      const symImg = await loadImage(item.imageUrl);
-      if (symImg) ctx.drawImage(symImg, legX, legY - sc(fs), sc(14), sc(14));
+      const symImg = await loadImage(item.imageUrl, iconW, iconH);
+      if (symImg) ctx.drawImage(symImg, legX, iconY, iconW, iconH);
     }
     ctx.font = font(7.5);
     ctx.fillStyle = '#000';
-    const lines = wrapText(ctx, item.label || '', labelMaxW);
+    const lines = wrapText(ctx, item.label || '', labelMaxW - sc(16));
     let textY = legY;
     for (const line of lines) {
       if (textY > schemaAreaY + schemaAreaH - sc(4)) break;
-      ctx.fillText(line, legX + sc(17), textY);
+      ctx.fillText(line, legX + iconW + sc(3), textY);
       textY += sc(8.5);
     }
     const blockH = Math.max(sc(fs + 4), lines.length * sc(8.5) + sc(2));
