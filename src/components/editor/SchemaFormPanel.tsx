@@ -96,8 +96,8 @@ const SVG_VENT_LOCK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 6
 
 export const LEGEND_SYMBOLS: { imageUrl: string; label: string; isSample?: boolean }[] = [
   // Существующие
-  { imageUrl: svgToDataUrl(SVG_FIRE), label: 'Пожар' },
-  { imageUrl: svgToDataUrl(SVG_EXPLOSION), label: 'Место взрыва' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/22018402-c124-46a6-ab25-0000c581f548.png', label: 'Пожар' },
+  { imageUrl: 'https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/bucket/6985d0b2-a6cd-450a-83b1-ff4c675a4d47.png', label: 'Место взрыва' },
   { imageUrl: svgToDataUrl(SVG_GAS), label: 'Газовыделение' },
   { imageUrl: svgToDataUrl(SVG_BEACON), label: 'Считыватель системы позиционирования' },
   { imageUrl: svgToDataUrl(SVG_BUILDING), label: 'Надшахтное здание' },
