@@ -5,7 +5,11 @@ const InlineSvgIcon: React.FC<{ url: string; size: number; wide?: number }> = ({
   const w = wide ?? size;
   const h = size;
   if (!url.startsWith('data:image/svg+xml')) {
-    return <img src={url} width={w} height={h} style={{ objectFit: 'fill', flexShrink: 0, display: 'block' }} />;
+    return (
+      <div style={{ width: w, height: h, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src={url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} />
+      </div>
+    );
   }
   try {
     let svgStr = '';

@@ -54,6 +54,28 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines;
 }
 
+function drawImageContain(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  boxX: number,
+  boxY: number,
+  boxW: number,
+  boxH: number
+) {
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if (!iw || !ih) {
+    ctx.drawImage(img, boxX, boxY, boxW, boxH);
+    return;
+  }
+  const ratio = Math.min(boxW / iw, boxH / ih);
+  const dw = iw * ratio;
+  const dh = ih * ratio;
+  const dx = boxX + (boxW - dw) / 2;
+  const dy = boxY + (boxH - dh) / 2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+
 function UL(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, minW: number) {
   const t = text?.trim() || '';
   const tw = Math.max(ctx.measureText(t).width, minW);
@@ -327,7 +349,7 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(rotation);
-            ctx.drawImage(symImg, -symW / 2, -symH / 2, symW, symH);
+            drawImageContain(ctx, symImg, -symW / 2, -symH / 2, symW, symH);
             if (sym.isSample && (sym.sampleNumber ?? '') !== '') {
               ctx.font = `900 ${sc(Math.max(8, sym.size * 0.6 * 0.22))}px Arial`;
               ctx.fillStyle = '#e65100';
@@ -374,8 +396,8 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
     const iconY = legY - sc(fs);
 
     if (item.imageUrl) {
-      const symImg = await loadImage(item.imageUrl, iconW, iconH);
-      if (symImg) ctx.drawImage(symImg, legX, iconY, iconW, iconH);
+      const symImg = await loadImage(item.imageUrl);
+      if (symImg) drawImageContain(ctx, symImg, legX, iconY, iconW, iconH);
     }
     ctx.font = font(7.5);
     ctx.fillStyle = '#000';
