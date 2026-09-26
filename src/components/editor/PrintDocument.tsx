@@ -39,11 +39,12 @@ const PrintDocument: React.FC<Props> = ({ data, schemaName, forExport = false })
   const V = (val: string, fallback = '___') => val?.trim() || fallback;
 
   const allLegendItems = [
-    ...data.legendItems,
+    ...data.legendItems.filter(l => l.imageUrl),
     ...(data.placedSymbols ?? [])
+      .filter(sym => !sym.isTextBlock && sym.imageUrl)
       .filter(sym => !data.legendItems.some(l => l.imageUrl === sym.imageUrl))
       .map(sym => ({ imageUrl: sym.imageUrl, label: sym.label })),
-  ];
+  ].filter((item, i, arr) => arr.findIndex(x => x.imageUrl === item.imageUrl) === i);
 
   const s = (v: number) => v;
 

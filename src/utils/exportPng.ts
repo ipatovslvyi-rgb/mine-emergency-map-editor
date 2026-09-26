@@ -379,11 +379,12 @@ export async function exportToPng(data: SchemaFormData, schemaName: string) {
   legY += sc(fs + 4);
 
   const allLegend = [
-    ...data.legendItems,
+    ...data.legendItems.filter(l => l.imageUrl),
     ...(data.placedSymbols ?? [])
+      .filter(sym => !sym.isTextBlock && sym.imageUrl)
       .filter(sym => !data.legendItems.some(l => l.imageUrl === sym.imageUrl))
       .map(sym => ({ imageUrl: sym.imageUrl, label: sym.label })),
-  ];
+  ].filter((item, i, arr) => arr.findIndex(x => x.imageUrl === item.imageUrl) === i);
 
   const legContentW = legendW - sc(12);
   const labelMaxW = legContentW - sc(20);

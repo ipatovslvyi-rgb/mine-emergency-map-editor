@@ -33,7 +33,7 @@ export const exportToExcel = (data: SchemaFormData, schemaName: string) => {
     ['', ''],
     ['УСЛОВНЫЕ ОБОЗНАЧЕНИЯ', ''],
     ...data.legendItems
-      .filter(i => i.label.trim())
+      .filter(i => i.label.trim() && i.imageUrl)
       .map((item, idx): [string, string] => [`Обозначение ${idx + 1}`, item.label]),
     ['', ''],
     ['ПОДПИСИ', ''],
