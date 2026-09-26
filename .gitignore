@@ -26,3 +26,5 @@ builds
 
 # warmup/handoff артефакты
 tmp/
+
+dist-desktop

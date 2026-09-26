@@ -1,0 +1,7 @@
+dist/
+build.log
+.tools/
+SauApp/bin/
+SauApp/obj/
+SauApp/app.zip
+SauApp/obfuscar.gen.xml
