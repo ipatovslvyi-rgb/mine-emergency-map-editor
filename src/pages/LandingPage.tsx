@@ -1,6 +1,7 @@
 import React from 'react';
 import Icon from '@/components/ui/icon';
 import LogoSvg from '@/components/ui/LogoSvg';
+import openGioWindow from '@/lib/gio/openGioWindow';
 
 interface Props {
   onEnter: () => void;
@@ -29,15 +30,28 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
             v1.003
           </span>
         </div>
-        <button
-          onClick={onEnter}
-          aria-label="Открыть редактор схем аварийного участка"
-          className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-90"
-          style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
-        >
-          Открыть редактор
-          <Icon name="ArrowRight" size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openGioWindow}
+            aria-label="ГИО — группа инженерного обеспечения, откроется в отдельном окне"
+            title="Группа инженерного обеспечения — откроется в отдельном окне"
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-all hover:border-primary"
+            style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', borderColor: 'hsl(var(--border))' }}
+          >
+            <Icon name="Wrench" size={14} />
+            ГИО
+            <Icon name="ExternalLink" size={12} />
+          </button>
+          <button
+            onClick={onEnter}
+            aria-label="Открыть редактор схем аварийного участка"
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all hover:opacity-90"
+            style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
+          >
+            Открыть редактор
+            <Icon name="ArrowRight" size={14} />
+          </button>
+        </div>
       </nav>
 
       {/* ── HERO ── */}
@@ -167,14 +181,26 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
         <p className="text-sm mb-8" style={{ color: 'hsl(var(--muted-foreground))', maxWidth: 360, lineHeight: 1.6 }}>
           Первая схема создаётся уже при открытии — просто заполните поля.
         </p>
-        <button
-          onClick={onEnter}
-          className="flex items-center gap-2 px-8 py-3.5 rounded font-semibold text-base transition-all hover:opacity-90"
-          style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', boxShadow: '0 0 32px hsl(var(--primary) / 0.3)' }}
-        >
-          Открыть редактор
-          <Icon name="ArrowRight" size={16} />
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={onEnter}
+            className="flex items-center gap-2 px-8 py-3.5 rounded font-semibold text-base transition-all hover:opacity-90"
+            style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', boxShadow: '0 0 32px hsl(var(--primary) / 0.3)' }}
+          >
+            Открыть редактор
+            <Icon name="ArrowRight" size={16} />
+          </button>
+          <button
+            onClick={openGioWindow}
+            title="Группа инженерного обеспечения — откроется в отдельном окне"
+            className="flex items-center gap-2 px-8 py-3.5 rounded font-semibold text-base border transition-all hover:border-primary"
+            style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', borderColor: 'hsl(var(--border))' }}
+          >
+            <Icon name="Wrench" size={16} />
+            ГИО
+            <Icon name="ExternalLink" size={14} />
+          </button>
+        </div>
       </section>
 
       {/* ── FOOTER ── */}

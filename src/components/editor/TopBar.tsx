@@ -31,14 +31,6 @@ const NAV_ITEMS = [
   { id: 'presentation', label: 'Презентация', icon: 'Presentation' },
 ];
 
-export function openGioWindow() {
-  const base = window.location.href.split('#')[0];
-  const w = Math.min(1280, window.screen.availWidth - 80);
-  const h = Math.min(900, window.screen.availHeight - 80);
-  const win = window.open(`${base}#/gio`, 'sau-gio', `width=${w},height=${h},left=40,top=40,resizable=yes,scrollbars=yes`);
-  win?.focus();
-}
-
 const BACK_VIEWS = ['schemas', 'settings', 'help', 'presentation', 'activate', 'file'];
 
 const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onHome, isDemo }) => {
@@ -102,16 +94,6 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
               <span>{item.label}</span>
             </button>
           ))}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="tab-btn flex items-center gap-1.5" onClick={openGioWindow}>
-                <Icon name="Wrench" size={13} />
-                <span>ГИО</span>
-                <Icon name="ExternalLink" size={11} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Группа инженерного обеспечения — откроется в отдельном окне</TooltipContent>
-          </Tooltip>
         </div>
 
         {/* Мобиле: кнопка назад + текущий раздел */}
@@ -278,15 +260,6 @@ const TopBar: React.FC<TopBarProps> = ({ activeView, onViewChange, onExport, onH
                 )}
               </button>
             ))}
-            <button
-              className="w-full flex items-center gap-3 px-4 py-4 text-sm transition-colors border-b border-border"
-              style={{ color: 'hsl(var(--foreground))' }}
-              onClick={() => { openGioWindow(); setMenuOpen(false); }}
-            >
-              <Icon name="Wrench" size={18} />
-              ГИО — инженерное обеспечение
-              <Icon name="ExternalLink" size={14} style={{ marginLeft: 'auto', color: 'hsl(var(--muted-foreground))' }} />
-            </button>
 
             {/* Кнопки экспорта в меню если редактор */}
             {activeView === 'editor' && (
