@@ -147,12 +147,14 @@ export function turnBackTime(r: ZvtResult): string | null {
   return r.mode === "moving" ? addMinutes(r.entryTime, r.tForward) : null
 }
 
-export function zvtReport(r: ZvtResult, object = "", performer = ""): string {
+export function zvtReport(r: ZvtResult, object = "", performer = "", squad = "", commander = ""): string {
   const lines = [
     "РАСЧЁТ ВРЕМЕНИ ПРЕБЫВАНИЯ В ЗВТ",
     "Приказ Ростехнадзора от 11.12.2020 №520, Приложение 6",
     "",
     object ? `Объект: ${object}` : null,
+    squad ? `Отделение №: ${squad}` : null,
+    commander ? `Командир отделения: ${commander}` : null,
     `Температура: ${r.temp} °C`,
     `Режим: ${r.mode === "moving" ? "передвижение по горным выработкам" : "работа на одном месте"}`,
     `Цель работ: ${r.rescue ? "спасение людей" : "прочие горноспасательные работы"}`,

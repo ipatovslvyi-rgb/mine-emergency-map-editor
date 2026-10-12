@@ -33,15 +33,17 @@ interface FormState {
   mode: ZvtMode;
   rescue: boolean;
   object: string;
+  squad: string;
+  commander: string;
   performer: string;
 }
 
 const loadForm = (): FormState => {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || '');
-    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', performer: '', ...s };
+    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', squad: '', commander: '', performer: '', ...s };
   } catch {
-    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', performer: '' };
+    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', squad: '', commander: '', performer: '' };
   }
 };
 
@@ -152,13 +154,13 @@ const ZvtCalculator: React.FC = () => {
 
   const copyReport = async () => {
     if (!ok) return;
-    await navigator.clipboard.writeText(zvtReport(ok, form.object, form.performer));
+    await navigator.clipboard.writeText(zvtReport(ok, form.object, form.performer, form.squad, form.commander));
     toast.success('Отчёт скопирован');
   };
 
   const printReport = () => {
     if (!ok) return;
-    const text = zvtReport(ok, form.object, form.performer).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const text = zvtReport(ok, form.object, form.performer, form.squad, form.commander).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const w = window.open('', '_blank', 'width=700,height=800');
     if (!w) return;
     w.document.write(`<html><head><title>Расчёт ЗВТ</title><style>body{font-family:Arial,sans-serif;padding:32px;font-size:14px;line-height:1.6}pre{font-family:inherit;white-space:pre-wrap}</style></head><body><pre>${text}</pre><script>window.onload=()=>{window.print()}</script></body></html>`);
@@ -230,6 +232,14 @@ const ZvtCalculator: React.FC = () => {
         <Field label="Объект (для отчёта)">
           <input className={inputCls} style={inputStyle} value={form.object} onChange={e => set('object', e.target.value)} placeholder="необязательно" />
         </Field>
+        <div className="grid grid-cols-[110px_1fr] gap-2">
+          <Field label="Отделение №">
+            <input className={inputCls} style={inputStyle} value={form.squad} onChange={e => set('squad', e.target.value)} placeholder="№" />
+          </Field>
+          <Field label="Командир отделения">
+            <input className={inputCls} style={inputStyle} value={form.commander} onChange={e => set('commander', e.target.value)} placeholder="ФИО" />
+          </Field>
+        </div>
         <Field label="Расчёт выполнил">
           <input className={inputCls} style={inputStyle} value={form.performer} onChange={e => set('performer', e.target.value)} placeholder="необязательно" />
         </Field>
