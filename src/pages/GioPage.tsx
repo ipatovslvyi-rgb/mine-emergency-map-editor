@@ -3,9 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import LogoSvg from '@/components/ui/LogoSvg';
 import ZvtCalculator from '@/components/gio/ZvtCalculator';
+import TriangleCalculator from '@/components/gio/TriangleCalculator';
 
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
+  { id: 'triangle', label: 'Треугольник', title: 'Взрываемость рудничной атмосферы (треугольник взрываемости)', icon: 'Triangle' },
 ];
 
 const GioPage: React.FC = () => {
@@ -74,6 +76,16 @@ const GioPage: React.FC = () => {
               {active.title}
             </h1>
             <ZvtCalculator />
+          </>
+        )}
+
+        {active?.id === 'triangle' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Triangle" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              {active.title}
+            </h1>
+            <TriangleCalculator />
           </>
         )}
       </div>
