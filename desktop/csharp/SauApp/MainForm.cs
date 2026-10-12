@@ -108,6 +108,11 @@ public sealed class MainForm : Form
 
         core.NewWindowRequested += (_, e) =>
         {
+            if (Uri.TryCreate(e.Uri, UriKind.Absolute, out var nu)
+                && nu.Host.Equals(AppHost, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
             e.Handled = true;
             OpenExternal(e.Uri);
         };
@@ -185,4 +190,4 @@ public sealed class MainForm : Form
     {
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
     }
-}
+}
