@@ -5,6 +5,7 @@ import {
   GASES, calcGasZone, calcVgschTriangle, gasZoneReport, vgschReport, Point,
 } from '@/lib/gio/explosion-triangle-calc';
 import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
+import { printGasZone, printVgsch } from '@/lib/gio/trianglePrint';
 
 const LS_KEY = 'sau-triangle-form';
 
@@ -152,12 +153,8 @@ const TriangleCalculator: React.FC = () => {
   };
 
   const printReport = () => {
-    if (!report) return;
-    const text = report.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    const w = window.open('', '_blank', 'width=700,height=800');
-    if (!w) return;
-    w.document.write(`<html><head><title>Расчёт взрываемости</title><style>body{font-family:Arial,sans-serif;padding:32px;font-size:14px;line-height:1.6}pre{font-family:inherit;white-space:pre-wrap}</style></head><body><pre>${text}</pre><script>window.onload=()=>{window.print()}</script></body></html>`);
-    w.document.close();
+    const opened = vgsch ? printVgsch(vInput, vgsch, meta) : single ? printGasZone(single, meta) : true;
+    if (!opened) toast.error('Разрешите всплывающие окна для печати');
   };
 
   const gasInfo = GASES.find(g => g.key === form.gas);

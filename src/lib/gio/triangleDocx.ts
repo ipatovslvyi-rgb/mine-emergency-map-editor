@@ -35,7 +35,7 @@ const table = (rows: TableRow[]) => new Table({ width: { size: 100, type: WidthT
 
 const CW = 1040, CH = 680;
 
-async function chartPng(tri: Point[], point: Point, explosive: boolean): Promise<Uint8Array> {
+export function chartCanvas(tri: Point[], point: Point, explosive: boolean): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = CW;
   canvas.height = CH;
@@ -106,6 +106,11 @@ async function chartPng(tri: Point[], point: Point, explosive: boolean): Promise
   ctx.fillStyle = pc;
   ctx.fillText(`(${point[0]}; ${point[1]})`, Math.min(sx(point[0]) + 16, CW - PR - 140), sy(point[1]) - 14);
 
+  return canvas;
+}
+
+async function chartPng(tri: Point[], point: Point, explosive: boolean): Promise<Uint8Array> {
+  const canvas = chartCanvas(tri, point, explosive);
   const blob: Blob = await new Promise((res, rej) => canvas.toBlob(b => (b ? res(b) : rej(new Error('canvas'))), 'image/png'));
   return new Uint8Array(await blob.arrayBuffer());
 }
