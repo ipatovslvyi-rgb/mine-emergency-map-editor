@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   GASES, calcGasZone, calcVgschTriangle, gasZoneReport, vgschReport, Point,
 } from '@/lib/gio/explosion-triangle-calc';
+import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
 
 const LS_KEY = 'sau-triangle-form';
 
@@ -17,9 +18,13 @@ interface FormState {
   o2: string;
   gas: string;
   gasPct: string;
+  object: string;
+  squad: string;
+  commander: string;
+  performer: string;
 }
 
-const DEFAULTS: FormState = { method: 'vgsch', ch4: '', co: '', h2: '', o2: '20.9', gas: 'methane', gasPct: '' };
+const DEFAULTS: FormState = { method: 'vgsch', ch4: '', co: '', h2: '', o2: '20.9', gas: 'methane', gasPct: '', object: '', squad: '', commander: '', performer: '' };
 
 const loadForm = (): FormState => {
   try {
@@ -133,6 +138,19 @@ const TriangleCalculator: React.FC = () => {
     toast.success('Отчёт скопирован');
   };
 
+  const meta = { object: form.object, squad: form.squad, commander: form.commander, performer: form.performer };
+
+  const wordReport = async () => {
+    try {
+      if (vgsch) await exportVgschDocx(vInput, vgsch, meta);
+      else if (single) await exportGasZoneDocx(single, meta);
+      else return;
+      toast.success('Документ Word сохранён');
+    } catch {
+      toast.error('Не удалось сформировать документ Word');
+    }
+  };
+
   const printReport = () => {
     if (!report) return;
     const text = report.replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -207,10 +225,25 @@ const TriangleCalculator: React.FC = () => {
           </>
         )}
 
+        <Field label="Объект (для отчёта)">
+          <input className={inputCls.replace(' font-mono-tech', '')} style={inputStyle} value={form.object} onChange={e => set('object', e.target.value)} placeholder="необязательно" />
+        </Field>
+        <div className="grid grid-cols-[110px_1fr] gap-2">
+          <Field label="Отделение №">
+            <input className={inputCls.replace(' font-mono-tech', '')} style={inputStyle} value={form.squad} onChange={e => set('squad', e.target.value)} placeholder="№" />
+          </Field>
+          <Field label="Командир отделения">
+            <input className={inputCls.replace(' font-mono-tech', '')} style={inputStyle} value={form.commander} onChange={e => set('commander', e.target.value)} placeholder="ФИО" />
+          </Field>
+        </div>
+        <Field label="Расчёт выполнил">
+          <input className={inputCls.replace(' font-mono-tech', '')} style={inputStyle} value={form.performer} onChange={e => set('performer', e.target.value)} placeholder="необязательно" />
+        </Field>
+
         <button
           className="flex items-center justify-center gap-1.5 py-2 rounded text-xs border border-border hover:border-primary transition-colors"
           style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
-          onClick={() => setForm(f => ({ ...DEFAULTS, method: f.method, gas: f.gas }))}>
+          onClick={() => setForm(f => ({ ...DEFAULTS, method: f.method, gas: f.gas, object: f.object, squad: f.squad, commander: f.commander, performer: f.performer }))}>
           <Icon name="RotateCcw" size={13} /> Очистить
         </button>
       </div>
@@ -257,6 +290,10 @@ const TriangleCalculator: React.FC = () => {
             <button onClick={copyReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
               style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
               <Icon name="Copy" size={13} /> Копировать
+            </button>
+            <button onClick={wordReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
+              style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+              <Icon name="FileText" size={13} /> Word
             </button>
             <button onClick={printReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium"
               style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
