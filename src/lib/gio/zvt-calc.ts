@@ -169,8 +169,6 @@ export function zvtReport(r: ZvtResult, object = "", performer = "", squad = "",
         ]
       : [`Работа на месте: ${Math.round(r.tWork)} мин`]),
     `Расчётное время выхода: ${r.exitTime}`,
-    "",
-    "ВНИМАНИЕ: при получении информации о других опасных факторах аварии (обрушение, прорыв воды и т.п.) работы в ЗВТ немедленно прекратить.",
     performer ? `\nРасчёт выполнил: ${performer}` : null,
   ]
   return lines.filter(l => l !== null).join("\n")

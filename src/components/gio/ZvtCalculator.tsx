@@ -6,6 +6,7 @@ import {
   ZVT_TABLE1, ZVT_TABLE2, ZvtMode, ZvtResult,
   ZVT_DEFINITION, ZVT_RULES, ZVT_MAX_NORMAL,
 } from '@/lib/gio/zvt-calc';
+import exportZvtDocx from '@/lib/gio/zvtDocx';
 
 const LS_KEY = 'sau-zvt-form';
 
@@ -158,6 +159,16 @@ const ZvtCalculator: React.FC = () => {
     toast.success('Отчёт скопирован');
   };
 
+  const wordReport = async () => {
+    if (!ok) return;
+    try {
+      await exportZvtDocx(ok, { object: form.object, squad: form.squad, commander: form.commander, performer: form.performer });
+      toast.success('Документ Word сохранён');
+    } catch {
+      toast.error('Не удалось сформировать документ Word');
+    }
+  };
+
   const printReport = () => {
     if (!ok) return;
     const text = zvtReport(ok, form.object, form.performer, form.squad, form.commander).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -270,6 +281,10 @@ const ZvtCalculator: React.FC = () => {
                 <button onClick={copyReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
                   style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
                   <Icon name="Copy" size={13} /> Копировать
+                </button>
+                <button onClick={wordReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
+                  style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+                  <Icon name="FileText" size={13} /> Word
                 </button>
                 <button onClick={printReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium"
                   style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}>
