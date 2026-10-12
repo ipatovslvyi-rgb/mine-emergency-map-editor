@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   calcZVT, isZvtError, minsToHHMM, turnBackTime, zvtReport,
   ZVT_TABLE1, ZVT_TABLE2, ZvtMode, ZvtResult,
+  ZVT_DEFINITION, ZVT_RULES, ZVT_MAX_NORMAL,
 } from '@/lib/gio/zvt-calc';
 
 const LS_KEY = 'sau-zvt-form';
@@ -30,6 +31,7 @@ interface FormState {
   entryTime: string;
   temp: string;
   mode: ZvtMode;
+  rescue: boolean;
   object: string;
   performer: string;
 }
@@ -37,9 +39,9 @@ interface FormState {
 const loadForm = (): FormState => {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || '');
-    return { entryTime: nowHHMM(), temp: '', mode: 'moving', object: '', performer: '', ...s };
+    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', performer: '', ...s };
   } catch {
-    return { entryTime: nowHHMM(), temp: '', mode: 'moving', object: '', performer: '' };
+    return { entryTime: nowHHMM(), temp: '', mode: 'moving', rescue: false, object: '', performer: '' };
   }
 };
 
@@ -77,6 +79,13 @@ const ResultView: React.FC<{ r: ZvtResult }> = ({ r }) => {
   const fwdPct = r.mode === 'moving' ? 33.33 : 100;
   return (
     <div className="flex flex-col gap-4">
+      {r.rescueLimited && (
+        <div className="flex items-start gap-2 p-3 rounded text-sm"
+          style={{ background: 'hsl(var(--danger) / 0.15)', color: 'hsl(var(--danger))' }}>
+          <Icon name="LifeBuoy" size={18} style={{ flexShrink: 0 }} />
+          <span>Температура выше +{ZVT_MAX_NORMAL} °C: работы допускаются только для спасения людей и не более 10 минут.</span>
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="rounded-lg p-3 border border-border" style={{ background: 'hsl(var(--card))' }}>
           <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>Макс. время пребывания</div>
@@ -136,8 +145,8 @@ const ZvtCalculator: React.FC = () => {
   const tempNum = parseFloat(form.temp.replace(',', '.'));
   const result = useMemo(() => {
     if (form.temp.trim() === '' || isNaN(tempNum)) return null;
-    return calcZVT(form.entryTime, tempNum, form.mode);
-  }, [form.entryTime, form.mode, form.temp, tempNum]);
+    return calcZVT(form.entryTime, tempNum, form.mode, form.rescue);
+  }, [form.entryTime, form.mode, form.rescue, form.temp, tempNum]);
 
   const ok = result && !isZvtError(result) ? result : null;
 
@@ -156,7 +165,7 @@ const ZvtCalculator: React.FC = () => {
     w.document.close();
   };
 
-  const activeT1 = ok && tempNum > 0 ? tempNum : null;
+  const activeT1 = ok && !ok.rescueLimited && tempNum > 0 ? tempNum : null;
   const activeT2 = ok && tempNum <= 0 ? ZVT_TABLE2.findIndex(r => (tempNum > r.min && tempNum <= r.max) || (tempNum === -20 && r.min === -20)) : -1;
 
   return (
@@ -199,6 +208,25 @@ const ZvtCalculator: React.FC = () => {
           </div>
         </Field>
 
+        <Field label="Цель работ">
+          <div className="grid grid-cols-2 gap-2">
+            {([[false, 'Прочие работы', 'HardHat'], [true, 'Спасение людей', 'LifeBuoy']] as const).map(([v, label, icon]) => (
+              <button key={String(v)}
+                className="flex items-center justify-center gap-1.5 py-2 rounded text-xs font-medium border transition-colors"
+                style={form.rescue === v
+                  ? { background: v ? 'hsl(var(--danger))' : 'hsl(var(--primary))', color: v ? 'hsl(var(--destructive-foreground))' : 'hsl(var(--primary-foreground))', borderColor: v ? 'hsl(var(--danger))' : 'hsl(var(--primary))' }
+                  : { background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', borderColor: 'hsl(var(--border))' }}
+                onClick={() => set('rescue', v)}>
+                <Icon name={icon} size={14} />
+                {label}
+              </button>
+            ))}
+          </div>
+          <span className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            При +41…+50 °C работы допускаются только для спасения людей — не более 10 минут
+          </span>
+        </Field>
+
         <Field label="Объект (для отчёта)">
           <input className={inputCls} style={inputStyle} value={form.object} onChange={e => set('object', e.target.value)} placeholder="необязательно" />
         </Field>
@@ -207,11 +235,20 @@ const ZvtCalculator: React.FC = () => {
         </Field>
 
         <div className="text-xs leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          {ZVT_DEFINITION}
+        </div>
+        <div className="text-xs leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
           Приказ Ростехнадзора от 11.12.2020 №520, Приложение 6. При передвижении 1/3 времени — вперёд, 2/3 — обратный путь (п. 12).
         </div>
       </div>
 
       <div className="flex flex-col gap-5 min-w-0">
+        <div className="flex items-start gap-2.5 p-3 rounded-lg border text-sm"
+          style={{ background: 'hsl(var(--danger) / 0.1)', borderColor: 'hsl(var(--danger) / 0.4)', color: 'hsl(var(--foreground))' }}>
+          <Icon name="TriangleAlert" size={18} style={{ color: 'hsl(var(--danger))', flexShrink: 0, marginTop: 1 }} />
+          <span>{ZVT_RULES[2]}</span>
+        </div>
+
         <div className="rounded-lg border border-border p-4" style={{ background: 'hsl(var(--card))' }}>
           <div className="flex items-center justify-between mb-4 gap-2">
             <div className="text-sm font-semibold flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
@@ -304,6 +341,21 @@ const ZvtCalculator: React.FC = () => {
               Между строками таблицы №1 — линейная интерполяция.
             </div>
           </div>
+        </div>
+
+        <div className="rounded-lg border border-border p-4" style={{ background: 'hsl(var(--card))' }}>
+          <div className="text-sm font-semibold flex items-center gap-2 mb-3" style={{ color: 'hsl(var(--foreground))' }}>
+            <Icon name="ShieldAlert" size={16} />
+            Правила ведения горноспасательных работ в ЗВТ
+          </div>
+          <ul className="flex flex-col gap-2">
+            {ZVT_RULES.map((rule, i) => (
+              <li key={i} className="flex gap-2 text-xs leading-relaxed" style={{ color: 'hsl(var(--foreground))' }}>
+                <span className="font-mono-tech font-semibold" style={{ color: 'hsl(var(--primary))' }}>{i + 1}.</span>
+                <span>{rule}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

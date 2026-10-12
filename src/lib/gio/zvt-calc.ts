@@ -5,6 +5,20 @@
 
 export type ZvtMode = "moving" | "stationary"
 
+export const ZVT_THRESHOLD = 27
+export const ZVT_MAX_NORMAL = 40
+export const ZVT_MAX_RESCUE = 50
+export const ZVT_RESCUE_LIMIT_MIN = 10
+
+export const ZVT_DEFINITION =
+  "Зона высоких температур (ЗВТ) — участок горных выработок, где температура воздуха достигает или превышает 27 °C при наличии непригодной для дыхания рудничной атмосферы."
+
+export const ZVT_RULES = [
+  "Запрещается вести горноспасательные работы, не связанные со спасением людей, в ЗВТ с непригодной для дыхания атмосферой при температуре выше +40 °C без средств противотепловой индивидуальной защиты.",
+  "Для спасения людей допускается проведение работ при температуре от +41 до +50 °C, но не более 10 минут.",
+  "При получении информации о других опасных факторах аварии (обрушение, прорыв воды и т.п.), угрожающих жизни и здоровью спасателей, работы в ЗВТ должны быть немедленно прекращены.",
+]
+
 export interface ZvtLimits {
   stationary: number
   moving: number
@@ -20,6 +34,8 @@ export interface ZvtResult {
   tBack: number
   tWork: number
   limits: ZvtLimits
+  rescue: boolean
+  rescueLimited: boolean
 }
 
 export type ZvtError =
@@ -88,12 +104,23 @@ export function getZvtLimits(temp: number): ZvtLimits | null {
   }
 }
 
-export function calcZVT(entryTime: string, temp: number, mode: ZvtMode): ZvtResult | ZvtError {
-  if (temp > 40) return { error: "forbidden", message: "При температуре выше 40 °C работы запрещены (п. 13)" }
+export function calcZVT(entryTime: string, temp: number, mode: ZvtMode, rescue = false): ZvtResult | ZvtError {
+  if (temp > ZVT_MAX_RESCUE)
+    return { error: "forbidden", message: "При температуре выше +50 °C работы в ЗВТ запрещены, в том числе для спасения людей" }
+  if (temp > ZVT_MAX_NORMAL && !rescue)
+    return {
+      error: "forbidden",
+      message:
+        "При температуре выше +40 °C запрещается вести работы, не связанные со спасением людей, без средств противотепловой индивидуальной защиты",
+    }
   if (temp < -20) return { error: "out_of_range", message: "Температура ниже −20 °C вне нормативных таблиц" }
 
-  const limits = getZvtLimits(temp)
-  if (!limits) return { error: "no_limit", message: "При температуре от 0 до 27 °C ограничение не нормируется" }
+  const rescueLimited = rescue && temp > ZVT_MAX_NORMAL
+  const limits = rescueLimited
+    ? { stationary: ZVT_RESCUE_LIMIT_MIN, moving: ZVT_RESCUE_LIMIT_MIN }
+    : getZvtLimits(temp)
+  if (!limits)
+    return { error: "no_limit", message: "Ниже +27 °C участок не относится к ЗВТ — ограничение времени не нормируется" }
 
   const maxTotal = mode === "moving" ? limits.moving : limits.stationary
   const exitTime = addMinutes(entryTime, maxTotal)
@@ -109,6 +136,8 @@ export function calcZVT(entryTime: string, temp: number, mode: ZvtMode): ZvtResu
     tBack: mode === "moving" ? (2 * maxTotal) / 3 : 0,
     tWork: mode === "stationary" ? maxTotal : 0,
     limits,
+    rescue,
+    rescueLimited,
   }
 }
 
@@ -126,6 +155,8 @@ export function zvtReport(r: ZvtResult, object = "", performer = ""): string {
     object ? `Объект: ${object}` : null,
     `Температура: ${r.temp} °C`,
     `Режим: ${r.mode === "moving" ? "передвижение по горным выработкам" : "работа на одном месте"}`,
+    `Цель работ: ${r.rescue ? "спасение людей" : "прочие горноспасательные работы"}`,
+    r.rescueLimited ? "Спасение людей при +41…+50 °C — не более 10 минут" : null,
     `Время входа: ${r.entryTime}`,
     "",
     `Максимальное время пребывания: ${Math.round(r.maxTotal)} мин (${minsToHHMM(r.maxTotal)})`,
@@ -136,6 +167,8 @@ export function zvtReport(r: ZvtResult, object = "", performer = ""): string {
         ]
       : [`Работа на месте: ${Math.round(r.tWork)} мин`]),
     `Расчётное время выхода: ${r.exitTime}`,
+    "",
+    "ВНИМАНИЕ: при получении информации о других опасных факторах аварии (обрушение, прорыв воды и т.п.) работы в ЗВТ немедленно прекратить.",
     performer ? `\nРасчёт выполнил: ${performer}` : null,
   ]
   return lines.filter(l => l !== null).join("\n")
