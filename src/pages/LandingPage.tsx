@@ -2,6 +2,7 @@ import React from 'react';
 import Icon from '@/components/ui/icon';
 import LogoSvg from '@/components/ui/LogoSvg';
 import openGioWindow from '@/lib/gio/openGioWindow';
+import InstallButton from '@/components/pwa/InstallButton';
 
 interface Props {
   onEnter: () => void;
@@ -90,6 +91,7 @@ const LandingPage: React.FC<Props> = ({ onEnter }) => {
               <Icon name="Zap" size={17} />
               Начать работу
             </button>
+            <InstallButton className="py-3" />
             <div className="flex items-center gap-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
               <Icon name="Shield" size={14} />
               Данные хранятся локально

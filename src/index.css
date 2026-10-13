@@ -382,3 +382,22 @@
     cursor: nw-resize;
   }
 }
+
+@media (pointer: coarse) {
+  .gio-root input:not([type="checkbox"]):not([type="radio"]),
+  .gio-root select {
+    min-height: 52px;
+    font-size: 18px;
+  }
+  .gio-root main button,
+  .gio-root .gio-touch button {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 767px) {
+  .gio-root input,
+  .gio-root select {
+    font-size: 17px;
+  }
+}

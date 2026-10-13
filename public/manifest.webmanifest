@@ -1,26 +1,25 @@
 {
+  "id": "/",
   "name": "САУ — Схема аварийного участка",
   "short_name": "САУ",
-  "description": "Профессиональный редактор аварийных схем для горнодобывающих предприятий",
+  "description": "Схемы аварийного участка и расчёты ГИО для горноспасательных подразделений",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0d1520",
-  "theme_color": "#f97316",
+  "theme_color": "#0d1520",
   "lang": "ru",
+  "categories": ["utilities", "productivity"],
   "icons": [
-    {
-      "src": "/logo.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.poehali.dev/projects/9c8b2d5a-890f-4855-bc05-5374370e1c6d/files/9be0eeb3-c83f-451d-87e8-356f81c9986a.jpg",
-      "type": "image/jpeg",
-      "sizes": "1024x1024",
-      "purpose": "any"
-    }
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
+    { "src": "/logo.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "ГИО — расчёты", "short_name": "ГИО", "url": "/#/gio", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "ЗВТ — зона высоких температур", "short_name": "ЗВТ", "url": "/#/gio/zvt", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Треугольник взрываемости", "short_name": "Треугольник", "url": "/#/gio/triangle", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
   ]
 }
