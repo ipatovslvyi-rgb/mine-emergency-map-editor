@@ -7,6 +7,8 @@ import {
 import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
 import { printGasZone, printVgsch } from '@/lib/gio/trianglePrint';
 import SendButton from '@/components/ops/SendButton';
+import VoiceCodeCard from '@/components/ops/VoiceCodeCard';
+import { encodeGas, encodeVgsch } from '@/lib/gio/voiceCode';
 
 const LS_KEY = 'sau-triangle-form';
 
@@ -282,6 +284,9 @@ const TriangleCalculator: React.FC = () => {
             </div>
           </>
         )}
+
+        {vgsch && <VoiceCodeCard code={encodeVgsch(vInput)} />}
+        {single && <VoiceCodeCard code={encodeGas(single.gas.key, single.gasPct, single.o2Pct)} />}
 
         {report && (
           <div className="flex flex-wrap gap-2 justify-end">

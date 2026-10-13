@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
-import { dismissDanger, useOps } from '@/lib/ops/store';
+import { clearVoiceEvents, dismissDanger, useOps } from '@/lib/ops/store';
+import { encodePayload } from '@/lib/gio/voiceCode';
 import { KIND_ICONS, KIND_LABELS } from '@/lib/ops/describe';
 import { OpEvent } from '@/lib/ops/types';
 import { ResultView } from '@/components/gio/ZvtCalculator';
@@ -80,6 +81,11 @@ const Row: React.FC<{ ev: OpEvent; open: boolean; onToggle: () => void; latest: 
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold">{KIND_LABELS[ev.kind]}</span>
             <span className="text-xs font-mono-tech" style={{ color: 'hsl(var(--muted-foreground))' }}>{fmtTime(ev.created_at)}</span>
+            {ev.voice && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1" style={{ background: 'hsl(var(--primary) / 0.15)', color: 'hsl(var(--primary))' }}>
+                <Icon name="Mic" size={10} /> ГОЛОСОМ
+              </span>
+            )}
             {latest && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: c, color: 'hsl(var(--background))' }}>ПОСЛЕДНИЙ</span>}
             {ev.sent === false && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1" style={{ background: 'hsl(var(--warning) / 0.2)', color: 'hsl(var(--warning))' }}>
@@ -88,6 +94,7 @@ const Row: React.FC<{ ev: OpEvent; open: boolean; onToggle: () => void; latest: 
             )}
           </div>
           <div className="text-sm mt-0.5" style={{ color: ev.danger ? c : 'hsl(var(--foreground))', fontWeight: ev.danger ? 600 : 400 }}>{ev.summary}</div>
+          <div className="text-xs font-mono-tech mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>{encodePayload(ev.payload)}</div>
         </div>
         <Icon name={open ? 'ChevronUp' : 'ChevronDown'} size={18} style={{ color: 'hsl(var(--muted-foreground))', flexShrink: 0 }} />
       </button>
@@ -124,7 +131,7 @@ const OperationFeed: React.FC = () => {
   const latestId = sorted[0]?.client_id;
   const effectiveOpen = openId ?? latestId ?? null;
 
-  if (!session) return null;
+  if (!session && !events.length) return null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -133,11 +140,16 @@ const OperationFeed: React.FC = () => {
           <Icon name="ListOrdered" size={16} /> Журнал расчётов
           <span className="text-xs font-normal" style={{ color: 'hsl(var(--muted-foreground))' }}>({events.length})</span>
         </div>
+        {!session && (
+          <button onClick={clearVoiceEvents} className="text-xs flex items-center gap-1 px-2 py-1 rounded hover:text-foreground" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <Icon name="Trash2" size={12} /> Очистить
+          </button>
+        )}
       </div>
       {sorted.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
-          <Icon name={session.role === 'commander' ? 'Send' : 'Radio'} size={32} className="mx-auto mb-2 opacity-50" />
-          {session.role === 'commander'
+          <Icon name={session?.role === 'commander' ? 'Send' : 'Radio'} size={32} className="mx-auto mb-2 opacity-50" />
+          {session?.role === 'commander'
             ? 'Сделайте расчёт в ЗВТ или «Треугольнике» и нажмите «Передать»'
             : 'Ожидание расчётов от командира отделения…'}
         </div>

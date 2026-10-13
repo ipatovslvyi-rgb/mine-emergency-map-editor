@@ -81,7 +81,7 @@ export async function createOperation(title: string) {
   const r = await call<{ code: string; title: string; token: string; active: boolean }>('POST', null, { action: 'create', title });
   set({
     session: { code: r.code, title: r.title, role: 'commander', token: r.token, active: true, joinedAt: new Date().toISOString() },
-    events: [],
+    events: state.events.filter(e => e.voice),
     error: null,
     lastDanger: null,
   });
@@ -93,7 +93,7 @@ export async function joinOperation(code: string, role: Exclude<OpRole, 'command
   const r = await call<{ code: string; title: string; active: boolean }>('GET', { action: 'info', code });
   set({
     session: { code: r.code, title: r.title, role, active: r.active, joinedAt: new Date().toISOString() },
-    events: [],
+    events: state.events.filter(e => e.voice),
     error: null,
     lastDanger: null,
   });
@@ -111,7 +111,27 @@ export async function closeOperation() {
 }
 
 export function leaveOperation() {
-  set({ session: null, events: [], error: null, lastDanger: null, lastSync: null });
+  set({ session: null, events: state.events.filter(e => e.voice), error: null, lastDanger: null, lastSync: null });
+}
+
+export function addVoiceEvent(payload: OpPayload) {
+  const d = describePayload(payload);
+  const ev: OpEvent = {
+    client_id: `v-${uid()}`,
+    kind: payload.type,
+    danger: d.danger,
+    summary: d.summary,
+    payload,
+    created_at: new Date().toISOString(),
+    sent: true,
+    voice: true,
+  };
+  set({ events: [...state.events, ev], lastDanger: d.danger ? ev : state.lastDanger });
+  signal(d.danger);
+}
+
+export function clearVoiceEvents() {
+  set({ events: state.events.filter(e => !e.voice) });
 }
 
 export function publish(payload: OpPayload) {
@@ -165,7 +185,7 @@ async function poll() {
   polling = true;
   set({ syncing: true });
   try {
-    const after = state.events.reduce((m, e) => Math.max(m, e.id || 0), 0);
+    const after = state.events.filter(e => !e.voice).reduce((m, e) => Math.max(m, e.id || 0), 0);
     const r = await call<{ active: boolean; title: string; events: OpEvent[] }>('GET', { action: 'events', code: s.code, after: String(after) });
     const known = new Set(state.events.map(e => e.client_id));
     const fresh = r.events.filter(e => !known.has(e.client_id)).map(e => ({ ...e, sent: true }));

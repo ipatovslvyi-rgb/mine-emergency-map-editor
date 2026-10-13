@@ -37,6 +37,7 @@ export interface OpEvent {
   id?: number;
   received_at?: string;
   sent?: boolean;
+  voice?: boolean;
 }
 
 export interface OpSession {

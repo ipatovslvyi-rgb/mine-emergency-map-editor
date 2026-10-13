@@ -9,6 +9,7 @@ import NetworkBadge from '@/components/pwa/NetworkBadge';
 import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel';
 import OperationFeed, { DangerAlert } from '@/components/ops/OperationFeed';
 import { startOpsSync, useOps } from '@/lib/ops/store';
+import VoiceCodeInput from '@/components/ops/VoiceCodeInput';
 
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
@@ -166,10 +167,23 @@ const GioPage: React.FC = () => {
                     </button>
                   </div>
                 )}
+                {session.role !== 'commander' && <VoiceCodeInput full />}
                 <OperationFeed />
               </div>
             ) : (
-              <OperationSetup />
+              <div className="flex flex-col gap-5">
+                <OperationSetup />
+                <div className="rounded-lg border border-border p-4 flex flex-col gap-3" style={{ background: 'hsl(var(--card))' }}>
+                  <div className="text-sm font-semibold flex items-center gap-2">
+                    <Icon name="Mic" size={16} /> Нет связи с сервером? Примите расчёт голосом
+                  </div>
+                  <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                    Командир диктует код расчёта по шахтной связи — введите его, и откроется тот же расчёт с графиком и выводом. Работает без интернета.
+                  </div>
+                  <VoiceCodeInput full />
+                </div>
+                <OperationFeed />
+              </div>
             )}
           </>
         )}

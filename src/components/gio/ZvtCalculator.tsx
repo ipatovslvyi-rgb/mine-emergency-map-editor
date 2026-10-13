@@ -8,6 +8,8 @@ import {
 } from '@/lib/gio/zvt-calc';
 import exportZvtDocx from '@/lib/gio/zvtDocx';
 import SendButton from '@/components/ops/SendButton';
+import VoiceCodeCard from '@/components/ops/VoiceCodeCard';
+import { encodeZvt } from '@/lib/gio/voiceCode';
 
 const LS_KEY = 'sau-zvt-form';
 
@@ -311,6 +313,7 @@ const ZvtCalculator: React.FC = () => {
             </div>
           )}
           {ok && <ResultView r={ok} />}
+          {ok && <div className="mt-4"><VoiceCodeCard code={encodeZvt(ok)} /></div>}
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
