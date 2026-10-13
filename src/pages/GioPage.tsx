@@ -6,16 +6,31 @@ import ZvtCalculator from '@/components/gio/ZvtCalculator';
 import TriangleCalculator from '@/components/gio/TriangleCalculator';
 import InstallButton from '@/components/pwa/InstallButton';
 import NetworkBadge from '@/components/pwa/NetworkBadge';
+import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel';
+import OperationFeed, { DangerAlert } from '@/components/ops/OperationFeed';
+import { startOpsSync, useOps } from '@/lib/ops/store';
 
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
   { id: 'triangle', label: 'Треугольник', short: 'Треуг.', title: 'Взрываемость рудничной атмосферы (треугольник взрываемости)', icon: 'Triangle' },
+  { id: 'op', label: 'Операция', short: 'Операция', title: 'Передача расчётов: командир → подземная база и командный пункт', icon: 'RadioTower' },
 ];
+
+const OpTabBadge: React.FC = () => {
+  const { session } = useOps();
+  if (!session) return null;
+  return <span className="w-2 h-2 rounded-full" style={{ background: session.active ? 'hsl(var(--safe))' : 'hsl(var(--muted-foreground))' }} />;
+};
 
 const GioPage: React.FC = () => {
   const { tool } = useParams();
   const navigate = useNavigate();
   const active = TOOLS.find(t => t.id === tool);
+  const { session } = useOps();
+
+  useEffect(() => {
+    startOpsSync();
+  }, []);
 
   useEffect(() => {
     document.title = active ? `ГИО — ${active.label}` : 'ГИО — группа инженерного обеспечения';
@@ -35,6 +50,7 @@ const GioPage: React.FC = () => {
             title={t.title}>
             <Icon name={t.icon} size={13} />
             {t.label}
+            {t.id === 'op' && <OpTabBadge />}
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2">
@@ -61,14 +77,30 @@ const GioPage: React.FC = () => {
               title={t.title}
               className="flex flex-col items-center justify-center gap-1 h-[68px] text-xs font-semibold transition-colors"
               style={{ color: on ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: on ? 'hsl(var(--primary) / 0.1)' : 'transparent', borderTop: on ? '3px solid hsl(var(--primary))' : '3px solid transparent' }}>
-              <Icon name={t.icon} size={24} />
+              <span className="relative">
+                <Icon name={t.icon} size={24} />
+                {t.id === 'op' && <span className="absolute -top-0.5 -right-1"><OpTabBadge /></span>}
+              </span>
               {t.short}
             </button>
           );
         })}
       </nav>
 
+      <DangerAlert />
+
       <main className="gio-touch flex-1 p-3 sm:p-4 md:p-6 max-w-6xl w-full mx-auto">
+        {session && active?.id !== 'op' && (
+          <button onClick={() => navigate('/gio/op')} className="w-full mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded border border-border text-left"
+            style={{ background: 'hsl(var(--card))' }}>
+            <Icon name="RadioTower" size={14} style={{ color: 'hsl(var(--primary))' }} />
+            <span>Операция <b className="font-mono-tech" style={{ color: 'hsl(var(--primary))' }}>{session.code}</b>{session.title ? ` · ${session.title}` : ''}</span>
+            <span className="ml-auto" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              {session.role === 'commander' ? 'расчёты можно передавать кнопкой «Передать»' : 'открыть журнал'}
+            </span>
+          </button>
+        )}
+
         {!active && (
           <>
             <h1 className="text-lg font-semibold mb-1">Расчёты группы инженерного обеспечения</h1>
@@ -110,6 +142,35 @@ const GioPage: React.FC = () => {
               {active.title}
             </h1>
             <TriangleCalculator />
+          </>
+        )}
+
+        {active?.id === 'op' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="RadioTower" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              Операция
+            </h1>
+            {session ? (
+              <div className="flex flex-col gap-4">
+                <OperationStatus />
+                {session.role === 'commander' && session.active && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => navigate('/gio/zvt')} className="flex items-center justify-center gap-2 py-3 rounded font-semibold text-sm border border-border hover:border-primary"
+                      style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+                      <Icon name="Thermometer" size={16} /> Расчёт ЗВТ
+                    </button>
+                    <button onClick={() => navigate('/gio/triangle')} className="flex items-center justify-center gap-2 py-3 rounded font-semibold text-sm border border-border hover:border-primary"
+                      style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+                      <Icon name="Triangle" size={16} /> Треугольник
+                    </button>
+                  </div>
+                )}
+                <OperationFeed />
+              </div>
+            ) : (
+              <OperationSetup />
+            )}
           </>
         )}
       </main>

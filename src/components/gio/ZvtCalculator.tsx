@@ -7,6 +7,7 @@ import {
   ZVT_DEFINITION, ZVT_RULES, ZVT_MAX_NORMAL,
 } from '@/lib/gio/zvt-calc';
 import exportZvtDocx from '@/lib/gio/zvtDocx';
+import SendButton from '@/components/ops/SendButton';
 
 const LS_KEY = 'sau-zvt-form';
 
@@ -77,7 +78,7 @@ const Countdown: React.FC<{ label: string; target: string; tone: string }> = ({ 
   );
 };
 
-const ResultView: React.FC<{ r: ZvtResult }> = ({ r }) => {
+export const ResultView: React.FC<{ r: ZvtResult }> = ({ r }) => {
   const turn = turnBackTime(r);
   const fwdPct = r.mode === 'moving' ? 33.33 : 100;
   return (
@@ -277,7 +278,8 @@ const ZvtCalculator: React.FC = () => {
               Результат
             </div>
             {ok && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <SendButton payload={{ type: 'zvt', result: ok, meta: { object: form.object, squad: form.squad, commander: form.commander, performer: form.performer } }} />
                 <button onClick={copyReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
                   style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
                   <Icon name="Copy" size={13} /> Копировать

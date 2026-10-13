@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {"name": "OPTIONS preflight", "method": "OPTIONS", "path": "/", "expectedStatus": 200},
+    {"name": "Неизвестный код операции", "method": "GET", "path": "/?action=info&code=xx", "expectedStatus": 404},
+    {"name": "События по несуществующему коду", "method": "GET", "path": "/?action=events&code=xx&after=0", "expectedStatus": 404},
+    {"name": "Создание операции", "method": "POST", "path": "/", "body": {"action": "create", "title": "Тест"}, "expectedStatus": 200, "expectedBody": {"active": true, "title": "Тест"}, "bodyMatcher": "partial"},
+    {"name": "Push без токена командира", "method": "POST", "path": "/", "body": {"action": "push", "code": "xx", "events": []}, "expectedStatus": 404},
+    {"name": "Неизвестное действие", "method": "GET", "path": "/?action=nope", "expectedStatus": 400}
+  ]
+}

@@ -6,6 +6,7 @@ import {
 } from '@/lib/gio/explosion-triangle-calc';
 import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
 import { printGasZone, printVgsch } from '@/lib/gio/trianglePrint';
+import SendButton from '@/components/ops/SendButton';
 
 const LS_KEY = 'sau-triangle-form';
 
@@ -55,7 +56,7 @@ const XMAX = 35, YMAX = 22;
 const sx = (c: number) => PL + (Math.min(c, XMAX) / XMAX) * (W - PL - PR);
 const sy = (o: number) => PT + (1 - Math.min(Math.max(o, 0), YMAX) / YMAX) * (H - PT - PB);
 
-const TriangleChart: React.FC<{ tri: Point[]; point: Point; explosive: boolean }> = ({ tri, point, explosive }) => {
+export const TriangleChart: React.FC<{ tri: Point[]; point: Point; explosive: boolean }> = ({ tri, point, explosive }) => {
   const color = explosive ? 'hsl(var(--danger))' : 'hsl(var(--safe))';
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto rounded-lg border border-border" style={{ background: 'hsl(var(--card))' }}>
@@ -284,6 +285,7 @@ const TriangleCalculator: React.FC = () => {
 
         {report && (
           <div className="flex flex-wrap gap-2 justify-end">
+            <SendButton payload={vgsch ? { type: 'vgsch', input: vInput, result: vgsch, meta } : single ? { type: 'gas', result: single, meta } : null} />
             <button onClick={copyReport} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
               style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
               <Icon name="Copy" size={13} /> Копировать
