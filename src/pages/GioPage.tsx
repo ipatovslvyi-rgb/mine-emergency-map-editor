@@ -4,6 +4,7 @@ import Icon from '@/components/ui/icon';
 import LogoSvg from '@/components/ui/LogoSvg';
 import ZvtCalculator from '@/components/gio/ZvtCalculator';
 import TriangleCalculator from '@/components/gio/TriangleCalculator';
+import FireLoadCalculator from '@/components/gio/FireLoadCalculator';
 import InstallButton from '@/components/pwa/InstallButton';
 import NetworkBadge from '@/components/pwa/NetworkBadge';
 import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel';
@@ -14,6 +15,7 @@ import VoiceCodeInput from '@/components/ops/VoiceCodeInput';
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
   { id: 'triangle', label: 'Треугольник', short: 'Треуг.', title: 'Взрываемость рудничной атмосферы (треугольник взрываемости)', icon: 'Triangle' },
+  { id: 'fire', label: 'Пож.нагрузка', short: 'Пожар', title: 'Пожарная нагрузка — мощность пожара техники и конвейерной ленты', icon: 'Flame' },
   { id: 'op', label: 'Операция', short: 'Операция', title: 'Передача расчётов: командир → подземная база и командный пункт', icon: 'RadioTower' },
 ];
 
@@ -143,6 +145,16 @@ const GioPage: React.FC = () => {
               {active.title}
             </h1>
             <TriangleCalculator />
+          </>
+        )}
+
+        {active?.id === 'fire' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Flame" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              {active.title}
+            </h1>
+            <FireLoadCalculator />
           </>
         )}
 
