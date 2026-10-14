@@ -1,5 +1,6 @@
 import type { ZvtResult } from '@/lib/gio/zvt-calc';
 import type { GasZoneResult, VgschInput, VgschResult } from '@/lib/gio/explosion-triangle-calc';
+import type { BeltInputs, Material } from '@/lib/gio/fire-load-calc';
 
 export type OpRole = 'commander' | 'base' | 'kp';
 
@@ -20,12 +21,15 @@ export interface OpMeta {
   squad?: string;
   commander?: string;
   performer?: string;
+  place?: string;
 }
 
 export type OpPayload =
   | { type: 'zvt'; result: ZvtResult; meta: OpMeta }
   | { type: 'vgsch'; input: VgschInput; result: VgschResult; meta: OpMeta }
-  | { type: 'gas'; result: GasZoneResult; meta: OpMeta };
+  | { type: 'gas'; result: GasZoneResult; meta: OpMeta }
+  | { type: 'machine'; name: string; materials: Material[]; flow: number; meta: OpMeta }
+  | { type: 'belt'; input: BeltInputs; meta: OpMeta };
 
 export interface OpEvent {
   client_id: string;

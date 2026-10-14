@@ -8,6 +8,10 @@ import {
 import {
   BELT_FORMULAS, BELT_KEY_TIMES, exportBeltDocx, exportMachineDocx, MACHINE_FORMULAS, printBelt, printMachine,
 } from '@/lib/gio/fireLoadDocs';
+import SendButton from '@/components/ops/SendButton';
+import VoiceCodeCard from '@/components/ops/VoiceCodeCard';
+import { encodeBelt, encodeMachine } from '@/lib/gio/voiceCode';
+import type { OpPayload } from '@/lib/ops/types';
 
 const LS_KEY = 'sau-fire-load-form';
 
@@ -146,9 +150,10 @@ const BeltChart: React.FC<{ r: BeltFireResult }> = ({ r }) => {
   );
 };
 
-const ActionBar: React.FC<{ onCopy: () => void; onWord: () => void; onPrint: () => void; extra?: React.ReactNode }> = ({ onCopy, onWord, onPrint, extra }) => (
+const ActionBar: React.FC<{ onCopy: () => void; onWord: () => void; onPrint: () => void; extra?: React.ReactNode; payload: OpPayload | null }> = ({ onCopy, onWord, onPrint, extra, payload }) => (
   <div className="flex flex-wrap gap-2 justify-end items-center">
     {extra}
+    <SendButton payload={payload} />
     <button onClick={onCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary"
       style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
       <Icon name="Copy" size={13} /> Копировать
@@ -207,6 +212,12 @@ const FireLoadCalculator: React.FC = () => {
 
   const meta = { object: form.object, place: form.place, performer: form.performer };
   const machineName = form.machine || 'Техника';
+  const machineFlow = num(form.machineFlow) || 0;
+
+  const payload: OpPayload | null = machine
+    ? { type: 'machine', name: machineName, materials: mats, flow: machineFlow, meta }
+    : belt ? { type: 'belt', input: beltInp, meta } : null;
+  const machineCode = machine ? encodeMachine(machineName, mats, machineFlow) : null;
 
   const copy = async () => {
     const text = machine ? machineFireReport(machineName, mats, machine, form.performer) : belt ? beltFireReport(beltInp, belt, form.performer) : '';
@@ -387,7 +398,13 @@ const FireLoadCalculator: React.FC = () => {
               </table>
             </div>
             <Formulas items={MACHINE_FORMULAS} />
-            <ActionBar onCopy={copy} onWord={word} onPrint={print} />
+            {machineCode ? <VoiceCodeCard code={machineCode} /> : (
+              <div className="text-xs flex items-start gap-2 rounded p-3 border border-dashed border-border" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                <Icon name="MicOff" size={14} className="flex-shrink-0 mt-0.5" />
+                Голосовой код доступен для техники из справочника или для набора «резина + дизель + масло» со стандартными свойствами. Для изменённого состава материалов используйте кнопку «Передать».
+              </div>
+            )}
+            <ActionBar onCopy={copy} onWord={word} onPrint={print} payload={payload} />
           </>
         )}
 
@@ -431,7 +448,8 @@ const FireLoadCalculator: React.FC = () => {
               </table>
             </div>
             <Formulas items={BELT_FORMULAS} />
-            <ActionBar onCopy={copy} onWord={word} onPrint={print} extra={
+            <VoiceCodeCard code={encodeBelt(beltInp)} />
+            <ActionBar onCopy={copy} onWord={word} onPrint={print} payload={payload} extra={
               <button onClick={() => setFullTable(v => !v)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-border hover:border-primary mr-auto"
                 style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
                 <Icon name={fullTable ? 'ListCollapse' : 'List'} size={13} />

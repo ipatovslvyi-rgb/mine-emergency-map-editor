@@ -6,7 +6,7 @@ import { decodeVoiceCode, GAS_LETTER_HINT, VOICE_FORMATS } from '@/lib/gio/voice
 import { addVoiceEvent } from '@/lib/ops/store';
 import { describePayload } from '@/lib/ops/describe';
 
-const KEYS = ['Т', 'Г', 'З', 'П', 'Н', 'С', 'М', 'В', 'У', 'Э', 'А', ','];
+const KEYS = ['Т', 'Г', 'З', 'ПТ', 'Л', 'П', 'Н', 'С', 'М', 'В', 'У', 'Э', 'А', ',', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 const VoiceCodeInput: React.FC<{ full?: boolean }> = ({ full }) => {
   const [open, setOpen] = useState(false);
@@ -24,9 +24,9 @@ const VoiceCodeInput: React.FC<{ full?: boolean }> = ({ full }) => {
   };
 
   const tap = (k: string) => setCode(c => {
-    if (k === ',') return c + ',';
+    if (k === ',' || /^\d$/.test(k)) return c + k;
     const needDash = c && !c.endsWith('-');
-    return c + (needDash ? '-' : '') + k + (['Т', 'Г', 'З'].includes(k) ? '-' : '');
+    return c + (needDash ? '-' : '') + k + (['Т', 'Г', 'З', 'ПТ', 'Л'].includes(k) ? '-' : '');
   });
 
   return (

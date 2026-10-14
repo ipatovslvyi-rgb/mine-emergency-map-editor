@@ -10,17 +10,23 @@ import { TriangleChart } from '@/components/gio/TriangleCalculator';
 import exportZvtDocx from '@/lib/gio/zvtDocx';
 import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
 import { printGasZone, printVgsch } from '@/lib/gio/trianglePrint';
+import { calcBeltFire, calcMachineFire, fmt } from '@/lib/gio/fire-load-calc';
+import { exportBeltDocx, exportMachineDocx, printBelt, printMachine } from '@/lib/gio/fireLoadDocs';
 
 const fmtTime = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '');
 
 const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
   const p = ev.payload;
+  const mach = p.type === 'machine' ? calcMachineFire(p.materials, p.flow) : null;
+  const belt = p.type === 'belt' ? calcBeltFire(p.input) : null;
 
   const word = async () => {
     try {
       if (p.type === 'zvt') await exportZvtDocx(p.result, p.meta);
       else if (p.type === 'vgsch') await exportVgschDocx(p.input, p.result, p.meta);
-      else await exportGasZoneDocx(p.result, p.meta);
+      else if (p.type === 'gas') await exportGasZoneDocx(p.result, p.meta);
+      else if (p.type === 'machine' && mach) await exportMachineDocx(p.name, p.materials, mach, p.meta);
+      else if (p.type === 'belt' && belt) await exportBeltDocx(p.input, belt, p.meta, false);
       toast.success('Документ Word сохранён');
     } catch {
       toast.error('Не удалось сформировать документ');
@@ -30,6 +36,8 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
   const print = () => {
     if (p.type === 'vgsch') printVgsch(p.input, p.result, p.meta);
     else if (p.type === 'gas') printGasZone(p.result, p.meta);
+    else if (p.type === 'machine' && mach) printMachine(p.name, p.materials, mach, p.meta);
+    else if (p.type === 'belt' && belt) printBelt(p.input, belt, p.meta, false);
   };
 
   return (
@@ -48,6 +56,38 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
         </>
       )}
       {p.type === 'gas' && <div className="text-sm" style={{ lineHeight: 1.5 }}>{p.result.conclusion}</div>}
+      {mach && p.type === 'machine' && (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono-tech">
+            <div>Q = <b>{fmt(mach.powerMW)} МВт</b></div>
+            <div>τ = <b>{fmt(mach.timeMin, 0)} мин</b></div>
+            <div>Δt = <b>{mach.deltaT !== null ? `${fmt(mach.deltaT, 1)} °C` : '—'}</b></div>
+            <div>L = <b>{fmt(p.flow, 1)} м³/с</b></div>
+          </div>
+          <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            {p.materials.map(m => `${m.name} ${m.mass} кг`).join(' · ')}
+          </div>
+          <div className="text-sm" style={{ lineHeight: 1.5 }}>
+            Для расчёта устойчивости вентиляционного режима принимаем мощность пожара <b>{fmt(mach.powerMW)} МВт</b>.
+          </div>
+        </>
+      )}
+      {belt && p.type === 'belt' && (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono-tech">
+            <div>Q30 = <b>{fmt(belt.power30)} МВт</b></div>
+            <div>Q60 = <b>{fmt(belt.power60)} МВт</b></div>
+            <div>Δt = <b>{p.input.flowM3s > 0 ? `${fmt(belt.deltaTmax, 1)} °C` : '—'}</b></div>
+            <div>L = <b>{fmt(p.input.flowM3s, 1)} м³/с</b></div>
+          </div>
+          <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            Лента {p.input.length} × {p.input.width} м, толщина {p.input.thickness} м, ρ = {p.input.density} кг/м³
+          </div>
+          <div className="text-sm" style={{ lineHeight: 1.5 }}>
+            Для расчёта устойчивости вентиляционного режима принимаем мощность пожара <b>{fmt(belt.powerMax)} МВт</b>.
+          </div>
+        </>
+      )}
       {(p.meta.object || p.meta.commander || p.meta.squad) && (
         <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
           {[p.meta.object, p.meta.squad && `отд. №${p.meta.squad}`, p.meta.commander].filter(Boolean).join(' · ')}
@@ -94,7 +134,9 @@ const Row: React.FC<{ ev: OpEvent; open: boolean; onToggle: () => void; latest: 
             )}
           </div>
           <div className="text-sm mt-0.5" style={{ color: ev.danger ? c : 'hsl(var(--foreground))', fontWeight: ev.danger ? 600 : 400 }}>{ev.summary}</div>
-          <div className="text-xs font-mono-tech mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>{encodePayload(ev.payload)}</div>
+          {encodePayload(ev.payload) && (
+            <div className="text-xs font-mono-tech mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>{encodePayload(ev.payload)}</div>
+          )}
         </div>
         <Icon name={open ? 'ChevronUp' : 'ChevronDown'} size={18} style={{ color: 'hsl(var(--muted-foreground))', flexShrink: 0 }} />
       </button>
