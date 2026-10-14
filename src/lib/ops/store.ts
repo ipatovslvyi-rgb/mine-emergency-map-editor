@@ -179,9 +179,11 @@ async function flush() {
 }
 
 let polling = false;
+let primedFor: string | null = null;
 async function poll() {
   const s = state.session;
   if (!s || s.role === 'commander' || polling) return;
+  if (!s.active && primedFor === s.code) return;
   polling = true;
   set({ syncing: true });
   try {
@@ -193,9 +195,12 @@ async function poll() {
     if (fresh.length) {
       patch.events = [...state.events, ...fresh];
       const danger = [...fresh].reverse().find(e => e.danger);
-      if (danger && after > 0) patch.lastDanger = danger;
-      if (after > 0) signal(!!danger);
+      if (primedFor === s.code) {
+        if (danger) patch.lastDanger = danger;
+        signal(!!danger);
+      }
     }
+    primedFor = s.code;
     if (r.active !== s.active || r.title !== s.title) patch.session = { ...s, active: r.active, title: r.title };
     set(patch);
   } catch (e) {
@@ -247,6 +252,9 @@ let started = false;
 export function startOpsSync() {
   if (started || typeof window === 'undefined') return;
   started = true;
+  const unlock = () => unlockAudio();
+  window.addEventListener('pointerdown', unlock, { passive: true });
+  window.addEventListener('keydown', unlock);
   window.addEventListener('online', () => { set({ online: true }); kick(); });
   window.addEventListener('offline', () => set({ online: false }));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });

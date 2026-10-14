@@ -165,7 +165,7 @@ const OperationSetup: React.FC = () => {
         <ol className="flex flex-col gap-2 list-decimal pl-5" style={{ color: 'hsl(var(--muted-foreground))' }}>
           <li><b style={{ color: 'hsl(var(--foreground))' }}>Командир</b> нажимает «Начать операцию» и получает код из 4 цифр.</li>
           <li><b style={{ color: 'hsl(var(--foreground))' }}>Подземная база</b> и <b style={{ color: 'hsl(var(--foreground))' }}>командный пункт</b> вводят этот код у себя.</li>
-          <li>Командир делает расчёт в ЗВТ или «Треугольнике» и нажимает <b style={{ color: 'hsl(var(--foreground))' }}>«Передать»</b>.</li>
+          <li>Командир делает расчёт (ЗВТ, «Треугольник», пожарная нагрузка) и нажимает <b style={{ color: 'hsl(var(--foreground))' }}>«Передать»</b>.</li>
           <li>Расчёт появляется на двух других устройствах через несколько секунд. Опасный результат — со звуком и вибрацией.</li>
         </ol>
         <div className="flex gap-2 items-start text-xs rounded p-3" style={{ background: 'hsl(var(--warning) / 0.1)' }}>

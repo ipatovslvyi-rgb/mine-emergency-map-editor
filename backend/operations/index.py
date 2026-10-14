@@ -71,7 +71,10 @@ def create(cur, body: dict) -> dict:
     token = secrets.token_hex(24)
     for _ in range(20):
         code = ''.join(secrets.choice(CODE_ALPHABET) for _ in range(4))
-        cur.execute('SELECT 1 FROM operations WHERE code = %s AND is_active = TRUE', (code,))
+        cur.execute(
+            "SELECT 1 FROM operations WHERE code = %s AND is_active = TRUE AND created_at > NOW() - INTERVAL '48 hours'",
+            (code,),
+        )
         if cur.fetchone():
             continue
         cur.execute('DELETE FROM operation_events WHERE operation_id IN (SELECT id FROM operations WHERE code = %s)', (code,))
