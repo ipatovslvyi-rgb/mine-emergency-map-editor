@@ -6,7 +6,7 @@ import { decodeVoiceCode, GAS_LETTER_HINT, VOICE_FORMATS } from '@/lib/gio/voice
 import { addVoiceEvent } from '@/lib/ops/store';
 import { describePayload } from '@/lib/ops/describe';
 
-const KEYS = ['Т', 'Г', 'З', 'ПТ', 'Л', 'П', 'Н', 'С', 'М', 'В', 'У', 'Э', 'А', ',', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+const KEYS = ['Т', 'Г', 'З', 'ПТ', 'Л', 'Д', 'А', 'П', 'Н', 'С', 'М', 'В', 'У', 'Э', 'Х', ',', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 const VoiceCodeInput: React.FC<{ full?: boolean }> = ({ full }) => {
   const [open, setOpen] = useState(false);
@@ -26,7 +26,7 @@ const VoiceCodeInput: React.FC<{ full?: boolean }> = ({ full }) => {
   const tap = (k: string) => setCode(c => {
     if (k === ',' || /^\d$/.test(k)) return c + k;
     const needDash = c && !c.endsWith('-');
-    return c + (needDash ? '-' : '') + k + (['Т', 'Г', 'З', 'ПТ', 'Л'].includes(k) ? '-' : '');
+    return c + (needDash ? '-' : '') + k + (!c && ['Т', 'Г', 'З', 'ПТ', 'Л', 'Д', 'А'].includes(k) ? '-' : '');
   });
 
   return (
@@ -52,7 +52,7 @@ const VoiceCodeInput: React.FC<{ full?: boolean }> = ({ full }) => {
             className="w-full rounded px-3 py-3 text-2xl font-mono-tech font-bold text-center outline-none border-2 focus:border-primary"
             style={{ background: 'hsl(var(--input))', color: 'hsl(var(--foreground))', borderColor: parsed && !parsed.ok ? 'hsl(var(--danger))' : 'hsl(var(--border))' }} />
 
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className="grid grid-cols-7 gap-1.5">
             {KEYS.map(k => (
               <button key={k} onClick={() => tap(k)}
                 className="py-2.5 rounded font-bold text-base border border-border hover:border-primary"

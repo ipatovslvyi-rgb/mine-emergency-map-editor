@@ -1,6 +1,8 @@
 import { calcZVT, isZvtError, ZvtResult } from './zvt-calc';
 import { GASES, calcGasZone, calcVgschTriangle } from './explosion-triangle-calc';
 import type { OpPayload } from '@/lib/ops/types';
+import { calcDa, DaInput, isDaError } from './da-calc';
+import { ATMO_DEFAULT_LIMITS, AtmoRow, calcAtmo } from './atmo-calc';
 import { BELT_DEFAULTS, BeltInputs, calcBeltFire, calcMachineFire, MACHINE_PRESETS, machineMaterials, Material } from './fire-load-calc';
 
 const GAS_LETTERS: Record<string, string> = {
@@ -15,7 +17,7 @@ const GAS_LETTERS: Record<string, string> = {
 const GAS_BY_LETTER: Record<string, string> = Object.fromEntries(Object.entries(GAS_LETTERS).map(([k, v]) => [v, k]));
 
 const LATIN_TO_CYR: Record<string, string> = {
-  T: 'Т', G: 'Г', Z: 'З', L: 'Л', M: 'М', V: 'В', B: 'В', U: 'У', Y: 'У', E: 'Э', P: 'П', A: 'А', N: 'Н', H: 'Н', S: 'С', C: 'С',
+  T: 'Т', G: 'Г', Z: 'З', L: 'Л', D: 'Д', X: 'Х', M: 'М', V: 'В', B: 'В', U: 'У', Y: 'У', E: 'Э', P: 'П', A: 'А', N: 'Н', H: 'Н', S: 'С', C: 'С',
 };
 
 const num = (n: number) => {
@@ -60,7 +62,41 @@ export function encodeBelt(i: BeltInputs): string {
   return short ? base : `${base}-${num(i.thickness)}-${num(i.density)}-${num(i.burnRate)}-${num(i.flameSpeed)}`;
 }
 
+const hhmm = (t?: string) => (t && /^\d{1,2}:\d{2}$/.test(t) ? t.replace(':', '').padStart(4, '0') : null);
+
+export function encodeDa(i: DaInput): string | null {
+  const ps = i.members.map(m => m.pressure).filter((v): v is number => v !== null && isFinite(v));
+  if (!ps.length) return null;
+  const parts = ['Д', num(Math.min(...ps)), i.route === 'third' ? '3' : '2'];
+  const t = hhmm(i.entryTime);
+  if (t) {
+    parts.push(t);
+    if (i.control && isFinite(i.control.minutes) && i.control.minutes > 0 && isFinite(i.control.current)) {
+      parts.push(num(i.control.minutes), num(i.control.current));
+    }
+  }
+  if (i.transport) parts.push('Т');
+  return parts.join('-');
+}
+
+const optNum = (v: number | null | undefined) => (v === null || v === undefined || !isFinite(v) ? 'Х' : num(v));
+
+export function encodeAtmo(rows: AtmoRow[], rise5?: number | null): string | null {
+  const last = rows[rows.length - 1];
+  const t = hhmm(last?.time);
+  if (!t) return null;
+  const parts = ['А', t, optNum(last.o2), optNum(last.co), optNum(last.ch4), optNum(last.temp)];
+  if (rise5 !== null && rise5 !== undefined && isFinite(rise5) && rise5 > 0) parts.push(num(Math.round(rise5 * 10) / 10));
+  return parts.join('-');
+}
+
 export function encodePayload(p: OpPayload): string | null {
+  if (p.type === 'da') return encodeDa(p.input);
+  if (p.type === 'atmo') {
+    const r = calcAtmo(p.rows, p.limits, p.rise5);
+    const lastRise = r ? r.evals[r.evals.length - 1].rise5 : null;
+    return encodeAtmo(p.rows, lastRise);
+  }
   if (p.type === 'zvt') return encodeZvt(p.result);
   if (p.type === 'vgsch') return encodeVgsch(p.input);
   if (p.type === 'machine') return encodeMachine(p.name, p.materials, p.flow);
@@ -74,6 +110,8 @@ const SPOKEN: Record<string, string> = {
   З: 'Зэ (ЗВТ)',
   ПТ: 'Пэ-Тэ (пожар техники)',
   Л: 'Эл (лента)',
+  Д: 'Дэ (давление ДА)',
+  А: 'А (атмосфера)',
   П: 'передвижение',
   Н: 'на месте',
   С: 'спасение',
@@ -96,7 +134,17 @@ export function spokenCode(code: string) {
       const m = MACHINE_PRESETS[+tok - 1];
       return m ? `номер ${tok} (${m.name})` : tok;
     }
-    if (kind !== 'ПТ' && kind !== 'Л' && /^[ПНС]$/.test(tok)) return SPOKEN[tok];
+    if (kind === 'Д') {
+      if (i === 2) return tok === '3' ? 'треть' : 'половина';
+      if (i === 3 && /^\d{4}$/.test(tok)) return `${tok.slice(0, 2)} ${tok.slice(2)}`;
+      if (tok === 'Т') return 'транспорт';
+    }
+    if (kind === 'А') {
+      if (i === 1) return `${tok.slice(0, 2)} ${tok.slice(2)}`;
+      if (tok === 'Х') return 'нет';
+      if (i === 6) return `рост ${tok.replace(',', ' запятая ')}`;
+    }
+    if (kind !== 'ПТ' && kind !== 'Л' && kind !== 'Д' && kind !== 'А' && /^[ПНС]$/.test(tok)) return SPOKEN[tok];
     return tok.replace(/^м/, 'минус ').replace(',', ' запятая ');
   }).join(' — ');
 }
@@ -198,7 +246,54 @@ export function decodeVoiceCode(raw: string): DecodeResult {
     return { ok: true, payload: { type: 'belt', input, meta: {} }, code: encodeBelt(input) };
   }
 
-  return { ok: false, error: 'Код должен начинаться с Т (треугольник), Г (газ), З (ЗВТ), ПТ (пожар техники) или Л (лента)' };
+  if (kind === 'Д') {
+    const transport = rest[rest.length - 1] === 'Т';
+    const r0 = transport ? rest.slice(0, -1) : rest;
+    if (![2, 3, 5].includes(r0.length)) {
+      return { ok: false, error: 'Код ДА: Д-давление-2/3[-ЧЧММ][-минуты-давление сейчас][-Т], например Д-190-2-1400-20-170' };
+    }
+    const pmin = parseNum(r0[0]);
+    if (isNaN(pmin) || pmin <= 0) return { ok: false, error: 'Минимальное давление — число, кгс/см²' };
+    if (r0[1] !== '2' && r0[1] !== '3') return { ok: false, error: 'Вторая цифра: 2 — половина запаса вперёд, 3 — треть (спуск более 10°)' };
+    let entryTime: string | undefined;
+    if (r0.length >= 3) {
+      const d = r0[2].replace(/[:.,]/g, '');
+      if (!/^\d{3,4}$/.test(d)) return { ok: false, error: 'Время включения — 4 цифры, например 1400' };
+      const p = d.padStart(4, '0');
+      if (+p.slice(0, 2) > 23 || +p.slice(2) > 59) return { ok: false, error: 'Неверное время включения' };
+      entryTime = `${p.slice(0, 2)}:${p.slice(2)}`;
+    }
+    let control: DaInput['control'] = null;
+    if (r0.length === 5) {
+      const minutes = parseNum(r0[3]), current = parseNum(r0[4]);
+      if (isNaN(minutes) || isNaN(current) || minutes <= 0) return { ok: false, error: 'Контроль: минуты с включения и текущее давление' };
+      control = { minutes, current, start: pmin };
+    }
+    const input: DaInput = { members: [{ label: 'мин. манометр', pressure: pmin }], route: r0[1] === '3' ? 'third' : 'half', transport, entryTime, control };
+    const r = calcDa(input);
+    if (isDaError(r)) return { ok: false, error: r.error };
+    return { ok: true, payload: { type: 'da', input, meta: {} }, code: encodeDa(input) ?? raw };
+  }
+
+  if (kind === 'А') {
+    if (rest.length !== 5 && rest.length !== 6) {
+      return { ok: false, error: 'Код атмосферы: А-ЧЧММ-O₂-CO-CH₄-t[-рост t за 5 мин], нет замера — Х. Пример: А-1408-19,5-0,006-1,2-29,5-3,5' };
+    }
+    const d = rest[0].replace(/[:.,]/g, '');
+    if (!/^\d{3,4}$/.test(d)) return { ok: false, error: 'Время замера — 4 цифры, например 1408' };
+    const p = d.padStart(4, '0');
+    if (+p.slice(0, 2) > 23 || +p.slice(2) > 59) return { ok: false, error: 'Неверное время замера' };
+    const vals = rest.slice(1, 5).map(t => (t === 'Х' || t === 'X' ? null : parseNum(t)));
+    if (vals.some(v => v !== null && isNaN(v))) return { ok: false, error: 'Значения — числа, нет замера — буква Х' };
+    const [o2, co, ch4, temp] = vals;
+    if ([o2, co, ch4].some(v => v !== null && (v < 0 || v > 100))) return { ok: false, error: 'Концентрации — от 0 до 100%' };
+    const rise5 = rest[5] ? parseNum(rest[5]) : null;
+    if (rise5 !== null && isNaN(rise5)) return { ok: false, error: 'Рост температуры — число, °C за 5 мин' };
+    const rows: AtmoRow[] = [{ time: `${p.slice(0, 2)}:${p.slice(2)}`, o2, co, ch4, temp }];
+    return { ok: true, payload: { type: 'atmo', rows, limits: ATMO_DEFAULT_LIMITS, rise5, meta: {} }, code: encodeAtmo(rows, rise5) ?? raw };
+  }
+
+  return { ok: false, error: 'Код должен начинаться с Т, Г, З, ПТ, Л, Д (давление ДА) или А (атмосфера)' };
 }
 
 export const VOICE_FORMATS = [
@@ -207,6 +302,8 @@ export const VOICE_FORMATS = [
   { code: 'З-1430-35-П', desc: 'ЗВТ: время входа – температура – П (передвижение) / Н (на месте), в конце -С при спасении людей' },
   { code: 'ПТ-1-39,6', desc: 'Пожар техники: номер в справочнике – расход воздуха, м³/с (или ПТ-резина-дизель-масло-расход, кг)' },
   { code: 'Л-640-0,8-12', desc: 'Пожар ленты: длина, м – ширина, м – расход воздуха, м³/с' },
+  { code: 'Д-190-2-1400-20-170', desc: 'Давление ДА: мин. давление – 2 (½ вперёд) / 3 (⅓, спуск >10°) – время включения – минут прошло – давление сейчас; -Т на транспорте' },
+  { code: 'А-1408-19,5-0,006-1,2-29,5', desc: 'Атмосфера: время – O₂ – CO – CH₄, % – t, °C – [рост t за 5 мин]; нет замера — Х' },
 ];
 
 export const GAS_LETTER_HINT = GASES.map(g => `${GAS_LETTERS[g.key]} — ${g.name.toLowerCase()}`).join(', ');

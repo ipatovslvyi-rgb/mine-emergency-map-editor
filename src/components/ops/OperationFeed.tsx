@@ -12,6 +12,11 @@ import { exportGasZoneDocx, exportVgschDocx } from '@/lib/gio/triangleDocx';
 import { printGasZone, printVgsch } from '@/lib/gio/trianglePrint';
 import { calcBeltFire, calcMachineFire, fmt } from '@/lib/gio/fire-load-calc';
 import { exportBeltDocx, exportMachineDocx, printBelt, printMachine } from '@/lib/gio/fireLoadDocs';
+import { calcDa, isDaError } from '@/lib/gio/da-calc';
+import { calcAtmo } from '@/lib/gio/atmo-calc';
+import { exportAtmoDocx, exportDaDocx, printAtmo, printDa } from '@/lib/gio/ustavDocs';
+import { DaGauge } from '@/components/gio/DaCalculator';
+import { AtmoAlarms, AtmoChart, AtmoTable } from '@/components/gio/AtmoCalculator';
 
 const fmtTime = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '');
 
@@ -19,6 +24,9 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
   const p = ev.payload;
   const mach = p.type === 'machine' ? calcMachineFire(p.materials, p.flow) : null;
   const belt = p.type === 'belt' ? calcBeltFire(p.input) : null;
+  const daRes = p.type === 'da' ? calcDa(p.input) : null;
+  const da = daRes && !isDaError(daRes) ? daRes : null;
+  const atmo = p.type === 'atmo' ? calcAtmo(p.rows, p.limits, p.rise5) : null;
 
   const word = async () => {
     try {
@@ -27,6 +35,8 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
       else if (p.type === 'gas') await exportGasZoneDocx(p.result, p.meta);
       else if (p.type === 'machine' && mach) await exportMachineDocx(p.name, p.materials, mach, p.meta);
       else if (p.type === 'belt' && belt) await exportBeltDocx(p.input, belt, p.meta, false);
+      else if (p.type === 'da' && da) await exportDaDocx(p.input, da, p.meta);
+      else if (p.type === 'atmo' && atmo) await exportAtmoDocx(atmo, p.limits, p.meta);
       toast.success('Документ Word сохранён');
     } catch {
       toast.error('Не удалось сформировать документ');
@@ -38,6 +48,8 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
     else if (p.type === 'gas') printGasZone(p.result, p.meta);
     else if (p.type === 'machine' && mach) printMachine(p.name, p.materials, mach, p.meta);
     else if (p.type === 'belt' && belt) printBelt(p.input, belt, p.meta, false);
+    else if (p.type === 'da' && da) printDa(p.input, da, p.meta);
+    else if (p.type === 'atmo' && atmo) printAtmo(atmo, p.limits, p.meta);
   };
 
   return (
@@ -72,6 +84,29 @@ const Detail: React.FC<{ ev: OpEvent }> = ({ ev }) => {
           </div>
         </>
       )}
+      {p.type === 'da' && daRes && isDaError(daRes) && <div className="text-sm font-semibold" style={{ color: 'hsl(var(--danger))' }}>{daRes.error}</div>}
+      {da && p.type === 'da' && (
+        <>
+          <div className="text-sm font-semibold" style={{ color: da.danger ? 'hsl(var(--danger))' : 'hsl(var(--foreground))' }}>{da.verdict}</div>
+          <DaGauge r={da} start={da.control?.start ?? da.pmin} />
+          {da.control && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono-tech">
+              <div>расход <b>{da.control.rate.toFixed(2).replace('.', ',')}</b>/мин</div>
+              <div>поворот <b>{da.control.mustReturn ? 'СЕЙЧАС' : da.control.turnClock ?? '—'}</b></div>
+              <div>выход до <b>{da.control.exitClock ?? '—'}</b></div>
+              <div>сейчас <b>{da.control.current}</b> кгс/см²</div>
+            </div>
+          )}
+        </>
+      )}
+      {atmo && p.type === 'atmo' && (
+        <>
+          <AtmoAlarms r={atmo} onlyLast />
+          <AtmoChart r={atmo} limits={p.limits} />
+          <AtmoTable r={atmo} />
+        </>
+      )}
+      {(p.meta.place) && <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>Место: {p.meta.place}</div>}
       {belt && p.type === 'belt' && (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono-tech">

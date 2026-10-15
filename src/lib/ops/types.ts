@@ -1,6 +1,8 @@
 import type { ZvtResult } from '@/lib/gio/zvt-calc';
 import type { GasZoneResult, VgschInput, VgschResult } from '@/lib/gio/explosion-triangle-calc';
 import type { BeltInputs, Material } from '@/lib/gio/fire-load-calc';
+import type { DaInput } from '@/lib/gio/da-calc';
+import type { AtmoLimits, AtmoRow } from '@/lib/gio/atmo-calc';
 
 export type OpRole = 'commander' | 'base' | 'kp';
 
@@ -29,7 +31,9 @@ export type OpPayload =
   | { type: 'vgsch'; input: VgschInput; result: VgschResult; meta: OpMeta }
   | { type: 'gas'; result: GasZoneResult; meta: OpMeta }
   | { type: 'machine'; name: string; materials: Material[]; flow: number; meta: OpMeta }
-  | { type: 'belt'; input: BeltInputs; meta: OpMeta };
+  | { type: 'belt'; input: BeltInputs; meta: OpMeta }
+  | { type: 'da'; input: DaInput; meta: OpMeta }
+  | { type: 'atmo'; rows: AtmoRow[]; limits: AtmoLimits; rise5?: number | null; meta: OpMeta };
 
 export interface OpEvent {
   client_id: string;

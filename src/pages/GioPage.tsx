@@ -5,6 +5,8 @@ import LogoSvg from '@/components/ui/LogoSvg';
 import ZvtCalculator from '@/components/gio/ZvtCalculator';
 import TriangleCalculator from '@/components/gio/TriangleCalculator';
 import FireLoadCalculator from '@/components/gio/FireLoadCalculator';
+import DaCalculator from '@/components/gio/DaCalculator';
+import AtmoCalculator from '@/components/gio/AtmoCalculator';
 import InstallButton from '@/components/pwa/InstallButton';
 import NetworkBadge from '@/components/pwa/NetworkBadge';
 import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel';
@@ -15,6 +17,8 @@ import VoiceCodeInput from '@/components/ops/VoiceCodeInput';
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
   { id: 'triangle', label: 'Треугольник', short: 'Треуг.', title: 'Взрываемость рудничной атмосферы (треугольник взрываемости)', icon: 'Triangle' },
+  { id: 'da', label: 'Давление ДА', short: 'ДА', title: 'Давление поворота дыхательного аппарата (Устав ВГСЧ, п. 22–23)', icon: 'Gauge' },
+  { id: 'atmo', label: 'Атмосфера', short: 'Атмосф.', title: 'Журнал замеров рудничной атмосферы с тревогами (Устав ВГСЧ, Приложение 4)', icon: 'Wind' },
   { id: 'fire', label: 'Пож.нагрузка', short: 'Пожар', title: 'Пожарная нагрузка — мощность пожара техники и конвейерной ленты', icon: 'Flame' },
   { id: 'op', label: 'Операция', short: 'Операция', title: 'Передача расчётов: командир → подземная база и командный пункт', icon: 'RadioTower' },
 ];
@@ -44,11 +48,11 @@ const GioPage: React.FC = () => {
       <div className="sticky top-0 z-30 flex items-center h-14 md:h-12 px-3 gap-2 border-b border-border flex-shrink-0" style={{ background: 'hsl(var(--toolbar-bg))', paddingTop: 'env(safe-area-inset-top)' }}>
         <LogoSvg className="w-7 h-7 rounded" />
         <span className="text-sm font-semibold">ГИО</span>
-        <span className="text-xs hidden sm:inline" style={{ color: 'hsl(var(--muted-foreground))' }}>группа инженерного обеспечения</span>
+        <span className="text-xs hidden sm:inline md:hidden" style={{ color: 'hsl(var(--muted-foreground))' }}>группа инженерного обеспечения</span>
         <div className="h-5 border-l border-border mx-2 hidden md:block" />
         {TOOLS.map(t => (
           <button key={t.id}
-            className={`tab-btn hidden md:flex items-center gap-1.5 ${tool === t.id ? 'active' : ''}`}
+            className={`tab-btn hidden md:flex items-center gap-1.5 whitespace-nowrap ${tool === t.id ? 'active' : ''}`}
             onClick={() => navigate(`/gio/${t.id}`)}
             title={t.title}>
             <Icon name={t.icon} size={13} />
@@ -60,10 +64,10 @@ const GioPage: React.FC = () => {
           <NetworkBadge />
           <InstallButton compact />
           {active && (
-            <button className="hidden md:flex items-center gap-1 text-xs px-2 py-1 rounded hover:text-foreground"
+            <button className="hidden md:flex items-center gap-1 text-xs px-2 py-1 rounded hover:text-foreground whitespace-nowrap"
               style={{ color: 'hsl(var(--muted-foreground))' }}
               onClick={() => navigate('/gio')}>
-              <Icon name="LayoutGrid" size={13} /> Все расчёты
+              <Icon name="LayoutGrid" size={13} /> <span className="hidden xl:inline">Все расчёты</span>
             </button>
           )}
         </div>
@@ -148,6 +152,26 @@ const GioPage: React.FC = () => {
           </>
         )}
 
+        {active?.id === 'da' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Gauge" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              {active.title}
+            </h1>
+            <DaCalculator />
+          </>
+        )}
+
+        {active?.id === 'atmo' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Wind" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              {active.title}
+            </h1>
+            <AtmoCalculator />
+          </>
+        )}
+
         {active?.id === 'fire' && (
           <>
             <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -168,7 +192,15 @@ const GioPage: React.FC = () => {
               <div className="flex flex-col gap-4">
                 <OperationStatus />
                 {session.role === 'commander' && session.active && (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button onClick={() => navigate('/gio/da')} className="flex items-center justify-center gap-2 py-3 rounded font-semibold text-sm border border-border hover:border-primary"
+                      style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+                      <Icon name="Gauge" size={16} /> Давление ДА
+                    </button>
+                    <button onClick={() => navigate('/gio/atmo')} className="flex items-center justify-center gap-2 py-3 rounded font-semibold text-sm border border-border hover:border-primary"
+                      style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
+                      <Icon name="Wind" size={16} /> Атмосфера
+                    </button>
                     <button onClick={() => navigate('/gio/zvt')} className="flex items-center justify-center gap-2 py-3 rounded font-semibold text-sm border border-border hover:border-primary"
                       style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}>
                       <Icon name="Thermometer" size={16} /> Расчёт ЗВТ

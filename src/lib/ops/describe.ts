@@ -1,5 +1,7 @@
 import { OpPayload } from './types';
 import { calcBeltFire, calcMachineFire, fmt } from '@/lib/gio/fire-load-calc';
+import { calcDa, fmt1, fmtMin, isDaError } from '@/lib/gio/da-calc';
+import { calcAtmo, fmtPct } from '@/lib/gio/atmo-calc';
 
 export const KIND_LABELS: Record<OpPayload['type'], string> = {
   zvt: 'ЗВТ',
@@ -7,6 +9,8 @@ export const KIND_LABELS: Record<OpPayload['type'], string> = {
   gas: 'Взрываемость газа',
   machine: 'Пожар техники',
   belt: 'Пожар ленты',
+  da: 'Давление ДА',
+  atmo: 'Атмосфера',
 };
 
 export const KIND_ICONS: Record<OpPayload['type'], string> = {
@@ -15,6 +19,8 @@ export const KIND_ICONS: Record<OpPayload['type'], string> = {
   gas: 'Flame',
   machine: 'Truck',
   belt: 'GalleryHorizontal',
+  da: 'Gauge',
+  atmo: 'Wind',
 };
 
 export function describePayload(p: OpPayload): { danger: boolean; summary: string } {
@@ -40,6 +46,22 @@ export function describePayload(p: OpPayload): { danger: boolean; summary: strin
       danger: false,
       summary: `${p.name}: Q = ${fmt(r.powerMW)} МВт, ${fmt(r.timeMin, 0)} мин${r.deltaT !== null ? `, Δt = ${fmt(r.deltaT, 1)} °C` : ''}`,
     };
+  }
+  if (p.type === 'da') {
+    const r = calcDa(p.input);
+    if (isDaError(r)) return { danger: true, summary: r.error };
+    const c = r.control;
+    const tail = c
+      ? c.mustReturn ? `, сейчас ${c.current} — ВОЗВРАЩЕНИЕ` : `, сейчас ${c.current}, до поворота ${fmtMin(c.toTurnMin)}${c.turnClock ? ` (${c.turnClock})` : ''}`
+      : r.estTurnClock ? `, поворот ≈ ${r.estTurnClock}` : '';
+    return { danger: r.danger, summary: `Pmin ${r.pmin}, поворот при ${fmt1(r.turnPressure)} кгс/см²${tail}` };
+  }
+  if (p.type === 'atmo') {
+    const r = calcAtmo(p.rows, p.limits, p.rise5);
+    if (!r) return { danger: false, summary: 'Нет замеров' };
+    const l = r.last;
+    const parts = [l.o2 != null && `O₂ ${fmtPct(l.o2)}`, l.co != null && `CO ${fmtPct(l.co)}`, l.ch4 != null && `CH₄ ${fmtPct(l.ch4)}`, l.temp != null && `t ${fmtPct(l.temp)} °C`].filter(Boolean).join(', ');
+    return { danger: r.danger, summary: `${r.verdict}: ${l.time} ${parts}` };
   }
   if (p.type === 'belt') {
     const r = calcBeltFire(p.input);
