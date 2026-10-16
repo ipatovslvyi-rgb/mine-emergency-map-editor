@@ -91,8 +91,8 @@ export function timerCalc(s: DaTimerState, at = Date.now()): DaTimerCalc | null 
   const r = calcDa(timerInput(s));
   if (isDaError(r)) return null;
   const last = s.readings[s.readings.length - 1];
-  const rateKnown = !!(r.control && r.control.rate > 0);
-  const rate = rateKnown ? r.control!.rate : r.forwardUse / r.estForwardMin;
+  const rateKnown = !!r.control?.rateReliable;
+  const rate = r.control ? r.control.rate : r.forwardUse / r.estForwardMin;
   const base = last ?? { at: s.startedAt, pressure: s.pmin };
   const minsFromBase = (at - base.at) / 60000;
   const estNow = Math.max(0, base.pressure - rate * minsFromBase);

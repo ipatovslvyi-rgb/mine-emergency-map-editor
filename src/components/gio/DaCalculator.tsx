@@ -288,7 +288,7 @@ const DaCalculator: React.FC = () => {
 
             {r.control ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Stat label="Фактический расход" value={r.control.rate.toFixed(2).replace('.', ',')} unit="кгс/см²/мин" sub={r.control.member} />
+                <Stat label={r.control.rateReliable ? 'Фактический расход' : 'Расход (средний)'} value={r.control.rate.toFixed(2).replace('.', ',')} unit="кгс/см²/мин" sub={r.control.member} />
                 <Stat label="До поворота" value={r.control.mustReturn ? '0' : fmtMin(r.control.toTurnMin).replace(' мин', '')} unit="мин" accent={!r.control.mustReturn}
                   sub={r.control.turnClock ? `в ${r.control.turnClock}` : undefined} />
                 <Stat label="На возвращение" value={fmtMin(r.control.returnMin).replace(' мин', '')} unit="мин" sub="до резерва 50" />

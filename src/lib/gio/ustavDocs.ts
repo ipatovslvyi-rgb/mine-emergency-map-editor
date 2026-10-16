@@ -96,7 +96,7 @@ const daRows = (input: DaInput, r: DaResult): { src: [string, string, boolean?][
       ['Контроль по манометру', c.member],
       ['Прошло с момента включения', `${c.minutes} мин${c.nowClock ? ` (${c.nowClock})` : ''}`],
       ['Давление: начальное / текущее', `${c.start} / ${c.current} кгс/см²`],
-      ['Фактический расход', `${c.rate.toFixed(2).replace('.', ',')} кгс/см²/мин`],
+      [c.rateReliable ? 'Фактический расход' : 'Расход (средний, данных мало)', `${c.rate.toFixed(2).replace('.', ',')} кгс/см²/мин`],
       ['Время до поворота', c.mustReturn ? 'ПОВОРОТ НАЗАД' : `${fmtMin(c.toTurnMin)}${c.turnClock ? ` (в ${c.turnClock})` : ''}`, true],
       ['Время на возвращение до резерва', fmtMin(c.returnMin)],
       ['Выход на ПБ не позднее', c.exitClock ?? '—', true],

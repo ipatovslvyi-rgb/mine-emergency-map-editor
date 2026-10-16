@@ -14,6 +14,10 @@ export const DA_NOMINAL_PRESSURE = 200
 export const DA_NOMINAL_MIN = 240
 export const DA_NOMINAL_RATE = DA_NOMINAL_PRESSURE / DA_NOMINAL_MIN
 
+/** Фактический расход считаем только при достаточных данных: манометр ДА имеет цену деления ~5–10 кгс/см² */
+export const DA_RATE_MIN_MINUTES = 5
+export const DA_RATE_MIN_DROP = 10
+
 export type DaRoute = 'half' | 'third'
 
 export const DA_ROUTES: Record<DaRoute, { label: string; short: string; share: number; text: string }> = {
@@ -57,6 +61,7 @@ export interface DaControlResult {
   current: number
   minutes: number
   rate: number
+  rateReliable: boolean
   used: number
   mustReturn: boolean
   toTurnMin: number
@@ -123,7 +128,8 @@ export function calcDa(input: DaInput): DaResult | DaError {
   if (c && isFinite(c.minutes) && c.minutes > 0 && isFinite(c.current)) {
     const start = c.start !== null && c.start !== undefined && isFinite(c.start) ? c.start : pmin
     const used = start - c.current
-    const rate = used > 0 ? used / c.minutes : 0
+    const rateReliable = c.minutes >= DA_RATE_MIN_MINUTES && used >= DA_RATE_MIN_DROP
+    const rate = rateReliable ? used / c.minutes : DA_NOMINAL_RATE
     const mustReturn = c.current <= turnPressure
     const toTurnMin = rate > 0 ? Math.max(0, (c.current - turnPressure) / rate) : Infinity
     const fromP = mustReturn ? c.current : turnPressure
@@ -135,6 +141,7 @@ export function calcDa(input: DaInput): DaResult | DaError {
       current: c.current,
       minutes: c.minutes,
       rate,
+      rateReliable,
       used,
       mustReturn,
       toTurnMin,
@@ -144,7 +151,8 @@ export function calcDa(input: DaInput): DaResult | DaError {
       exitClock: addMin(input.entryTime, c.minutes + (mustReturn ? 0 : toTurnMin) + returnMin),
     }
     if (c.current <= DA_RESERVE) advice.push('Давление достигло резерва — немедленный выход на ПБ, доклад на КП (Код 2, сообщение 2).')
-    if (rate > DA_NOMINAL_RATE * 1.5) advice.push(`Фактический расход ${rate.toFixed(2).replace('.', ',')} кгс/см²/мин заметно выше среднего — уточняйте давление чаще.`)
+    if (!rateReliable) advice.push(`Данных для фактического расхода пока мало (нужно не менее ${DA_RATE_MIN_MINUTES} мин и падение не менее ${DA_RATE_MIN_DROP} кгс/см²) — прогноз времени по среднему расходу ${DA_NOMINAL_RATE.toFixed(2).replace('.', ',')} кгс/см²/мин. Давление поворота от этого не зависит.`)
+    if (rateReliable && rate > DA_NOMINAL_RATE * 1.5) advice.push(`Фактический расход ${rate.toFixed(2).replace('.', ',')} кгс/см²/мин заметно выше среднего — уточняйте давление чаще.`)
   }
 
   if (input.transport) advice.push('Отделение движется на транспорте: запас на обратный путь рассчитан из условия возвращения пешком (п. 22).')
@@ -197,7 +205,7 @@ export function daReport(input: DaInput, r: DaResult): string {
     lines.push(
       '',
       `Контроль (${c.member}): через ${c.minutes} мин давление ${c.current} кгс/см² (было ${c.start})`,
-      `Фактический расход: ${c.rate.toFixed(2).replace('.', ',')} кгс/см²/мин`,
+      `${c.rateReliable ? 'Фактический' : 'Средний (данных мало)'} расход: ${c.rate.toFixed(2).replace('.', ',')} кгс/см²/мин`,
       c.mustReturn ? 'ТРЕБУЕТСЯ ВОЗВРАЩЕНИЕ' : `До поворота: ${fmtMin(c.toTurnMin)}${c.turnClock ? ` (в ${c.turnClock})` : ''}`,
       `Время на возвращение до резерва: ${fmtMin(c.returnMin)}${c.exitClock ? `, выход не позднее ${c.exitClock}` : ''}`,
     )
