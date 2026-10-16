@@ -216,6 +216,10 @@ export function dismissDanger() {
 }
 
 let audio: AudioContext | null = null;
+export function playSignal(danger: boolean) {
+  signal(danger);
+}
+
 function signal(danger: boolean) {
   try {
     navigator.vibrate?.(danger ? [400, 150, 400, 150, 600] : [150]);

@@ -13,6 +13,7 @@ import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel
 import OperationFeed, { DangerAlert } from '@/components/ops/OperationFeed';
 import { startOpsSync, useOps } from '@/lib/ops/store';
 import VoiceCodeInput from '@/components/ops/VoiceCodeInput';
+import { DaTimerAlertOverlay, DaTimerBar } from '@/components/gio/DaTimer';
 
 const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
@@ -95,8 +96,10 @@ const GioPage: React.FC = () => {
       </nav>
 
       <DangerAlert />
+      <DaTimerAlertOverlay />
 
       <main className="gio-touch flex-1 p-3 sm:p-4 md:p-6 max-w-6xl w-full mx-auto">
+        {active?.id !== 'da' && <DaTimerBar />}
         {session && active?.id !== 'op' && (
           <button onClick={() => navigate('/gio/op')} className="w-full mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded border border-border text-left"
             style={{ background: 'hsl(var(--card))' }}>

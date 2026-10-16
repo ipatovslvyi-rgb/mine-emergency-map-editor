@@ -9,6 +9,8 @@ import SendButton from '@/components/ops/SendButton';
 import VoiceCodeCard from '@/components/ops/VoiceCodeCard';
 import { encodeDa } from '@/lib/gio/voiceCode';
 import type { OpPayload } from '@/lib/ops/types';
+import DaTimerPanel from '@/components/gio/DaTimer';
+import { useDaTimer } from '@/lib/gio/daTimer';
 
 const LS_KEY = 'sau-da-form';
 const LABELS = ['КО', '№1', '№2', '№3', '№4'];
@@ -110,6 +112,7 @@ export const DaGauge: React.FC<{ r: DaResult; start: number }> = ({ r, start }) 
 
 const DaCalculator: React.FC = () => {
   const [form, setForm] = useState<FormState>(loadForm);
+  const { state: timer } = useDaTimer();
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
   const setP = (i: number, v: string) => setForm(f => ({ ...f, pressures: f.pressures.map((p, j) => (j === i ? v : p)) }));
 
@@ -245,7 +248,8 @@ const DaCalculator: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-4 min-w-0">
-        {!res && (
+        <DaTimerPanel pmin={r?.pmin ?? null} route={form.route} transport={form.transport} member={form.ctrlMember} meta={meta} />
+        {!timer && !res && (
           <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
             <Icon name="Gauge" size={32} className="mx-auto mb-2 opacity-50" />
             Введите показания манометров ДА отделения
