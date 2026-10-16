@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { calcDa, DaInput, DaRoute, isDaError } from './da-calc';
 import { playSignal } from '@/lib/ops/store';
+import { keepAwake } from '@/lib/wakeLock';
 
 export interface DaReading {
   at: number;
@@ -45,6 +46,7 @@ function load(): DaTimerState | null {
 
 function emit() {
   snap = { state, alert, now };
+  keepAwake(!!state);
   if (state) localStorage.setItem(LS, JSON.stringify(state));
   else localStorage.removeItem(LS);
   listeners.forEach(l => l());
@@ -229,7 +231,10 @@ function ensureTick() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 }
 
-if (state) ensureTick();
+if (state) {
+  ensureTick();
+  keepAwake(true);
+}
 
 export const fmtClock = (t: number) => hhmm(t);
 export function fmtLeft(ms: number) {

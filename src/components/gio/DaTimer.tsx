@@ -8,6 +8,7 @@ import {
 } from '@/lib/gio/daTimer';
 import { unlockAudio } from '@/lib/ops/store';
 import SendButton from '@/components/ops/SendButton';
+import { keepAwake, useWakeLockMode } from '@/lib/wakeLock';
 
 const btn2 = { background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' };
 const inputStyle = { background: 'hsl(var(--input))', color: 'hsl(var(--foreground))' };
@@ -120,6 +121,22 @@ export const DaTimerBar: React.FC = () => {
   );
 };
 
+/** Состояние удержания экрана */
+const WakeBadge: React.FC = () => {
+  const mode = useWakeLockMode();
+  const ok = mode === 'native' || mode === 'video';
+  return (
+    <button onClick={() => keepAwake(true)} disabled={ok}
+      className="flex items-center gap-2 text-xs rounded px-3 py-2 border text-left w-full"
+      style={{ borderColor: ok ? 'hsl(var(--safe) / 0.5)' : 'hsl(var(--warning))', background: ok ? 'hsl(var(--safe) / 0.08)' : 'hsl(var(--warning) / 0.1)' }}>
+      <Icon name={ok ? 'SunMedium' : 'MoonStar'} size={16} style={{ color: ok ? 'hsl(var(--safe))' : 'hsl(var(--warning))', flexShrink: 0 }} />
+      {ok
+        ? <span>Экран не гаснет, пока работает таймер. После остановки — как обычно.</span>
+        : <span><b>Экран может погаснуть.</b> Нажмите здесь, чтобы не давать ему гаснуть. Если не помогает — увеличьте время отключения экрана в настройках телефона.</span>}
+    </button>
+  );
+};
+
 /** Блок таймера на странице «Давление ДА» */
 const DaTimerPanel: React.FC<{ pmin: number | null; route: DaRoute; transport: boolean; member?: string; meta: { object?: string; place?: string; performer?: string } }> = ({ pmin, route, transport, member, meta }) => {
   const { state, now } = useDaTimer();
@@ -133,7 +150,7 @@ const DaTimerPanel: React.FC<{ pmin: number | null; route: DaRoute; transport: b
           <Icon name="Timer" size={18} style={{ color: 'hsl(var(--primary))' }} /> Таймер командира
         </div>
         <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.5 }}>
-          Запустите в момент включения в ДА. Таймер напомнит снять показания манометра, предупредит перед поворотом и подаст сирену в расчётное время поворота. Работает без связи и на любой вкладке ГИО.
+          Запустите в момент включения в ДА. Таймер напомнит снять показания манометра, предупредит перед поворотом и подаст сирену в расчётное время поворота. Пока таймер работает, экран телефона не гаснет. Работает без связи и на любой вкладке ГИО.
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
@@ -248,8 +265,9 @@ const DaTimerPanel: React.FC<{ pmin: number | null; route: DaRoute; transport: b
           <Icon name="Square" size={14} /> Вышли на ПБ — стоп
         </button>
       </div>
+      <WakeBadge />
       <div className="text-[11px]" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.5 }}>
-        Держите экран включённым: при заблокированном телефоне браузер может задержать звук. Таймер переживает перезапуск приложения.
+        Не блокируйте телефон кнопкой: при заблокированном экране браузер может задержать звук. Таймер переживает перезапуск приложения.
       </div>
     </div>
   );
