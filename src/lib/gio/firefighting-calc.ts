@@ -159,35 +159,59 @@ export function calcHoseResistance(p: { n: number; Sp: number; Q: number }) {
 
 // ═════════════════════════ 11. ПОЖАРНОЕ СОСТОЯНИЕ (ГРЭХЕМ, ЯНГ) ═════════════════════════
 
-export const GRAHAM_SCALE = [
-  { range: "< 0.1", max: 0.1, label: "Пожара нет / начальная стадия" },
-  { range: "0.1–0.5", max: 0.5, label: "Пожар в начальной стадии" },
-  { range: "0.5–1.0", max: 1.0, label: "Активное горение" },
-  { range: "> 1.0", max: Infinity, label: "Интенсивное горение" },
+export type FireLevel = 0 | 1 | 2 | 3
+
+/** Индекс Грэхема, % (Ray et al.; Mackenzie-Wood & Strang) */
+export const GRAHAM_SCALE: { range: string; max: number; label: string; level: FireLevel }[] = [
+  { range: "< 0,5", max: 0.5, label: "Норма — признаков нагревания нет", level: 0 },
+  { range: "0,5–1", max: 1, label: "Начальное самонагревание", level: 1 },
+  { range: "1–2", max: 2, label: "Самонагревание", level: 2 },
+  { range: "2–3", max: 3, label: "Интенсивное нагревание, приближение к пожару", level: 2 },
+  { range: "3–7", max: 7, label: "Активный пожар", level: 3 },
+  { range: "≥ 7", max: Infinity, label: "Открытый (пламенный) пожар", level: 3 },
 ]
 
-export const YOUNG_SCALE = [
-  { range: "< 0.5", max: 0.5, label: "Пожара нет" },
-  { range: "0.5–1.5", max: 1.5, label: "Признаки самонагревания" },
-  { range: "1.5–3.0", max: 3.0, label: "Самонагревание / начало пожара" },
-  { range: "> 3.0", max: Infinity, label: "Активный пожар" },
+/** Индекс Янга, % — вспомогательный показатель */
+export const YOUNG_SCALE: { range: string; max: number; label: string; level: FireLevel }[] = [
+  { range: "< 25", max: 25, label: "Норма / слабое окисление", level: 0 },
+  { range: "25–50", max: 50, label: "Самонагревание", level: 1 },
+  { range: "50–75", max: 75, label: "Интенсивное нагревание", level: 2 },
+  { range: "≥ 75", max: Infinity, label: "Пожар", level: 3 },
 ]
+
+export const FIRE_LEVEL_LABEL: Record<FireLevel, string> = {
+  0: "НЕТ ПРИЗНАКОВ ПОЖАРА",
+  1: "ПРИЗНАКИ САМОНАГРЕВАНИЯ",
+  2: "САМОНАГРЕВАНИЕ — УГРОЗА ПОЖАРА",
+  3: "ПОЖАР",
+}
+
+/** Содержание CO₂ в чистом атмосферном воздухе, % */
+export const CO2_FRESH_AIR = 0.04
+/** Минимальный дефицит O₂, при котором индексы достоверны, % */
+export const MIN_O2_DEFICIT = 0.3
 
 /**
- * Ig = CO / (21 − O₂)
- * Iy = (CO₂ − 0,04 + CO) / O₂ × 100
- * Пожар, если Ig ≥ 0,5 или Iy ≥ 1,5
- * @param CO, O2, CO2, N2 — концентрации газов, % (N2 — справочно)
+ * ΔO₂ = 0,265 × N₂ − O₂   (если измерен N₂, учитывает разбавление газами)
+ * ΔO₂ = 20,93 − O₂        (если N₂ не измерен)
+ * Ig  = 100 × CO / ΔO₂                — индекс Грэхема, %
+ * Iy  = 100 × (CO₂ − 0,04) / ΔO₂      — индекс Янга, %
+ * @param CO, O2, CO2, N2 — концентрации газов, % (N2 — необязательно)
  */
 export function calcFireIndex(p: { CO: number; O2: number; CO2: number; N2?: number }) {
-  if ([p.CO, p.O2, p.CO2].some(isNaN) || p.O2 <= 0) return null
-  const defO2 = 21 - p.O2
-  const Ig = defO2 > 0 ? parseFloat((p.CO / defO2).toFixed(4)) : 0
-  const Iy = parseFloat((((p.CO2 - 0.04 + p.CO) / p.O2) * 100).toFixed(3))
-  const igStatus = GRAHAM_SCALE.find(s => Ig < s.max)!.label
-  const iyStatus = YOUNG_SCALE.find(s => Iy < s.max)!.label
-  const isFire = Ig >= 0.5 || Iy >= 1.5
-  return { Ig, Iy, igStatus, iyStatus, isFire, fireStage: isFire ? "ПОЖАР" : "НЕТ ПРИЗНАКОВ ПОЖАРА" }
+  if ([p.CO, p.O2, p.CO2].some(isNaN) || p.CO < 0 || p.CO2 < 0 || p.O2 <= 0 || p.O2 > 21) return null
+  const byN2 = p.N2 !== undefined && !isNaN(p.N2) && p.N2 > 0
+  const dO2 = byN2 ? 0.265 * p.N2! - p.O2 : 20.93 - p.O2
+  const reliable = dO2 >= MIN_O2_DEFICIT
+  if (dO2 <= 0) {
+    return { dO2, byN2, reliable: false, Ig: 0, Iy: 0, igStatus: "Не определяется — нет дефицита O₂", iyStatus: "Не определяется — нет дефицита O₂", level: 0 as FireLevel, isFire: false, fireStage: FIRE_LEVEL_LABEL[0] }
+  }
+  const Ig = (100 * p.CO) / dO2
+  const Iy = (100 * Math.max(0, p.CO2 - CO2_FRESH_AIR)) / dO2
+  const g = GRAHAM_SCALE.find(s => Ig < s.max)!
+  const y = YOUNG_SCALE.find(s => Iy < s.max)!
+  const level = Math.max(g.level, y.level) as FireLevel
+  return { dO2, byN2, reliable, Ig, Iy, igStatus: g.label, iyStatus: y.label, level, isFire: level === 3, fireStage: FIRE_LEVEL_LABEL[level] }
 }
 
 // ═════════════════════════ 12. ИНЕРТНЫЙ ГАЗ ═════════════════════════
@@ -269,11 +293,12 @@ export const FIREFIGHTING_CALCS: CalcInfo[] = [
     { sym: "Sp", desc: "Сопротивление одного рукава (справочное значение)" },
     { sym: "Q", desc: "Расход воды через линию, л/с" },
   ] },
-  { key: "fire-index", label: "Пожарное состояние", title: "Индексы пожарного состояния атмосферы (Грэхем, Янг)", formula: "Ig = CO / (21 − O₂);  Iy = (CO₂ + CO − 0,04) / O₂ × 100", params: [
+  { key: "fire-index", label: "Пожарное состояние", title: "Индексы пожарного состояния атмосферы (Грэхем, Янг)", formula: "Ig = 100 × CO / ΔO₂;  Iy = 100 × (CO₂ − 0,04) / ΔO₂;  ΔO₂ = 0,265 × N₂ − O₂", params: [
+    { sym: "ΔO₂", desc: "Дефицит кислорода, % — при неизмеренном N₂ принимается 20,93 − O₂; при ΔO₂ < 0,3 % индексы недостоверны" },
     { sym: "CO", desc: "Окись углерода, %" },
     { sym: "O₂", desc: "Кислород, %" },
-    { sym: "CO₂", desc: "Углекислый газ, %" },
-    { sym: "N₂", desc: "Азот, % (необязательно)" },
+    { sym: "CO₂", desc: "Углекислый газ, % (0,04 — фон в чистом воздухе)" },
+    { sym: "N₂", desc: "Азот, % — желательно: учитывает разбавление метаном и инертными газами" },
   ] },
   { key: "inert-gas", label: "Инертный газ", title: "Расчёт подачи инертного газа для тушения подземного пожара", formula: "Vin = V × (O₂н − O₂ц) / (20,9 − O₂ц);  t = Vin / q", params: [
     { sym: "V", desc: "Объём изолируемого пространства, м³" },

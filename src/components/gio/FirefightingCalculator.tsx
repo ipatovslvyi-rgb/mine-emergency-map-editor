@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import {
   buildReport, calcFireArea, calcFireIndex, calcFlood, calcFlow, calcFoam, calcHoseResistance, calcHoses, calcInertGas,
   calcPowder, calcPowderReserve, calcTrunks, calcVolume, FIREFIGHTING_CALCS, GRAHAM_SCALE, INERT_GAS_LABELS, InertGasType,
-  parseNum, POWDER_MATERIALS, ReportRow, WATER_INTENSITY, YOUNG_SCALE,
+  MIN_O2_DEFICIT, parseNum, POWDER_MATERIALS, ReportRow, WATER_INTENSITY, YOUNG_SCALE,
 } from '@/lib/gio/firefighting-calc';
 
 const LS_KEY = 'sau-firefighting-form';
@@ -13,7 +13,7 @@ type Vals = Record<string, string>;
 
 interface Preset { label: string; set: Vals }
 interface FieldDef { id: string; label: string; unit?: string; hint?: string; optional?: boolean; presets?: Preset[]; fill?: { label: string; get: (v: Vals) => number | null } }
-interface Out { results: ReportRow[]; main: { label: string; value: string; unit?: string }; verdict?: { text: string; danger: boolean; note?: string }; extra?: React.ReactNode }
+interface Out { results: ReportRow[]; main: { label: string; value: string; unit?: string }; verdict?: { text: string; danger: boolean; warn?: boolean; note?: string }; extra?: React.ReactNode }
 interface CalcDef { key: string; icon: string; fields: FieldDef[]; compute: (v: Vals) => Out | null; select?: { id: string; label: string; options: { value: string; label: string; set?: Vals }[] } }
 
 const n = (v: Vals, k: string) => parseNum(v[k] ?? '');
@@ -189,16 +189,16 @@ const CALCS: CalcDef[] = [
       { id: 'CO', label: 'Окись углерода CO', unit: '%' },
       { id: 'O2', label: 'Кислород O₂', unit: '%' },
       { id: 'CO2', label: 'Углекислый газ CO₂', unit: '%' },
-      { id: 'N2', label: 'Азот N₂', unit: '%', optional: true, hint: 'Справочно, в расчёте не используется' },
+      { id: 'N2', label: 'Азот N₂', unit: '%', optional: true, hint: 'Если измерен — дефицит O₂ считается точнее (учитывается разбавление метаном и инертными газами)' },
     ],
     compute: v => {
       const r = calcFireIndex({ CO: n(v, 'CO'), O2: n(v, 'O2'), CO2: n(v, 'CO2'), N2: n(v, 'N2') });
       if (!r) return null;
-      const scale = (rows: typeof GRAHAM_SCALE, val: number) => (
+      const scale = (rows: typeof GRAHAM_SCALE | typeof YOUNG_SCALE, val: number) => (
         <table className="w-full text-xs border-collapse">
           <tbody>
             {rows.map(s => {
-              const on = rows.find(x => val < x.max) === s;
+              const on = r.dO2 > 0 && (rows as { max: number }[]).find(x => val < x.max) === s;
               return (
                 <tr key={s.range} style={on ? { background: 'hsl(var(--primary) / 0.15)', fontWeight: 700 } : undefined}>
                   <td className="border border-border px-2 py-1 font-mono-tech w-20">{s.range}</td>
@@ -211,16 +211,23 @@ const CALCS: CalcDef[] = [
       );
       return {
         main: { label: 'Состояние', value: r.fireStage },
-        verdict: { text: r.fireStage, danger: r.isFire, note: 'Признак пожара: Ig ≥ 0,5 или Iy ≥ 1,5' },
+        verdict: {
+          text: r.fireStage, danger: r.level >= 2, warn: r.level === 1,
+          note: !r.reliable
+            ? (r.dO2 <= 0 ? 'Дефицита кислорода нет — индексы не определяются. Проверьте замер O₂ (и N₂).' : `Дефицит O₂ всего ${f(r.dO2, 2)} % (меньше ${f(MIN_O2_DEFICIT, 1)} %) — индексы недостоверны, оценивайте по динамике CO и повторным пробам.`)
+            : 'Основной показатель — индекс Грэхема; индекс Янга — вспомогательный. Важна динамика: рост индексов между пробами — признак развития пожара.',
+        },
         results: [
-          { label: 'Индекс Грэхема Ig', value: f(r.Ig, 4) }, { label: 'Оценка по Грэхему', value: r.igStatus },
-          { label: 'Индекс Янга Iy', value: f(r.Iy, 3) }, { label: 'Оценка по Янгу', value: r.iyStatus },
+          { label: `Дефицит кислорода ΔO₂ (${r.byN2 ? '0,265·N₂ − O₂' : '20,93 − O₂'})`, value: f(r.dO2, 2), unit: '%' },
+          { label: 'Индекс Грэхема Ig', value: f(r.Ig, 2), unit: '%' }, { label: 'Оценка по Грэхему', value: r.igStatus },
+          { label: 'Индекс Янга Iy', value: f(r.Iy, 1), unit: '%' }, { label: 'Оценка по Янгу', value: r.iyStatus },
+          { label: 'Достоверность', value: r.reliable ? 'достаточная' : 'низкая (ΔO₂ < 0,3 %)' },
           { label: 'Вывод', value: r.fireStage },
         ],
         extra: (
           <div className="grid sm:grid-cols-2 gap-3">
-            <div><div className="text-xs font-semibold mb-1">Шкала Грэхема · Ig = {f(r.Ig, 4)}</div>{scale(GRAHAM_SCALE, r.Ig)}</div>
-            <div><div className="text-xs font-semibold mb-1">Шкала Янга · Iy = {f(r.Iy, 3)}</div>{scale(YOUNG_SCALE, r.Iy)}</div>
+            <div><div className="text-xs font-semibold mb-1">Шкала Грэхема, % · Ig = {f(r.Ig, 2)}</div>{scale(GRAHAM_SCALE, r.Ig)}</div>
+            <div><div className="text-xs font-semibold mb-1">Шкала Янга, % · Iy = {f(r.Iy, 1)}</div>{scale(YOUNG_SCALE, r.Iy)}</div>
           </div>
         ),
       };
@@ -289,7 +296,7 @@ ${rowsHtml(metaRows)}
 <h2>Формула</h2><div class="f">${esc(formula)}</div>${params.map(p => `<div class="p"><b>${esc(p.sym)}</b> — ${esc(p.desc)}</div>`).join('')}
 <h2>Исходные данные</h2>${rowsHtml(inputs)}
 <h2>Результаты</h2>${rowsHtml(results)}
-${verdict ? `<div class="v" style="color:${verdict.danger ? '#c00000' : '#000'}">${esc(verdict.text)}</div>` : ''}
+${verdict ? `<div class="v" style="color:${verdict.danger ? '#c00000' : '#000'}">${esc(verdict.text)}</div>${verdict.note ? `<div class="p">${esc(verdict.note)}</div>` : ''}` : ''}
 <div class="sign">Расчёт выполнил: ${esc(meta.performer || '____________________')}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Подпись: ______________</div>
 <script>window.onload=()=>{setTimeout(()=>window.print(),200)}</script></body></html>`);
   w.document.close();
@@ -394,15 +401,18 @@ const FirefightingCalculator: React.FC = () => {
             </div>
           ) : (
             <>
-              {out.verdict ? (
-                <div className="rounded-lg p-4 border-2 flex gap-3 items-center" style={{ borderColor: out.verdict.danger ? 'hsl(var(--danger))' : 'hsl(var(--safe))', background: 'hsl(var(--card))' }}>
-                  <Icon name={out.verdict.danger ? 'Flame' : 'ShieldCheck'} size={32} style={{ color: out.verdict.danger ? 'hsl(var(--danger))' : 'hsl(var(--safe))', flexShrink: 0 }} />
-                  <div>
-                    <div className="text-xl font-black" style={{ color: out.verdict.danger ? 'hsl(var(--danger))' : 'hsl(var(--safe))' }}>{out.verdict.text}</div>
-                    {out.verdict.note && <div className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>{out.verdict.note}</div>}
+              {out.verdict ? (() => {
+                const c = out.verdict.danger ? 'hsl(var(--danger))' : out.verdict.warn ? 'hsl(var(--warning))' : 'hsl(var(--safe))';
+                return (
+                  <div className="rounded-lg p-4 border-2 flex gap-3 items-center" style={{ borderColor: c, background: 'hsl(var(--card))' }}>
+                    <Icon name={out.verdict.danger ? 'Flame' : out.verdict.warn ? 'TriangleAlert' : 'ShieldCheck'} size={32} style={{ color: c, flexShrink: 0 }} />
+                    <div>
+                      <div className="text-xl font-black" style={{ color: c }}>{out.verdict.text}</div>
+                      {out.verdict.note && <div className="text-xs mt-0.5" style={{ color: 'hsl(var(--muted-foreground))', lineHeight: 1.45 }}>{out.verdict.note}</div>}
+                    </div>
                   </div>
-                </div>
-              ) : (
+                );
+              })() : (
                 <div className="rounded-lg p-4 border-2 flex gap-3 items-center" style={{ borderColor: 'hsl(var(--primary))', background: 'hsl(var(--card))' }}>
                   <Icon name={def.icon} size={30} style={{ color: 'hsl(var(--primary))', flexShrink: 0 }} />
                   <div>
