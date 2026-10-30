@@ -7,6 +7,7 @@ import TriangleCalculator from '@/components/gio/TriangleCalculator';
 import FireLoadCalculator from '@/components/gio/FireLoadCalculator';
 import DaCalculator from '@/components/gio/DaCalculator';
 import AtmoCalculator from '@/components/gio/AtmoCalculator';
+import FirefightingCalculator from '@/components/gio/FirefightingCalculator';
 import InstallButton from '@/components/pwa/InstallButton';
 import NetworkBadge from '@/components/pwa/NetworkBadge';
 import OperationSetup, { OperationStatus } from '@/components/ops/OperationPanel';
@@ -21,6 +22,7 @@ const TOOLS = [
   { id: 'da', label: 'Давление ДА', short: 'ДА', title: 'Давление поворота дыхательного аппарата (Устав ВГСЧ, п. 22–23)', icon: 'Gauge' },
   { id: 'atmo', label: 'Атмосфера', short: 'Атмосф.', title: 'Журнал замеров рудничной атмосферы с тревогами (Устав ВГСЧ, Приложение 4)', icon: 'Wind' },
   { id: 'fire', label: 'Пож.нагрузка', short: 'Пожар', title: 'Пожарная нагрузка — мощность пожара техники и конвейерной ленты', icon: 'Flame' },
+  { id: 'ff', label: 'Пожаротушение', short: 'Тушение', title: 'Расчёты пожаротушения в горных выработках: стволы, вода, рукава, порошок, пена, инертный газ, индексы Грэхема и Янга', icon: 'FireExtinguisher' },
   { id: 'op', label: 'Операция', short: 'Операция', title: 'Передача расчётов: командир → подземная база и командный пункт', icon: 'RadioTower' },
 ];
 
@@ -83,7 +85,7 @@ const GioPage: React.FC = () => {
             <button key={t.id || 'all'}
               onClick={() => navigate(t.id ? `/gio/${t.id}` : '/gio')}
               title={t.title}
-              className="flex flex-col items-center justify-center gap-1 h-[68px] text-xs font-semibold transition-colors"
+              className="flex flex-col items-center justify-center gap-1 h-[68px] text-[10px] min-[400px]:text-xs font-semibold transition-colors min-w-0 overflow-hidden"
               style={{ color: on ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))', background: on ? 'hsl(var(--primary) / 0.1)' : 'transparent', borderTop: on ? '3px solid hsl(var(--primary))' : '3px solid transparent' }}>
               <span className="relative">
                 <Icon name={t.icon} size={24} />
@@ -182,6 +184,16 @@ const GioPage: React.FC = () => {
               {active.title}
             </h1>
             <FireLoadCalculator />
+          </>
+        )}
+
+        {active?.id === 'ff' && (
+          <>
+            <h1 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="FireExtinguisher" size={20} style={{ color: 'hsl(var(--primary))' }} />
+              Пожаротушение в горных выработках
+            </h1>
+            <FirefightingCalculator />
           </>
         )}
 
