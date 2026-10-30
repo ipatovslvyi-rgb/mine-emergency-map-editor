@@ -18,8 +18,8 @@
     { "src": "/logo.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
   ],
   "shortcuts": [
-    { "name": "ГИО — расчёты", "short_name": "ГИО", "url": "/#/gio", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
-    { "name": "ЗВТ — зона высоких температур", "short_name": "ЗВТ", "url": "/#/gio/zvt", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Треугольник взрываемости", "short_name": "Треугольник", "url": "/#/gio/triangle", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+    { "name": "ГИО — расчёты", "short_name": "ГИО", "url": "/gio", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "ЗВТ — зона высоких температур", "short_name": "ЗВТ", "url": "/gio/zvt", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Треугольник взрываемости", "short_name": "Треугольник", "url": "/gio/triangle", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
   ]
 }

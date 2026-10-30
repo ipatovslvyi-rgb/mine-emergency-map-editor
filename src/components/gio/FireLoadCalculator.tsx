@@ -170,7 +170,8 @@ const ActionBar: React.FC<{ onCopy: () => void; onWord: () => void; onPrint: () 
 );
 
 const FireLoadCalculator: React.FC = () => {
-  const [form, setForm] = useState<FormState>(loadForm);
+  const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
   const [fullTable, setFullTable] = useState(false);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
   const setBelt = (k: keyof BeltInputs, v: string) => setForm(f => ({ ...f, belt: { ...f.belt, [k]: v } }));
@@ -178,8 +179,13 @@ const FireLoadCalculator: React.FC = () => {
     setForm(f => ({ ...f, materials: f.materials.map((r, j) => (j === i ? { ...r, [k]: v } : r)) }));
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(form));
-  }, [form]);
+    setForm(loadForm());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(form));
+  }, [form, loaded]);
 
   const pickMachine = (name: string) => {
     const p = MACHINE_PRESETS.find(m => m.name === name);

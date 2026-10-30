@@ -111,14 +111,20 @@ export const DaGauge: React.FC<{ r: DaResult; start: number }> = ({ r, start }) 
 };
 
 const DaCalculator: React.FC = () => {
-  const [form, setForm] = useState<FormState>(loadForm);
+  const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
   const { state: timer } = useDaTimer();
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
   const setP = (i: number, v: string) => setForm(f => ({ ...f, pressures: f.pressures.map((p, j) => (j === i ? v : p)) }));
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(form));
-  }, [form]);
+    setForm(loadForm());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(form));
+  }, [form, loaded]);
 
   const input: DaInput = useMemo(() => {
     const minutes = num(form.ctrlMinutes), current = num(form.ctrlCurrent);

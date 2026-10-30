@@ -141,12 +141,18 @@ export const ResultView: React.FC<{ r: ZvtResult }> = ({ r }) => {
 };
 
 const ZvtCalculator: React.FC = () => {
-  const [form, setForm] = useState<FormState>(loadForm);
+  const [form, setForm] = useState<FormState>({ entryTime: '', temp: '', mode: 'moving', rescue: false, object: '', squad: '', commander: '', performer: '' });
+  const [loaded, setLoaded] = useState(false);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(form));
-  }, [form]);
+    setForm(loadForm());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(form));
+  }, [form, loaded]);
 
   const tempNum = parseFloat(form.temp.replace(',', '.'));
   const result = useMemo(() => {

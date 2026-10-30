@@ -179,15 +179,21 @@ export const AtmoAlarms: React.FC<{ r: AtmoResult; onlyLast?: boolean }> = ({ r,
 };
 
 const AtmoCalculator: React.FC = () => {
-  const [form, setForm] = useState<FormState>(loadForm);
+  const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
   const [showLimits, setShowLimits] = useState(false);
   const [showAllAlarms, setShowAllAlarms] = useState(false);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
   const setD = (k: keyof Draft, v: string) => setForm(f => ({ ...f, draft: { ...f.draft, [k]: v } }));
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(form));
-  }, [form]);
+    setForm(loadForm());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(form));
+  }, [form, loaded]);
 
   const r = useMemo(() => calcAtmo(form.rows, form.limits), [form.rows, form.limits]);
 

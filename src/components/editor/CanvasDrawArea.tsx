@@ -16,8 +16,8 @@ interface Props {
   dragOver: boolean;
   isMobile: boolean;
   editingSampleId: string | null;
-  mainCanvasRef: React.RefObject<HTMLCanvasElement>;
-  containerRef: React.RefObject<HTMLDivElement>;
+  mainCanvasRef: React.RefObject<HTMLCanvasElement | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   onDragOver: () => void;
   onDragLeave: () => void;
   onDrop: (file: File) => void;

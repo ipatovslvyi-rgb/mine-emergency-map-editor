@@ -57,7 +57,9 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-export const useDaTimer = () => useSyncExternalStore(subscribe, () => snap);
+const SERVER_SNAP: { state: DaTimerState | null; alert: DaTimerAlert; now: number } = { state: null, alert: null, now: 0 };
+
+export const useDaTimer = () => useSyncExternalStore(subscribe, () => snap, () => SERVER_SNAP);
 
 const hhmm = (t: number) => new Date(t).toTimeString().slice(0, 5);
 

@@ -303,9 +303,11 @@ ${verdict ? `<div class="v" style="color:${verdict.danger ? '#c00000' : '#000'}"
 }
 
 const FirefightingCalculator: React.FC = () => {
-  const [st, setSt] = useState(loadState);
+  const [st, setSt] = useState<{ calc: string; vals: Vals; meta: Vals }>({ calc: 'area', vals: DEFAULTS, meta: {} });
+  const [loaded, setLoaded] = useState(false);
   const { calc, vals, meta } = st;
-  useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(st)); }, [st]);
+  useEffect(() => { setSt(loadState()); setLoaded(true); }, []);
+  useEffect(() => { if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(st)); }, [st, loaded]);
 
   const def = CALCS.find(c => c.key === calc) ?? CALCS[0];
   const info = FIREFIGHTING_CALCS.find(c => c.key === def.key)!;

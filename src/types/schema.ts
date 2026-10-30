@@ -158,7 +158,7 @@ export interface MineSymbol {
   name: string;
   category: string;
   description?: string;
-  icon: React.ReactNode | string;
+  icon?: React.ReactNode | string;
   type: 'svg' | 'text' | 'emoji';
   content: string;
   color?: string;

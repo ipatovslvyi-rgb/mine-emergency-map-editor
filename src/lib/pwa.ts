@@ -22,7 +22,7 @@ export const isStandalone = () =>
 export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 const collectUrls = () => {
-  const urls = new Set<string>(['/', '/index.html']);
+  const urls = new Set<string>(['/', '/gio']);
   performance.getEntriesByType('resource').forEach(e => urls.add((e as PerformanceResourceTiming).name));
   document.querySelectorAll<HTMLScriptElement>('script[src]').forEach(s => urls.add(s.src));
   document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href], link[rel="modulepreload"][href]').forEach(l => urls.add(l.href));
@@ -50,11 +50,13 @@ export function initPwa() {
     }
   });
 
-  window.addEventListener('load', () => {
+  const register = () => {
     navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready).then(reg => {
       setTimeout(() => reg.active?.postMessage({ type: 'precache', urls: collectUrls() }), 1500);
     }).catch(() => {});
-  });
+  };
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register);
 }
 
 export async function promptInstall(): Promise<boolean> {
@@ -68,9 +70,12 @@ export async function promptInstall(): Promise<boolean> {
 
 export function usePwa() {
   const [, setTick] = useState(0);
-  const [online, setOnline] = useState(navigator.onLine);
+  const [online, setOnline] = useState(true);
+  const [env, setEnv] = useState({ desktop: false, standalone: false, ios: false, mounted: false });
 
   useEffect(() => {
+    setOnline(navigator.onLine);
+    setEnv({ desktop: isDesktopApp(), standalone: isStandalone(), ios: isIOS(), mounted: true });
     const l = () => setTick(t => t + 1);
     listeners.add(l);
     const on = () => setOnline(true);
@@ -84,13 +89,13 @@ export function usePwa() {
     };
   }, []);
 
-  const desktop = isDesktopApp();
+  const desktop = env.desktop;
   return {
     desktop,
     online,
-    offlineReady,
-    installed: !desktop && isStandalone(),
+    offlineReady: env.mounted && offlineReady,
+    installed: !desktop && env.standalone,
     canPrompt: !!deferred,
-    ios: isIOS(),
+    ios: env.ios,
   };
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from "@/lib/router-compat";
 import Icon from '@/components/ui/icon';
 import LogoSvg from '@/components/ui/LogoSvg';
 import ZvtCalculator from '@/components/gio/ZvtCalculator';
@@ -16,7 +16,7 @@ import { startOpsSync, useOps } from '@/lib/ops/store';
 import VoiceCodeInput from '@/components/ops/VoiceCodeInput';
 import { DaTimerAlertOverlay, DaTimerBar } from '@/components/gio/DaTimer';
 
-const TOOLS = [
+export const TOOLS = [
   { id: 'zvt', label: 'ЗВТ', short: 'ЗВТ', title: 'Время пребывания в зоне высоких температур', icon: 'Thermometer' },
   { id: 'triangle', label: 'Треугольник', short: 'Треуг.', title: 'Взрываемость рудничной атмосферы (треугольник взрываемости)', icon: 'Triangle' },
   { id: 'da', label: 'Давление ДА', short: 'ДА', title: 'Давление поворота дыхательного аппарата (Устав ВГСЧ, п. 22–23)', icon: 'Gauge' },
@@ -32,8 +32,9 @@ const OpTabBadge: React.FC = () => {
   return <span className="w-2 h-2 rounded-full" style={{ background: session.active ? 'hsl(var(--safe))' : 'hsl(var(--muted-foreground))' }} />;
 };
 
-const GioPage: React.FC = () => {
-  const { tool } = useParams();
+const GioPage: React.FC<{ toolId?: string }> = ({ toolId }) => {
+  const params = useParams();
+  const tool = toolId ?? params.tool;
   const navigate = useNavigate();
   const active = TOOLS.find(t => t.id === tool);
   const { session } = useOps();
@@ -42,9 +43,6 @@ const GioPage: React.FC = () => {
     startOpsSync();
   }, []);
 
-  useEffect(() => {
-    document.title = active ? `ГИО — ${active.label}` : 'ГИО — группа инженерного обеспечения';
-  }, [active]);
 
   return (
     <div className="gio-root min-h-screen flex flex-col pb-[calc(68px+env(safe-area-inset-bottom))] md:pb-0" style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}>

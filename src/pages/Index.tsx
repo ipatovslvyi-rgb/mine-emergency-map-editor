@@ -40,7 +40,7 @@ const Index: React.FC = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [undo, redo]);
 
-  const handleExport = useCallback(async (type: 'pdf' | 'png' | 'print') => {
+  const handleExport = useCallback(async (type: 'pdf' | 'png' | 'print' | 'preview') => {
     if (type === 'preview') { setEditorTab('preview'); return; }
     window.print();
   }, []);

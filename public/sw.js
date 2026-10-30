@@ -1,5 +1,5 @@
 const CACHE = 'sau-v2';
-const CORE = ['/', '/index.html', '/manifest.webmanifest', '/logo.svg', '/icon-192.png', '/icon-512.png'];
+const CORE = ['/', '/gio', '/manifest.webmanifest', '/logo.svg', '/icon-192.png', '/icon-512.png'];
 const TIMEOUT = 3500;
 
 self.addEventListener('install', e => {
@@ -68,8 +68,8 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate') {
     e.respondWith(
       withTimeout(fetch(req), TIMEOUT)
-        .then(res => { put('/index.html', res.clone()); return res; })
-        .catch(async () => (await caches.match('/index.html')) || (await caches.match('/')) || Response.error())
+        .then(res => { put(req, res.clone()); return res; })
+        .catch(async () => (await caches.match(req, { ignoreSearch: true })) || (await caches.match('/')) || Response.error())
     );
     return;
   }

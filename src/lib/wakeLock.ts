@@ -102,4 +102,4 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-export const useWakeLockMode = () => useSyncExternalStore(subscribe, () => mode);
+export const useWakeLockMode = () => useSyncExternalStore(subscribe, () => mode, () => 'off' as Mode);

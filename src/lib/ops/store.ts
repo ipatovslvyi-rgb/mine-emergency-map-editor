@@ -50,7 +50,17 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-export const useOps = () => useSyncExternalStore(subscribe, () => state);
+const SERVER_STATE: State = {
+  session: null,
+  events: [],
+  online: true,
+  syncing: false,
+  lastSync: null,
+  error: null,
+  lastDanger: null,
+};
+
+export const useOps = () => useSyncExternalStore(subscribe, () => state, () => SERVER_STATE);
 export const getOps = () => state;
 export const apiReady = () => !!API;
 

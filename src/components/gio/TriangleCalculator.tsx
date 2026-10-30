@@ -111,12 +111,18 @@ const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
 );
 
 const TriangleCalculator: React.FC = () => {
-  const [form, setForm] = useState<FormState>(loadForm);
+  const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(form));
-  }, [form]);
+    setForm(loadForm());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(LS_KEY, JSON.stringify(form));
+  }, [form, loaded]);
 
   const vInput = useMemo(() => ({
     ch4: num(form.ch4) || 0, co: num(form.co) || 0, h2: num(form.h2) || 0, o2: num(form.o2),
